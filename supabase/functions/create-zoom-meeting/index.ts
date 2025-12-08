@@ -1,45 +1,65 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Verify Firebase ID token by calling Google's tokeninfo endpoint
+async function verifyFirebaseToken(token: string): Promise<boolean> {
+  try {
+    const response = await fetch(
+      `https://oauth2.googleapis.com/tokeninfo?id_token=${token}`
+    );
+    if (!response.ok) return false;
+    const data = await response.json();
+    // Check if token is valid and not expired
+    return data.aud && data.exp && parseInt(data.exp) * 1000 > Date.now();
+  } catch {
+    return false;
+  }
+}
+
 serve(async (req) => {
+  // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    // Verify authentication
+    // Verify Firebase authentication
     const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      console.log('Missing or invalid authorization header');
       return new Response(
         JSON.stringify({ success: false, error: 'Missing authorization header' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Create Supabase client to verify the JWT (even though we use Firebase for auth,
-    // we can verify the request has proper authorization header format)
-    const supabaseUrl = Deno.env.get('SUPABASE_URL');
-    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
-    
-    if (!supabaseUrl || !supabaseAnonKey) {
-      throw new Error('Supabase configuration missing');
-    }
-
-    // For Firebase-based auth, we'll validate the request has proper authorization
-    // The client should pass Firebase ID token which we trust since this is called from authenticated pages
     const token = authHeader.replace('Bearer ', '');
-    if (!token || token.length < 10) {
+    
+    // Validate token format (Firebase tokens are JWTs with 3 parts)
+    const tokenParts = token.split('.');
+    if (tokenParts.length !== 3 || token.length < 100) {
+      console.log('Invalid token format');
       return new Response(
-        JSON.stringify({ success: false, error: 'Invalid authorization token' }),
+        JSON.stringify({ success: false, error: 'Invalid authorization token format' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
+    // Verify the Firebase token
+    const isValid = await verifyFirebaseToken(token);
+    if (!isValid) {
+      console.log('Firebase token validation failed');
+      return new Response(
+        JSON.stringify({ success: false, error: 'Invalid or expired token' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log('Firebase token validated successfully');
     const { topic, startTime, duration } = await req.json();
     
     const ZOOM_CLIENT_ID = Deno.env.get('ZOOM_CLIENT_ID');

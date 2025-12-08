@@ -295,3 +295,66 @@ export const updateUserStatus = async (uid: string, isActive: boolean): Promise<
     throw error;
   }
 };
+
+// Review Types and Functions
+export interface Review {
+  id?: string;
+  sessionId: string;
+  studentId: string;
+  studentName: string;
+  tutorId: string;
+  tutorName: string;
+  rating: number; // 1-5
+  comment: string;
+  subject: string;
+  createdAt: string;
+}
+
+export const createReview = async (review: Omit<Review, 'id'>): Promise<string> => {
+  try {
+    const docRef = await addDoc(collection(db, 'reviews'), {
+      ...review,
+      createdAt: new Date().toISOString()
+    });
+    return docRef.id;
+  } catch (error) {
+    if (isDev) console.error('Error creating review:', error);
+    throw error;
+  }
+};
+
+export const getTutorReviews = async (tutorId: string): Promise<Review[]> => {
+  try {
+    const snapshot = await getDocs(collection(db, 'reviews'));
+    const allReviews = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Review));
+    return allReviews
+      .filter(r => r.tutorId === tutorId)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  } catch (error) {
+    if (isDev) console.error('Error fetching tutor reviews:', error);
+    return [];
+  }
+};
+
+export const getAllReviews = async (): Promise<Review[]> => {
+  try {
+    const snapshot = await getDocs(collection(db, 'reviews'));
+    return snapshot.docs
+      .map(doc => ({ ...doc.data(), id: doc.id } as Review))
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  } catch (error) {
+    if (isDev) console.error('Error fetching all reviews:', error);
+    return [];
+  }
+};
+
+export const getSessionReview = async (sessionId: string): Promise<Review | null> => {
+  try {
+    const snapshot = await getDocs(collection(db, 'reviews'));
+    const reviews = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Review));
+    return reviews.find(r => r.sessionId === sessionId) || null;
+  } catch (error) {
+    if (isDev) console.error('Error fetching session review:', error);
+    return null;
+  }
+};
