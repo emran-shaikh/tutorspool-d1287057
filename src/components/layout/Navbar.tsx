@@ -1,12 +1,13 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Users, BookOpen, Star, Mail, Info, GraduationCap, Globe, Menu, X } from "lucide-react";
+import { Users, BookOpen, Star, Mail, Info, GraduationCap, Globe, Menu, X, FileText } from "lucide-react";
 import { useState } from "react";
 
 const navLinks = [
   { label: "Subjects", href: "/subjects", icon: BookOpen },
   { label: "Find Tutors", href: "/tutors", icon: Users },
   { label: "Reviews", href: "/reviews", icon: Star },
+  { label: "Blog", href: "/blog", icon: FileText },
   { label: "About", href: "/about", icon: Info },
   { label: "Contact", href: "/contact", icon: Mail },
   { label: "Become a Tutor", href: "/register?role=tutor", icon: GraduationCap },
