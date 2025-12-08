@@ -22,16 +22,21 @@ serve(async (req) => {
     }
 
     // Get access token using Server-to-Server OAuth
-    const tokenResponse = await fetch(
-      `https://zoom.us/oauth/token?grant_type=account_credentials&account_id=${ZOOM_ACCOUNT_ID}`,
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Basic ${btoa(`${ZOOM_CLIENT_ID}:${ZOOM_CLIENT_SECRET}`)}`,
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-      }
-    );
+    const tokenBody = new URLSearchParams({
+      grant_type: 'account_credentials',
+      account_id: ZOOM_ACCOUNT_ID,
+    });
+
+    console.log('Requesting Zoom access token...');
+    
+    const tokenResponse = await fetch('https://zoom.us/oauth/token', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Basic ${btoa(`${ZOOM_CLIENT_ID}:${ZOOM_CLIENT_SECRET}`)}`,
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: tokenBody.toString(),
+    });
 
     if (!tokenResponse.ok) {
       const errorText = await tokenResponse.text();
