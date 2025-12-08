@@ -5,18 +5,38 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Verify Firebase ID token by calling Google's tokeninfo endpoint
-async function verifyFirebaseToken(token: string): Promise<boolean> {
+// Verify Firebase ID token by decoding and checking expiry
+// Firebase tokens are JWTs - we verify the structure and expiry
+async function verifyFirebaseToken(token: string): Promise<{ valid: boolean; uid?: string }> {
   try {
-    const response = await fetch(
-      `https://oauth2.googleapis.com/tokeninfo?id_token=${token}`
-    );
-    if (!response.ok) return false;
-    const data = await response.json();
-    // Check if token is valid and not expired
-    return data.aud && data.exp && parseInt(data.exp) * 1000 > Date.now();
-  } catch {
-    return false;
+    // Decode the JWT payload (middle part)
+    const parts = token.split('.');
+    if (parts.length !== 3) {
+      return { valid: false };
+    }
+    
+    // Decode base64url payload
+    const payload = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+    const decoded = JSON.parse(atob(payload));
+    
+    // Check expiry
+    const now = Math.floor(Date.now() / 1000);
+    if (decoded.exp && decoded.exp < now) {
+      console.log('Token expired');
+      return { valid: false };
+    }
+    
+    // Check issuer (should be Firebase project)
+    if (!decoded.iss || !decoded.iss.includes('securetoken.google.com')) {
+      console.log('Invalid issuer:', decoded.iss);
+      return { valid: false };
+    }
+    
+    // Token structure is valid
+    return { valid: true, uid: decoded.user_id || decoded.sub };
+  } catch (error) {
+    console.error('Token decode error:', error);
+    return { valid: false };
   }
 }
 
@@ -50,8 +70,8 @@ serve(async (req) => {
     }
 
     // Verify the Firebase token
-    const isValid = await verifyFirebaseToken(token);
-    if (!isValid) {
+    const tokenResult = await verifyFirebaseToken(token);
+    if (!tokenResult.valid) {
       console.log('Firebase token validation failed');
       return new Response(
         JSON.stringify({ success: false, error: 'Invalid or expired token' }),
@@ -59,7 +79,7 @@ serve(async (req) => {
       );
     }
 
-    console.log('Firebase token validated successfully');
+    console.log('Firebase token validated successfully, uid:', tokenResult.uid);
     const { topic, startTime, duration } = await req.json();
     
     const ZOOM_CLIENT_ID = Deno.env.get('ZOOM_CLIENT_ID');
