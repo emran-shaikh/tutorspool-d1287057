@@ -1,10 +1,66 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, UserCheck, Video, TrendingUp, Download, Shield, BookOpen } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
+import { getAllUsers, getAllTutors, getAllSessions } from "@/lib/firestore";
 
 export default function AdminDashboard() {
+  const [stats, setStats] = useState({
+    totalStudents: 0,
+    activeTutors: 0,
+    pendingTutors: 0,
+    sessionsToday: 0,
+    totalSessions: 0,
+    completedSessions: 0
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const fetchStats = async () => {
+    try {
+      const [users, tutors, sessions] = await Promise.all([
+        getAllUsers(),
+        getAllTutors(),
+        getAllSessions()
+      ]);
+
+      const today = new Date().toISOString().split('T')[0];
+      const students = users.filter(u => u.role === 'student');
+      const activeTutors = tutors.filter(t => t.isApproved);
+      const pendingTutors = tutors.filter(t => !t.isApproved);
+      const sessionsToday = sessions.filter(s => s.date === today);
+      const completedSessions = sessions.filter(s => s.status === 'completed');
+
+      setStats({
+        totalStudents: students.length,
+        activeTutors: activeTutors.length,
+        pendingTutors: pendingTutors.length,
+        sessionsToday: sessionsToday.length,
+        totalSessions: sessions.length,
+        completedSessions: completedSessions.length
+      });
+    } catch (error) {
+      console.error('Error fetching admin stats');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <DashboardLayout role="admin">
+        <div className="flex justify-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
   return (
     <DashboardLayout role="admin">
       <div className="mb-8">
@@ -14,10 +70,10 @@ export default function AdminDashboard() {
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {[
-          { label: "Total Students", value: "-", icon: Users, color: "text-primary" },
-          { label: "Active Tutors", value: "-", icon: UserCheck, color: "text-success" },
-          { label: "Sessions Today", value: "-", icon: Video, color: "text-warning" },
-          { label: "Revenue (MTD)", value: "-", icon: TrendingUp, color: "text-primary" },
+          { label: "Total Students", value: stats.totalStudents.toString(), icon: Users, color: "text-primary" },
+          { label: "Active Tutors", value: stats.activeTutors.toString(), icon: UserCheck, color: "text-success" },
+          { label: "Sessions Today", value: stats.sessionsToday.toString(), icon: Video, color: "text-warning" },
+          { label: "Total Sessions", value: stats.totalSessions.toString(), icon: TrendingUp, color: "text-primary" },
         ].map((stat) => (
           <Card key={stat.label}>
             <CardContent className="pt-6">
@@ -39,11 +95,22 @@ export default function AdminDashboard() {
             <CardTitle className="flex items-center gap-2">
               <Shield className="h-5 w-5 text-primary" />
               Pending Tutor Approvals
+              {stats.pendingTutors > 0 && (
+                <span className="bg-destructive text-destructive-foreground text-xs px-2 py-0.5 rounded-full">
+                  {stats.pendingTutors}
+                </span>
+              )}
             </CardTitle>
             <CardDescription>Review and approve tutor registrations</CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground text-center py-4">View pending approvals in User Management</p>
+            {stats.pendingTutors === 0 ? (
+              <p className="text-muted-foreground text-center py-4">No pending approvals</p>
+            ) : (
+              <p className="text-muted-foreground text-center py-4">
+                {stats.pendingTutors} tutor(s) awaiting approval
+              </p>
+            )}
             <Button variant="outline" className="w-full" asChild>
               <Link to="/admin/users">Manage Users</Link>
             </Button>
@@ -71,7 +138,7 @@ export default function AdminDashboard() {
               <Video className="h-5 w-5 text-primary" />
               Session Monitoring
             </CardTitle>
-            <CardDescription>View all platform sessions</CardDescription>
+            <CardDescription>View all platform sessions ({stats.completedSessions} completed)</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             <Button variant="outline" className="w-full justify-start" asChild>
