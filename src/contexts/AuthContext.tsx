@@ -63,17 +63,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const signUp = async (email: string, password: string, fullName: string, role: UserRole) => {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    const userProfile: UserProfile = {
-      uid: userCredential.user.uid,
-      email,
-      fullName,
-      role,
-      createdAt: new Date()
-    };
-    
-    await setDoc(doc(db, 'users', userCredential.user.uid), userProfile);
-    setUserProfile(userProfile);
+    console.log("Starting signup process...");
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      console.log("Firebase auth user created:", userCredential.user.uid);
+      
+      const userProfile: UserProfile = {
+        uid: userCredential.user.uid,
+        email,
+        fullName,
+        role,
+        createdAt: new Date()
+      };
+      
+      await setDoc(doc(db, 'users', userCredential.user.uid), userProfile);
+      console.log("User profile saved to Firestore");
+      setUserProfile(userProfile);
+    } catch (error) {
+      console.error("SignUp error in AuthContext:", error);
+      throw error;
+    }
   };
 
   const signIn = async (email: string, password: string) => {
