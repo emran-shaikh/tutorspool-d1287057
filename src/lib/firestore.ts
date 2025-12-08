@@ -15,6 +15,9 @@ import {
 } from 'firebase/firestore';
 import { db } from './firebase';
 
+// Environment check for conditional logging
+const isDev = import.meta.env.DEV;
+
 // Types
 export interface TutorProfile {
   uid: string;
@@ -67,10 +70,9 @@ export const getTutors = async (): Promise<TutorProfile[]> => {
     const snapshot = await getDocs(collection(db, 'tutorProfiles'));
     const allTutors = snapshot.docs.map(doc => ({ ...doc.data(), uid: doc.id } as TutorProfile));
     const approvedTutors = allTutors.filter(tutor => tutor.isApproved === true);
-    console.log('Approved tutors found:', approvedTutors.length, approvedTutors);
     return approvedTutors;
   } catch (error) {
-    console.error('Error fetching tutors:', error);
+    if (isDev) console.error('Error fetching tutors:', error);
     return [];
   }
 };
@@ -78,10 +80,9 @@ export const getTutors = async (): Promise<TutorProfile[]> => {
 export const getAllTutors = async (): Promise<TutorProfile[]> => {
   try {
     const snapshot = await getDocs(collection(db, 'tutorProfiles'));
-    console.log('Fetched tutors count:', snapshot.docs.length);
     return snapshot.docs.map(doc => ({ ...doc.data(), uid: doc.id } as TutorProfile));
   } catch (error) {
-    console.error('Error fetching all tutors:', error);
+    if (isDev) console.error('Error fetching all tutors:', error);
     return [];
   }
 };
@@ -95,7 +96,7 @@ export const getTutorProfile = async (uid: string): Promise<TutorProfile | null>
     }
     return null;
   } catch (error) {
-    console.error('Error fetching tutor profile:', error);
+    if (isDev) console.error('Error fetching tutor profile:', error);
     return null;
   }
 };
@@ -105,7 +106,7 @@ export const createTutorProfile = async (profile: TutorProfile): Promise<void> =
     // Use setDoc with merge option to create or update the document
     await setDoc(doc(db, 'tutorProfiles', profile.uid), profile, { merge: true });
   } catch (error) {
-    console.error('Error creating tutor profile:', error);
+    if (isDev) console.error('Error creating tutor profile:', error);
     throw error;
   }
 };
@@ -114,7 +115,7 @@ export const updateTutorProfile = async (uid: string, data: Partial<TutorProfile
   try {
     await updateDoc(doc(db, 'tutorProfiles', uid), data);
   } catch (error) {
-    console.error('Error updating tutor profile:', error);
+    if (isDev) console.error('Error updating tutor profile:', error);
     throw error;
   }
 };
@@ -123,7 +124,7 @@ export const approveTutor = async (uid: string): Promise<void> => {
   try {
     await updateDoc(doc(db, 'tutorProfiles', uid), { isApproved: true });
   } catch (error) {
-    console.error('Error approving tutor:', error);
+    if (isDev) console.error('Error approving tutor:', error);
     throw error;
   }
 };
@@ -135,7 +136,7 @@ export const getTutorAvailability = async (tutorId: string): Promise<Availabilit
     const snapshot = await getDocs(q);
     return snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as AvailabilitySlot));
   } catch (error) {
-    console.error('Error fetching availability:', error);
+    if (isDev) console.error('Error fetching availability:', error);
     return [];
   }
 };
@@ -151,7 +152,7 @@ export const setTutorAvailability = async (slots: AvailabilitySlot[]): Promise<v
       }
     }
   } catch (error) {
-    console.error('Error setting availability:', error);
+    if (isDev) console.error('Error setting availability:', error);
     throw error;
   }
 };
@@ -160,7 +161,7 @@ export const deleteAvailabilitySlot = async (slotId: string): Promise<void> => {
   try {
     await deleteDoc(doc(db, 'availability', slotId));
   } catch (error) {
-    console.error('Error deleting availability slot:', error);
+    if (isDev) console.error('Error deleting availability slot:', error);
     throw error;
   }
 };
@@ -168,15 +169,13 @@ export const deleteAvailabilitySlot = async (slotId: string): Promise<void> => {
 // Session functions
 export const createSession = async (session: Omit<Session, 'id'>): Promise<string> => {
   try {
-    console.log('Creating session:', session);
     const docRef = await addDoc(collection(db, 'sessions'), {
       ...session,
       createdAt: new Date().toISOString()
     });
-    console.log('Session created with ID:', docRef.id);
     return docRef.id;
   } catch (error) {
-    console.error('Error creating session:', error);
+    if (isDev) console.error('Error creating session:', error);
     throw error;
   }
 };
@@ -189,10 +188,9 @@ export const getStudentSessions = async (studentId: string): Promise<Session[]> 
     const studentSessions = allSessions
       .filter(s => s.studentId === studentId)
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    console.log('Student sessions found:', studentSessions.length);
     return studentSessions;
   } catch (error) {
-    console.error('Error fetching student sessions:', error);
+    if (isDev) console.error('Error fetching student sessions:', error);
     return [];
   }
 };
@@ -205,10 +203,9 @@ export const getTutorSessions = async (tutorId: string): Promise<Session[]> => {
     const tutorSessions = allSessions
       .filter(s => s.tutorId === tutorId)
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    console.log('Tutor sessions found:', tutorSessions.length, tutorSessions);
     return tutorSessions;
   } catch (error) {
-    console.error('Error fetching tutor sessions:', error);
+    if (isDev) console.error('Error fetching tutor sessions:', error);
     return [];
   }
 };
@@ -217,10 +214,9 @@ export const getAllSessions = async (): Promise<Session[]> => {
   try {
     const snapshot = await getDocs(collection(db, 'sessions'));
     const sessions = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Session));
-    console.log('All sessions found:', sessions.length, sessions);
     return sessions.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   } catch (error) {
-    console.error('Error fetching all sessions:', error);
+    if (isDev) console.error('Error fetching all sessions:', error);
     return [];
   }
 };
@@ -235,7 +231,7 @@ export const updateSessionStatus = async (
     if (zoomLink) updateData.zoomLink = zoomLink;
     await updateDoc(doc(db, 'sessions', sessionId), updateData);
   } catch (error) {
-    console.error('Error updating session:', error);
+    if (isDev) console.error('Error updating session:', error);
     throw error;
   }
 };
@@ -247,7 +243,7 @@ export const getStudentGoals = async (studentId: string): Promise<LearningGoal[]
     const snapshot = await getDocs(q);
     return snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as LearningGoal));
   } catch (error) {
-    console.error('Error fetching goals:', error);
+    if (isDev) console.error('Error fetching goals:', error);
     return [];
   }
 };
@@ -257,7 +253,7 @@ export const createLearningGoal = async (goal: Omit<LearningGoal, 'id'>): Promis
     const docRef = await addDoc(collection(db, 'learningGoals'), goal);
     return docRef.id;
   } catch (error) {
-    console.error('Error creating goal:', error);
+    if (isDev) console.error('Error creating goal:', error);
     throw error;
   }
 };
@@ -266,7 +262,7 @@ export const updateLearningGoal = async (goalId: string, data: Partial<LearningG
   try {
     await updateDoc(doc(db, 'learningGoals', goalId), data);
   } catch (error) {
-    console.error('Error updating goal:', error);
+    if (isDev) console.error('Error updating goal:', error);
     throw error;
   }
 };
@@ -275,7 +271,7 @@ export const deleteLearningGoal = async (goalId: string): Promise<void> => {
   try {
     await deleteDoc(doc(db, 'learningGoals', goalId));
   } catch (error) {
-    console.error('Error deleting goal:', error);
+    if (isDev) console.error('Error deleting goal:', error);
     throw error;
   }
 };
@@ -286,7 +282,7 @@ export const getAllUsers = async (): Promise<any[]> => {
     const snapshot = await getDocs(collection(db, 'users'));
     return snapshot.docs.map(doc => ({ ...doc.data(), uid: doc.id }));
   } catch (error) {
-    console.error('Error fetching users:', error);
+    if (isDev) console.error('Error fetching users:', error);
     return [];
   }
 };
@@ -295,7 +291,7 @@ export const updateUserStatus = async (uid: string, isActive: boolean): Promise<
   try {
     await updateDoc(doc(db, 'users', uid), { isActive });
   } catch (error) {
-    console.error('Error updating user status:', error);
+    if (isDev) console.error('Error updating user status:', error);
     throw error;
   }
 };

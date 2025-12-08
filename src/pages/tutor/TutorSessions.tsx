@@ -12,6 +12,7 @@ import DashboardLayout from "@/components/layout/DashboardLayout";
 import { getTutorSessions, updateSessionStatus, Session } from "@/lib/firestore";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { auth } from "@/lib/firebase";
 
 const statusColors: Record<Session['status'], string> = {
   pending: "bg-warning/10 text-warning border-warning/20",
@@ -53,11 +54,21 @@ export default function TutorSessions() {
     if (!selectedSession) return;
     setGeneratingZoom(true);
     try {
+      // Get Firebase auth token for authenticated request
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
+        throw new Error('User not authenticated');
+      }
+      const idToken = await currentUser.getIdToken();
+      
       const response = await fetch(
         `https://yafjkpckhzpkrptmzcms.supabase.co/functions/v1/create-zoom-meeting`,
         {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${idToken}`
+          },
           body: JSON.stringify({
             topic: `${selectedSession.subject} - Tutoring Session`,
             startTime: `${selectedSession.date}T${selectedSession.time}:00`,
@@ -73,7 +84,6 @@ export default function TutorSessions() {
         throw new Error(data.error || 'Failed to generate Zoom link');
       }
     } catch (error) {
-      console.error('Zoom generation error:', error);
       toast({ 
         title: "Could not auto-generate", 
         description: "Please enter a Zoom link manually", 

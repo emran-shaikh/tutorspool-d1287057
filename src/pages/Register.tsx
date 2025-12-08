@@ -3,11 +3,14 @@ import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { GraduationCap, Mail, Lock, User, Eye, EyeOff, Users, BookOpen, Shield } from "lucide-react";
+import { GraduationCap, Mail, Lock, User, Eye, EyeOff, Users, BookOpen, Shield, Key } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { useAuth, UserRole } from "@/contexts/AuthContext";
 import { z } from "zod";
+
+// Admin security key - in production, this should be stored securely and rotated
+const ADMIN_SECURITY_KEY = "TutorsPool2024Admin!";
 
 const registerSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters").max(100),
@@ -50,6 +53,7 @@ export default function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [adminSecurityKey, setAdminSecurityKey] = useState("");
   const [role, setRole] = useState<UserRole>(initialRole);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -68,6 +72,26 @@ export default function Register() {
       return;
     }
 
+    // Validate admin security key if admin role is selected
+    if (role === "admin") {
+      if (!adminSecurityKey) {
+        toast({
+          title: "Security Key Required",
+          description: "Please enter the admin security key to register as an admin.",
+          variant: "destructive",
+        });
+        return;
+      }
+      if (adminSecurityKey !== ADMIN_SECURITY_KEY) {
+        toast({
+          title: "Invalid Security Key",
+          description: "The admin security key is incorrect. Please contact an existing admin for the correct key.",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
     setIsLoading(true);
 
     try {
@@ -78,7 +102,6 @@ export default function Register() {
       });
       navigate(`/${role}/dashboard`);
     } catch (error: any) {
-      console.error("Registration error:", error);
       let errorMessage = "Failed to create account. Please try again.";
       
       if (error.code === 'auth/email-already-in-use') {
@@ -237,6 +260,31 @@ export default function Register() {
                 />
               </div>
             </div>
+
+            {/* Admin Security Key Field - Only shown when admin role is selected */}
+            {role === "admin" && (
+              <div className="space-y-2">
+                <Label htmlFor="adminSecurityKey" className="flex items-center gap-2">
+                  <Shield className="h-4 w-4 text-primary" />
+                  Admin Security Key
+                </Label>
+                <div className="relative">
+                  <Key className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="adminSecurityKey"
+                    type="password"
+                    placeholder="Enter admin security key"
+                    value={adminSecurityKey}
+                    onChange={(e) => setAdminSecurityKey(e.target.value)}
+                    className="pl-10"
+                    required
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Contact an existing administrator to obtain the security key.
+                </p>
+              </div>
+            )}
 
             <Button type="submit" variant="hero" className="w-full" size="lg" disabled={isLoading}>
               {isLoading ? "Creating account..." : `Create ${role.charAt(0).toUpperCase() + role.slice(1)} Account`}
