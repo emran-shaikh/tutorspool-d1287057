@@ -72,16 +72,14 @@ export default function EditTutorProfile() {
         createdAt: profile?.createdAt || new Date().toISOString()
       };
 
-      if (profile) {
-        await updateTutorProfile(userProfile.uid, { bio, experience, hourlyRate, subjects });
-      } else {
-        await createTutorProfile(profileData);
-      }
+      // Always use createTutorProfile which uses setDoc (creates or overwrites)
+      await createTutorProfile(profileData);
       
       toast({ title: "Profile saved!", description: "Your tutor profile has been updated" });
       navigate('/tutor/dashboard');
     } catch (error) {
-      toast({ title: "Error", description: "Failed to save profile", variant: "destructive" });
+      console.error('Error saving profile:', error);
+      toast({ title: "Error", description: "Failed to save profile. Please try again.", variant: "destructive" });
     } finally {
       setSaving(false);
     }

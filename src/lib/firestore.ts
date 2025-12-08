@@ -78,6 +78,7 @@ export const getTutors = async (): Promise<TutorProfile[]> => {
 export const getAllTutors = async (): Promise<TutorProfile[]> => {
   try {
     const snapshot = await getDocs(collection(db, 'tutorProfiles'));
+    console.log('Fetched tutors count:', snapshot.docs.length);
     return snapshot.docs.map(doc => ({ ...doc.data(), uid: doc.id } as TutorProfile));
   } catch (error) {
     console.error('Error fetching all tutors:', error);
@@ -101,7 +102,8 @@ export const getTutorProfile = async (uid: string): Promise<TutorProfile | null>
 
 export const createTutorProfile = async (profile: TutorProfile): Promise<void> => {
   try {
-    await setDoc(doc(db, 'tutorProfiles', profile.uid), profile);
+    // Use setDoc with merge option to create or update the document
+    await setDoc(doc(db, 'tutorProfiles', profile.uid), profile, { merge: true });
   } catch (error) {
     console.error('Error creating tutor profile:', error);
     throw error;
