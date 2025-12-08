@@ -63,12 +63,12 @@ export interface LearningGoal {
 // Tutor functions
 export const getTutors = async (): Promise<TutorProfile[]> => {
   try {
-    const tutorsQuery = query(
-      collection(db, 'tutorProfiles'),
-      where('isApproved', '==', true)
-    );
-    const snapshot = await getDocs(tutorsQuery);
-    return snapshot.docs.map(doc => ({ ...doc.data(), uid: doc.id } as TutorProfile));
+    // Fetch all tutors and filter client-side to avoid index issues
+    const snapshot = await getDocs(collection(db, 'tutorProfiles'));
+    const allTutors = snapshot.docs.map(doc => ({ ...doc.data(), uid: doc.id } as TutorProfile));
+    const approvedTutors = allTutors.filter(tutor => tutor.isApproved === true);
+    console.log('Approved tutors found:', approvedTutors.length, approvedTutors);
+    return approvedTutors;
   } catch (error) {
     console.error('Error fetching tutors:', error);
     return [];
