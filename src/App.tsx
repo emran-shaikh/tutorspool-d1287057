@@ -47,10 +47,13 @@ const AuthRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
 
+  // If user is logged in and has a profile, redirect to their dashboard
   if (user && userProfile) {
     return <Navigate to={`/${userProfile.role}/dashboard`} replace />;
   }
 
+  // If user is logged in but no profile exists (Firestore write failed), stay on auth page
+  // This allows them to see the page and try again or logout
   return <>{children}</>;
 };
 
