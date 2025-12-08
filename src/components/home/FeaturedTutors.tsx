@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Star, ArrowRight } from "lucide-react";
 import { getTutors, TutorProfile } from "@/lib/firestore";
 
@@ -61,7 +61,8 @@ export function FeaturedTutors() {
             <Card key={tutor.uid} className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
               <CardContent className="p-6">
                 <div className="flex flex-col items-center text-center">
-                  <Avatar className="h-20 w-20 mb-4">
+                  <Avatar className="h-20 w-20 mb-4 border-2 border-primary/20">
+                    <AvatarImage src={tutor.photoURL} alt={tutor.fullName} />
                     <AvatarFallback className="bg-primary/10 text-primary text-xl">
                       {getInitials(tutor.fullName)}
                     </AvatarFallback>

@@ -28,7 +28,27 @@ export interface TutorProfile {
   hourlyRate: number;
   experience: string;
   isApproved: boolean;
+  photoURL?: string;
   createdAt: string;
+}
+
+// Blog Types and Functions
+export interface BlogPost {
+  id?: string;
+  title: string;
+  slug: string;
+  content: string;
+  excerpt: string;
+  coverImage?: string;
+  authorId: string;
+  authorName: string;
+  isPublished: boolean;
+  publishedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+  tags: string[];
+  metaTitle?: string;
+  metaDescription?: string;
 }
 
 export interface AvailabilitySlot {
@@ -351,6 +371,91 @@ export const getSessionReview = async (sessionId: string): Promise<Review | null
     return reviews.find(r => r.sessionId === sessionId) || null;
   } catch (error) {
     if (isDev) console.error('Error fetching session review:', error);
+    return null;
+  }
+};
+
+// Blog functions
+export const createBlogPost = async (post: Omit<BlogPost, 'id'>): Promise<string> => {
+  try {
+    const docRef = await addDoc(collection(db, 'blogPosts'), {
+      ...post,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    });
+    return docRef.id;
+  } catch (error) {
+    if (isDev) console.error('Error creating blog post:', error);
+    throw error;
+  }
+};
+
+export const updateBlogPost = async (postId: string, data: Partial<BlogPost>): Promise<void> => {
+  try {
+    await updateDoc(doc(db, 'blogPosts', postId), {
+      ...data,
+      updatedAt: new Date().toISOString()
+    });
+  } catch (error) {
+    if (isDev) console.error('Error updating blog post:', error);
+    throw error;
+  }
+};
+
+export const deleteBlogPost = async (postId: string): Promise<void> => {
+  try {
+    await deleteDoc(doc(db, 'blogPosts', postId));
+  } catch (error) {
+    if (isDev) console.error('Error deleting blog post:', error);
+    throw error;
+  }
+};
+
+export const getAllBlogPosts = async (): Promise<BlogPost[]> => {
+  try {
+    const snapshot = await getDocs(collection(db, 'blogPosts'));
+    return snapshot.docs
+      .map(doc => ({ ...doc.data(), id: doc.id } as BlogPost))
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  } catch (error) {
+    if (isDev) console.error('Error fetching all blog posts:', error);
+    return [];
+  }
+};
+
+export const getPublishedBlogPosts = async (): Promise<BlogPost[]> => {
+  try {
+    const snapshot = await getDocs(collection(db, 'blogPosts'));
+    const posts = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as BlogPost));
+    return posts
+      .filter(p => p.isPublished)
+      .sort((a, b) => new Date(b.publishedAt || b.createdAt).getTime() - new Date(a.publishedAt || a.createdAt).getTime());
+  } catch (error) {
+    if (isDev) console.error('Error fetching published blog posts:', error);
+    return [];
+  }
+};
+
+export const getBlogPostBySlug = async (slug: string): Promise<BlogPost | null> => {
+  try {
+    const snapshot = await getDocs(collection(db, 'blogPosts'));
+    const posts = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as BlogPost));
+    return posts.find(p => p.slug === slug && p.isPublished) || null;
+  } catch (error) {
+    if (isDev) console.error('Error fetching blog post by slug:', error);
+    return null;
+  }
+};
+
+export const getBlogPostById = async (postId: string): Promise<BlogPost | null> => {
+  try {
+    const docSnap = await getDoc(doc(db, 'blogPosts', postId));
+    if (docSnap.exists()) {
+      return { ...docSnap.data(), id: docSnap.id } as BlogPost;
+    }
+    return null;
+  } catch (error) {
+    if (isDev) console.error('Error fetching blog post:', error);
     return null;
   }
 };
