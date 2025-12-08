@@ -132,7 +132,7 @@ export function HeroSection() {
                 className="text-center animate-fade-in"
                 style={{ animationDelay: `${0.6 + i * 0.1}s` }}
               >
-                <p className="font-display text-3xl lg:text-4xl font-bold text-secondary">
+                <p className="font-display text-3xl lg:text-4xl font-bold text-foreground">
                   {stat.value}
                 </p>
                 <p className="text-muted-foreground mt-1">{stat.label}</p>

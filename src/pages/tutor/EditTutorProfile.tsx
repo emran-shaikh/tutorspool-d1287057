@@ -8,7 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, User, Save, X, Plus } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import { getTutorProfile, createTutorProfile, updateTutorProfile, TutorProfile } from "@/lib/firestore";
+import { PhotoUpload } from "@/components/PhotoUpload";
+import { getTutorProfile, createTutorProfile, TutorProfile } from "@/lib/firestore";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 
@@ -26,6 +27,7 @@ export default function EditTutorProfile() {
   const [hourlyRate, setHourlyRate] = useState(0);
   const [subjects, setSubjects] = useState<string[]>([]);
   const [newSubject, setNewSubject] = useState("");
+  const [photoURL, setPhotoURL] = useState<string>("");
 
   useEffect(() => {
     fetchProfile();
@@ -40,6 +42,7 @@ export default function EditTutorProfile() {
       setExperience(data.experience || "");
       setHourlyRate(data.hourlyRate || 0);
       setSubjects(data.subjects || []);
+      setPhotoURL(data.photoURL || "");
     }
     setLoading(false);
   };
@@ -68,6 +71,7 @@ export default function EditTutorProfile() {
         experience,
         hourlyRate,
         subjects,
+        photoURL: photoURL || undefined,
         isApproved: profile?.isApproved || false,
         createdAt: profile?.createdAt || new Date().toISOString()
       };
@@ -110,6 +114,15 @@ export default function EditTutorProfile() {
               <CardDescription>This information will be visible to students</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
+              {/* Photo Upload */}
+              <div className="flex justify-center pb-4 border-b border-border">
+                <PhotoUpload
+                  currentPhotoURL={photoURL}
+                  fullName={userProfile?.fullName || ""}
+                  onPhotoChange={setPhotoURL}
+                />
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="bio">Bio</Label>
                 <Textarea

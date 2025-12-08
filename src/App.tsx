@@ -12,6 +12,8 @@ import FindTutors from "./pages/FindTutors";
 import Reviews from "./pages/Reviews";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
+import Blog from "./pages/Blog";
+import BlogPost from "./pages/BlogPost";
 import StudentDashboard from "./pages/dashboard/StudentDashboard";
 import TutorDashboard from "./pages/dashboard/TutorDashboard";
 import AdminDashboard from "./pages/dashboard/AdminDashboard";
@@ -25,6 +27,8 @@ import EditTutorProfile from "./pages/tutor/EditTutorProfile";
 import ManageUsers from "./pages/admin/ManageUsers";
 import SessionMonitoring from "./pages/admin/SessionMonitoring";
 import Reports from "./pages/admin/Reports";
+import ManageBlogs from "./pages/admin/ManageBlogs";
+import BlogEditor from "./pages/admin/BlogEditor";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -83,6 +87,8 @@ const App = () => (
             <Route path="/reviews" element={<Reviews />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/blog" element={<Blog />} />
+            <Route path="/blog/:slug" element={<BlogPost />} />
             <Route path="/login" element={<AuthRoute><Login /></AuthRoute>} />
             <Route path="/register" element={<AuthRoute><Register /></AuthRoute>} />
             
@@ -104,6 +110,9 @@ const App = () => (
             <Route path="/admin/users" element={<ProtectedRoute allowedRoles={['admin']}><ManageUsers /></ProtectedRoute>} />
             <Route path="/admin/sessions" element={<ProtectedRoute allowedRoles={['admin']}><SessionMonitoring /></ProtectedRoute>} />
             <Route path="/admin/reports" element={<ProtectedRoute allowedRoles={['admin']}><Reports /></ProtectedRoute>} />
+            <Route path="/admin/blogs" element={<ProtectedRoute allowedRoles={['admin']}><ManageBlogs /></ProtectedRoute>} />
+            <Route path="/admin/blogs/new" element={<ProtectedRoute allowedRoles={['admin']}><BlogEditor /></ProtectedRoute>} />
+            <Route path="/admin/blogs/edit/:id" element={<ProtectedRoute allowedRoles={['admin']}><BlogEditor /></ProtectedRoute>} />
             
             <Route path="*" element={<NotFound />} />
           </Routes>
