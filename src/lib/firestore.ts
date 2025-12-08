@@ -168,10 +168,12 @@ export const deleteAvailabilitySlot = async (slotId: string): Promise<void> => {
 // Session functions
 export const createSession = async (session: Omit<Session, 'id'>): Promise<string> => {
   try {
+    console.log('Creating session:', session);
     const docRef = await addDoc(collection(db, 'sessions'), {
       ...session,
       createdAt: new Date().toISOString()
     });
+    console.log('Session created with ID:', docRef.id);
     return docRef.id;
   } catch (error) {
     console.error('Error creating session:', error);
@@ -181,13 +183,14 @@ export const createSession = async (session: Omit<Session, 'id'>): Promise<strin
 
 export const getStudentSessions = async (studentId: string): Promise<Session[]> => {
   try {
-    const q = query(
-      collection(db, 'sessions'),
-      where('studentId', '==', studentId),
-      orderBy('createdAt', 'desc')
-    );
-    const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Session));
+    // Fetch all sessions and filter client-side to avoid composite index requirement
+    const snapshot = await getDocs(collection(db, 'sessions'));
+    const allSessions = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Session));
+    const studentSessions = allSessions
+      .filter(s => s.studentId === studentId)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    console.log('Student sessions found:', studentSessions.length);
+    return studentSessions;
   } catch (error) {
     console.error('Error fetching student sessions:', error);
     return [];
@@ -196,13 +199,14 @@ export const getStudentSessions = async (studentId: string): Promise<Session[]> 
 
 export const getTutorSessions = async (tutorId: string): Promise<Session[]> => {
   try {
-    const q = query(
-      collection(db, 'sessions'),
-      where('tutorId', '==', tutorId),
-      orderBy('createdAt', 'desc')
-    );
-    const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Session));
+    // Fetch all sessions and filter client-side to avoid composite index requirement
+    const snapshot = await getDocs(collection(db, 'sessions'));
+    const allSessions = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Session));
+    const tutorSessions = allSessions
+      .filter(s => s.tutorId === tutorId)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    console.log('Tutor sessions found:', tutorSessions.length, tutorSessions);
+    return tutorSessions;
   } catch (error) {
     console.error('Error fetching tutor sessions:', error);
     return [];
@@ -211,9 +215,10 @@ export const getTutorSessions = async (tutorId: string): Promise<Session[]> => {
 
 export const getAllSessions = async (): Promise<Session[]> => {
   try {
-    const q = query(collection(db, 'sessions'), orderBy('createdAt', 'desc'));
-    const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Session));
+    const snapshot = await getDocs(collection(db, 'sessions'));
+    const sessions = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Session));
+    console.log('All sessions found:', sessions.length, sessions);
+    return sessions.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   } catch (error) {
     console.error('Error fetching all sessions:', error);
     return [];
