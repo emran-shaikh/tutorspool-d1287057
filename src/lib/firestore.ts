@@ -182,13 +182,11 @@ export const createSession = async (session: Omit<Session, 'id'>): Promise<strin
 
 export const getStudentSessions = async (studentId: string): Promise<Session[]> => {
   try {
-    // Fetch all sessions and filter client-side to avoid composite index requirement
-    const snapshot = await getDocs(collection(db, 'sessions'));
-    const allSessions = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Session));
-    const studentSessions = allSessions
-      .filter(s => s.studentId === studentId)
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    return studentSessions;
+    // Use query with where clause to respect Firestore security rules
+    const q = query(collection(db, 'sessions'), where('studentId', '==', studentId));
+    const snapshot = await getDocs(q);
+    const sessions = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Session));
+    return sessions.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   } catch (error) {
     if (isDev) console.error('Error fetching student sessions:', error);
     return [];
@@ -197,13 +195,11 @@ export const getStudentSessions = async (studentId: string): Promise<Session[]> 
 
 export const getTutorSessions = async (tutorId: string): Promise<Session[]> => {
   try {
-    // Fetch all sessions and filter client-side to avoid composite index requirement
-    const snapshot = await getDocs(collection(db, 'sessions'));
-    const allSessions = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Session));
-    const tutorSessions = allSessions
-      .filter(s => s.tutorId === tutorId)
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    return tutorSessions;
+    // Use query with where clause to respect Firestore security rules
+    const q = query(collection(db, 'sessions'), where('tutorId', '==', tutorId));
+    const snapshot = await getDocs(q);
+    const sessions = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Session));
+    return sessions.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   } catch (error) {
     if (isDev) console.error('Error fetching tutor sessions:', error);
     return [];
