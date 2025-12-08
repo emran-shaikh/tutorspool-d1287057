@@ -10,6 +10,16 @@ import Register from "./pages/Register";
 import StudentDashboard from "./pages/dashboard/StudentDashboard";
 import TutorDashboard from "./pages/dashboard/TutorDashboard";
 import AdminDashboard from "./pages/dashboard/AdminDashboard";
+import BrowseTutors from "./pages/student/BrowseTutors";
+import BookSession from "./pages/student/BookSession";
+import MySessions from "./pages/student/MySessions";
+import LearningGoals from "./pages/student/LearningGoals";
+import TutorSessions from "./pages/tutor/TutorSessions";
+import TutorAvailability from "./pages/tutor/TutorAvailability";
+import EditTutorProfile from "./pages/tutor/EditTutorProfile";
+import ManageUsers from "./pages/admin/ManageUsers";
+import SessionMonitoring from "./pages/admin/SessionMonitoring";
+import Reports from "./pages/admin/Reports";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -47,13 +57,10 @@ const AuthRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
 
-  // If user is logged in and has a profile, redirect to their dashboard
   if (user && userProfile) {
     return <Navigate to={`/${userProfile.role}/dashboard`} replace />;
   }
 
-  // If user is logged in but no profile exists (Firestore write failed), stay on auth page
-  // This allows them to see the page and try again or logout
   return <>{children}</>;
 };
 
@@ -68,10 +75,26 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<AuthRoute><Login /></AuthRoute>} />
             <Route path="/register" element={<AuthRoute><Register /></AuthRoute>} />
+            
+            {/* Student Routes */}
             <Route path="/student/dashboard" element={<ProtectedRoute allowedRoles={['student']}><StudentDashboard /></ProtectedRoute>} />
+            <Route path="/student/tutors" element={<ProtectedRoute allowedRoles={['student']}><BrowseTutors /></ProtectedRoute>} />
+            <Route path="/student/book/:tutorId" element={<ProtectedRoute allowedRoles={['student']}><BookSession /></ProtectedRoute>} />
+            <Route path="/student/sessions" element={<ProtectedRoute allowedRoles={['student']}><MySessions /></ProtectedRoute>} />
+            <Route path="/student/goals" element={<ProtectedRoute allowedRoles={['student']}><LearningGoals /></ProtectedRoute>} />
+            
+            {/* Tutor Routes */}
             <Route path="/tutor/dashboard" element={<ProtectedRoute allowedRoles={['tutor']}><TutorDashboard /></ProtectedRoute>} />
+            <Route path="/tutor/sessions" element={<ProtectedRoute allowedRoles={['tutor']}><TutorSessions /></ProtectedRoute>} />
+            <Route path="/tutor/availability" element={<ProtectedRoute allowedRoles={['tutor']}><TutorAvailability /></ProtectedRoute>} />
+            <Route path="/tutor/profile" element={<ProtectedRoute allowedRoles={['tutor']}><EditTutorProfile /></ProtectedRoute>} />
+            
+            {/* Admin Routes */}
             <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="/admin/users" element={<ProtectedRoute allowedRoles={['admin']}><ManageUsers /></ProtectedRoute>} />
+            <Route path="/admin/sessions" element={<ProtectedRoute allowedRoles={['admin']}><SessionMonitoring /></ProtectedRoute>} />
+            <Route path="/admin/reports" element={<ProtectedRoute allowedRoles={['admin']}><Reports /></ProtectedRoute>} />
+            
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
