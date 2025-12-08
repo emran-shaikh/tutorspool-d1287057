@@ -4,10 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Calendar, Video, Clock, ExternalLink } from "lucide-react";
+import { ArrowLeft, Calendar, Video, Clock, ExternalLink, Star } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import { getStudentSessions, Session } from "@/lib/firestore";
+import { getStudentSessions, getSessionReview, Session } from "@/lib/firestore";
 import { useAuth } from "@/contexts/AuthContext";
+import ReviewDialog from "@/components/ReviewDialog";
 
 const statusColors: Record<Session['status'], string> = {
   pending: "bg-warning/10 text-warning border-warning/20",
@@ -21,50 +22,91 @@ export default function MySessions() {
   const { userProfile } = useAuth();
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
+  const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
+  const [selectedSession, setSelectedSession] = useState<Session | null>(null);
+  const [reviewedSessions, setReviewedSessions] = useState<Set<string>>(new Set());
+
+  const fetchSessions = async () => {
+    if (!userProfile?.uid) return;
+    const data = await getStudentSessions(userProfile.uid);
+    setSessions(data);
+    
+    // Check which completed sessions have reviews
+    const completedSessions = data.filter(s => s.status === 'completed');
+    const reviewedIds = new Set<string>();
+    for (const session of completedSessions) {
+      if (session.id) {
+        const review = await getSessionReview(session.id);
+        if (review) reviewedIds.add(session.id);
+      }
+    }
+    setReviewedSessions(reviewedIds);
+    setLoading(false);
+  };
 
   useEffect(() => {
-    const fetchSessions = async () => {
-      if (!userProfile?.uid) return;
-      const data = await getStudentSessions(userProfile.uid);
-      setSessions(data);
-      setLoading(false);
-    };
     fetchSessions();
   }, [userProfile]);
+
+  const handleLeaveReview = (session: Session) => {
+    setSelectedSession(session);
+    setReviewDialogOpen(true);
+  };
 
   const upcomingSessions = sessions.filter(s => s.status === 'accepted');
   const pendingSessions = sessions.filter(s => s.status === 'pending');
   const pastSessions = sessions.filter(s => ['completed', 'declined', 'cancelled'].includes(s.status));
 
-  const SessionCard = ({ session }: { session: Session }) => (
-    <div className="p-4 rounded-lg bg-muted/50 space-y-3">
-      <div className="flex justify-between items-start">
-        <div>
-          <p className="font-medium">{session.subject}</p>
-          <p className="text-sm text-muted-foreground">{session.tutorName}</p>
+  const SessionCard = ({ session }: { session: Session }) => {
+    const hasReview = session.id ? reviewedSessions.has(session.id) : false;
+    const canReview = session.status === 'completed' && !hasReview;
+    
+    return (
+      <div className="p-4 rounded-lg bg-muted/50 space-y-3">
+        <div className="flex justify-between items-start">
+          <div>
+            <p className="font-medium">{session.subject}</p>
+            <p className="text-sm text-muted-foreground">{session.tutorName}</p>
+          </div>
+          <Badge variant="outline" className={statusColors[session.status]}>
+            {session.status}
+          </Badge>
         </div>
-        <Badge variant="outline" className={statusColors[session.status]}>
-          {session.status}
-        </Badge>
+        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+          <span className="flex items-center gap-1">
+            <Calendar className="h-3 w-3" /> {session.date}
+          </span>
+          <span className="flex items-center gap-1">
+            <Clock className="h-3 w-3" /> {session.time}
+          </span>
+        </div>
+        {session.status === 'accepted' && session.zoomLink && (
+          <Button size="sm" className="w-full" asChild>
+            <a href={session.zoomLink} target="_blank" rel="noopener noreferrer">
+              <Video className="h-4 w-4 mr-2" /> Join Session
+              <ExternalLink className="h-3 w-3 ml-2" />
+            </a>
+          </Button>
+        )}
+        {canReview && (
+          <Button 
+            size="sm" 
+            variant="outline" 
+            className="w-full"
+            onClick={() => handleLeaveReview(session)}
+          >
+            <Star className="h-4 w-4 mr-2" /> Leave Review
+          </Button>
+        )}
+        {hasReview && (
+          <div className="flex items-center gap-1 text-sm text-muted-foreground">
+            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+            <span>Review submitted</span>
+          </div>
+        )}
       </div>
-      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-        <span className="flex items-center gap-1">
-          <Calendar className="h-3 w-3" /> {session.date}
-        </span>
-        <span className="flex items-center gap-1">
-          <Clock className="h-3 w-3" /> {session.time}
-        </span>
-      </div>
-      {session.status === 'accepted' && session.zoomLink && (
-        <Button size="sm" className="w-full" asChild>
-          <a href={session.zoomLink} target="_blank" rel="noopener noreferrer">
-            <Video className="h-4 w-4 mr-2" /> Join Session
-            <ExternalLink className="h-3 w-3 ml-2" />
-          </a>
-        </Button>
-      )}
-    </div>
-  );
+    );
+  };
 
   return (
     <DashboardLayout role="student">
@@ -165,6 +207,15 @@ export default function MySessions() {
             </Card>
           </TabsContent>
         </Tabs>
+      )}
+
+      {selectedSession && (
+        <ReviewDialog
+          open={reviewDialogOpen}
+          onOpenChange={setReviewDialogOpen}
+          session={selectedSession}
+          onReviewSubmitted={fetchSessions}
+        />
       )}
     </DashboardLayout>
   );

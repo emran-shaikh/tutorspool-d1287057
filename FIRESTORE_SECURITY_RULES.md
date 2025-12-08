@@ -123,6 +123,22 @@ service cloud.firestore {
       allow delete: if isAuthenticated() && isStudent() 
         && resource.data.studentId == request.auth.uid;
     }
+    
+    // Reviews collection
+    match /reviews/{reviewId} {
+      // Anyone can read reviews (public for tutor profiles)
+      allow read: if true;
+      
+      // Only students can create reviews for sessions they attended
+      allow create: if isAuthenticated() && isStudent() 
+        && request.resource.data.studentId == request.auth.uid;
+      
+      // Reviews cannot be updated (one-time submission)
+      allow update: if false;
+      
+      // Only admins can delete reviews
+      allow delete: if isAdmin();
+    }
   }
 }
 ```
