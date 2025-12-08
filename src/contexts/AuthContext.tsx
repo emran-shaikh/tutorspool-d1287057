@@ -51,7 +51,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const userDoc = await getDoc(doc(db, 'users', uid));
       if (userDoc.exists()) {
         const data = userDoc.data();
-        setUserProfile(data as UserProfile);
+        // Ensure uid is always set from the document ID
+        setUserProfile({ ...data, uid } as UserProfile);
       } else {
         if (isDev) console.warn("No user profile found for uid:", uid);
         setUserProfile(null);
