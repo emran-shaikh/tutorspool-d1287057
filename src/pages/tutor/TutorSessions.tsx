@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ArrowLeft, Calendar, Video, Clock, CheckCircle, XCircle, ExternalLink } from "lucide-react";
+import { ArrowLeft, Calendar, Video, Clock, CheckCircle, XCircle, ExternalLink, Loader2 } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { getTutorSessions, updateSessionStatus, Session } from "@/lib/firestore";
 import { useAuth } from "@/contexts/AuthContext";
@@ -47,10 +47,48 @@ export default function TutorSessions() {
     setZoomDialogOpen(true);
   };
 
+  const [generatingZoom, setGeneratingZoom] = useState(false);
+
+  const generateZoomLink = async () => {
+    if (!selectedSession) return;
+    setGeneratingZoom(true);
+    try {
+      const response = await fetch(
+        `https://yafjkpckhzpkrptmzcms.supabase.co/functions/v1/create-zoom-meeting`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            topic: `${selectedSession.subject} - Tutoring Session`,
+            startTime: `${selectedSession.date}T${selectedSession.time}:00`,
+            duration: 60
+          })
+        }
+      );
+      const data = await response.json();
+      if (data.success && data.joinUrl) {
+        setZoomLink(data.joinUrl);
+        toast({ title: "Zoom link generated!", description: "Meeting link has been created" });
+      } else {
+        throw new Error(data.error || 'Failed to generate Zoom link');
+      }
+    } catch (error) {
+      console.error('Zoom generation error:', error);
+      toast({ 
+        title: "Could not auto-generate", 
+        description: "Please enter a Zoom link manually", 
+        variant: "destructive" 
+      });
+    } finally {
+      setGeneratingZoom(false);
+    }
+  };
+
   const confirmAccept = async () => {
     if (!selectedSession?.id) return;
     try {
-      await updateSessionStatus(selectedSession.id, 'accepted', zoomLink || `https://zoom.us/j/${Date.now()}`);
+      const meetingLink = zoomLink || `https://zoom.us/j/${Date.now()}`;
+      await updateSessionStatus(selectedSession.id, 'accepted', meetingLink);
       toast({ title: "Session accepted!", description: "Student has been notified" });
       setZoomDialogOpen(false);
       fetchSessions();
@@ -237,23 +275,44 @@ export default function TutorSessions() {
           <DialogHeader>
             <DialogTitle>Accept Session</DialogTitle>
             <DialogDescription>
-              Add a Zoom link for the session (or leave blank to auto-generate)
+              Generate a Zoom meeting link automatically or enter one manually
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <Label htmlFor="zoom">Zoom Meeting Link</Label>
-              <Input
-                id="zoom"
-                placeholder="https://zoom.us/j/..."
-                value={zoomLink}
-                onChange={(e) => setZoomLink(e.target.value)}
-              />
+              <div className="flex gap-2">
+                <Input
+                  id="zoom"
+                  placeholder="https://zoom.us/j/..."
+                  value={zoomLink}
+                  onChange={(e) => setZoomLink(e.target.value)}
+                  className="flex-1"
+                />
+                <Button 
+                  type="button" 
+                  variant="secondary" 
+                  onClick={generateZoomLink}
+                  disabled={generatingZoom}
+                >
+                  {generatingZoom ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Video className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Click the button to auto-generate a Zoom link, or paste your own
+              </p>
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setZoomDialogOpen(false)}>Cancel</Button>
-            <Button onClick={confirmAccept}>Accept Session</Button>
+            <Button onClick={confirmAccept} disabled={!zoomLink}>
+              <CheckCircle className="h-4 w-4 mr-2" />
+              Accept Session
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -7,6 +7,11 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import Subjects from "./pages/Subjects";
+import FindTutors from "./pages/FindTutors";
+import Reviews from "./pages/Reviews";
+import About from "./pages/About";
+import Contact from "./pages/Contact";
 import StudentDashboard from "./pages/dashboard/StudentDashboard";
 import TutorDashboard from "./pages/dashboard/TutorDashboard";
 import AdminDashboard from "./pages/dashboard/AdminDashboard";
@@ -73,6 +78,11 @@ const App = () => (
         <AuthProvider>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/subjects" element={<Subjects />} />
+            <Route path="/tutors" element={<FindTutors />} />
+            <Route path="/reviews" element={<Reviews />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
             <Route path="/login" element={<AuthRoute><Login /></AuthRoute>} />
             <Route path="/register" element={<AuthRoute><Register /></AuthRoute>} />
             
