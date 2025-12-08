@@ -78,6 +78,7 @@ export default function Register() {
       });
       navigate(`/${role}/dashboard`);
     } catch (error: any) {
+      console.error("Registration error:", error);
       let errorMessage = "Failed to create account. Please try again.";
       
       if (error.code === 'auth/email-already-in-use') {
@@ -86,6 +87,12 @@ export default function Register() {
         errorMessage = "Password is too weak. Please use a stronger password.";
       } else if (error.code === 'auth/invalid-email') {
         errorMessage = "Invalid email address.";
+      } else if (error.code === 'auth/network-request-failed') {
+        errorMessage = "Network error. Please check your internet connection.";
+      } else if (error.code === 'auth/operation-not-allowed') {
+        errorMessage = "Email/password accounts are not enabled. Please contact support.";
+      } else if (error.message) {
+        errorMessage = error.message;
       }
       
       toast({
