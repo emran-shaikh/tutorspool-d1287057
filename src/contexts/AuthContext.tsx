@@ -9,6 +9,9 @@ import {
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 
+// Environment check for conditional logging
+const isDev = import.meta.env.DEV;
+
 export type UserRole = 'student' | 'tutor' | 'admin';
 
 interface UserProfile {
@@ -45,26 +48,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchUserProfile = async (uid: string) => {
     try {
-      console.log("Fetching user profile for:", uid);
       const userDoc = await getDoc(doc(db, 'users', uid));
       if (userDoc.exists()) {
         const data = userDoc.data();
-        console.log("User profile found:", data);
         setUserProfile(data as UserProfile);
       } else {
-        console.log("No user profile found in Firestore for:", uid);
+        if (isDev) console.warn("No user profile found for uid:", uid);
         setUserProfile(null);
       }
     } catch (error) {
-      console.error("Error fetching user profile:", error);
+      if (isDev) console.error("Error fetching user profile:", error);
       setUserProfile(null);
     }
   };
 
   useEffect(() => {
-    console.log("Setting up auth state listener...");
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      console.log("Auth state changed:", firebaseUser?.uid || "No user");
       setUser(firebaseUser);
       
       if (firebaseUser) {
@@ -84,10 +83,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const signUp = async (email: string, password: string, fullName: string, role: UserRole) => {
-    console.log("Starting signup process...");
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      console.log("Firebase auth user created:", userCredential.user.uid);
       
       const newUserProfile: UserProfile = {
         uid: userCredential.user.uid,
@@ -97,32 +94,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         createdAt: new Date()
       };
       
-      console.log("Saving user profile to Firestore...");
       await setDoc(doc(db, 'users', userCredential.user.uid), {
         ...newUserProfile,
         createdAt: newUserProfile.createdAt.toISOString()
       });
-      console.log("User profile saved to Firestore successfully");
       setUserProfile(newUserProfile);
     } catch (error) {
-      console.error("SignUp error in AuthContext:", error);
+      if (isDev) console.error("SignUp error:", error);
       throw error;
     }
   };
 
   const signIn = async (email: string, password: string) => {
-    console.log("Starting sign in process...");
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      console.log("Sign in successful");
     } catch (error) {
-      console.error("Sign in error:", error);
+      if (isDev) console.error("Sign in error:", error);
       throw error;
     }
   };
 
   const logout = async () => {
-    console.log("Logging out...");
     await signOut(auth);
     setUserProfile(null);
   };
