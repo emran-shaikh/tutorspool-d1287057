@@ -1,15 +1,25 @@
 import { useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { GraduationCap, Mail, Lock, User, Eye, EyeOff, Users, BookOpen, Shield } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { useAuth, UserRole } from "@/contexts/AuthContext";
+import { z } from "zod";
 
-type Role = "student" | "tutor" | "admin";
+const registerSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters").max(100),
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+  confirmPassword: z.string()
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+});
 
-const roles: { value: Role; label: string; icon: typeof User; description: string }[] = [
+const roles: { value: UserRole; label: string; icon: typeof User; description: string }[] = [
   {
     value: "student",
     label: "Student",
@@ -32,13 +42,15 @@ const roles: { value: Role; label: string; icon: typeof User; description: strin
 
 export default function Register() {
   const [searchParams] = useSearchParams();
-  const initialRole = (searchParams.get("role") as Role) || "student";
+  const initialRole = (searchParams.get("role") as UserRole) || "student";
+  const navigate = useNavigate();
+  const { signUp } = useAuth();
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [role, setRole] = useState<Role>(initialRole);
+  const [role, setRole] = useState<UserRole>(initialRole);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -46,10 +58,11 @@ export default function Register() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (password !== confirmPassword) {
+    const validation = registerSchema.safeParse({ name, email, password, confirmPassword });
+    if (!validation.success) {
       toast({
-        title: "Passwords don't match",
-        description: "Please make sure your passwords match.",
+        title: "Validation Error",
+        description: validation.error.errors[0].message,
         variant: "destructive",
       });
       return;
@@ -57,14 +70,32 @@ export default function Register() {
 
     setIsLoading(true);
 
-    // Placeholder for auth logic
-    setTimeout(() => {
+    try {
+      await signUp(email, password, name, role);
       toast({
         title: "Account created!",
-        description: "Registration will be fully enabled with backend integration.",
+        description: "Welcome to TutorsPool. Redirecting to your dashboard...",
       });
+      navigate(`/${role}/dashboard`);
+    } catch (error: any) {
+      let errorMessage = "Failed to create account. Please try again.";
+      
+      if (error.code === 'auth/email-already-in-use') {
+        errorMessage = "This email is already registered. Please sign in instead.";
+      } else if (error.code === 'auth/weak-password') {
+        errorMessage = "Password is too weak. Please use a stronger password.";
+      } else if (error.code === 'auth/invalid-email') {
+        errorMessage = "Invalid email address.";
+      }
+      
+      toast({
+        title: "Registration failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   return (
