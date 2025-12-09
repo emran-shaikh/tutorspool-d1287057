@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, UserCheck, Video, TrendingUp, Download, Shield, BookOpen } from "lucide-react";
+import { Users, UserCheck, Video, TrendingUp, Download, Shield, BookOpen, FileText, Plus } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { getAllUsers, getAllTutors, getAllSessions } from "@/lib/firestore";
 
@@ -158,6 +158,24 @@ export default function AdminDashboard() {
           <CardContent className="space-y-3">
             <Button variant="outline" className="w-full justify-start" asChild>
               <Link to="/admin/reports"><Download className="h-4 w-4 mr-2" /> Download Reports</Link>
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-primary" />
+              Blog Management
+            </CardTitle>
+            <CardDescription>Create and manage blog posts</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Button variant="outline" className="w-full justify-start" asChild>
+              <Link to="/admin/blogs"><FileText className="h-4 w-4 mr-2" /> Manage Blogs</Link>
+            </Button>
+            <Button variant="default" className="w-full justify-start" asChild>
+              <Link to="/admin/blogs/new"><Plus className="h-4 w-4 mr-2" /> Create New Post</Link>
             </Button>
           </CardContent>
         </Card>
