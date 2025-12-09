@@ -38,7 +38,7 @@ export function Footer() {
           <div className="col-span-2 md:col-span-1">
             <Link to="/" className="flex items-center gap-2 mb-4">
             <div className="flex items-center justify-center rounded-lg">
-          <img src="public/logo.png" alt="TutorsPool Logo" className="h-12 w-auto" />
+          <img src="/logo.png" alt="TutorsPool Logo" className="h-12 w-auto" />
           </div>
               {/* <span className="font-display text-xl font-bold text-secondary-foreground">
                 TutorsPool
