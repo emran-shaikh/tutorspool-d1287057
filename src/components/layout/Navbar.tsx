@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Users, BookOpen, Star, Mail, Info, GraduationCap, Globe, Menu, X, FileText } from "lucide-react";
 import { useState } from "react";
-import logo from "../../assets/logo.png";
+import logo from "@/assets/logo.png";
 
 const navLinks = [
   { label: "Subjects", href: "/subjects", icon: BookOpen },
