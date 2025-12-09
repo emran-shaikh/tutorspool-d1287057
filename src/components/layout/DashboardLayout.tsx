@@ -36,7 +36,7 @@ export default function DashboardLayout({ children, role }: DashboardLayoutProps
       <header className="bg-background border-b border-border sticky top-0 z-50">
         <div className="container flex h-16 items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
-            <div className="flex items-center justify-center rounded-lg gradient-primary">
+            <div className="flex items-center justify-center rounded-lg">
               <img src="/logo.png" alt="TutorsPool Logo" className="h-12 w-auto" />
             </div>
             {/* <span className="font-display text-lg font-bold">
