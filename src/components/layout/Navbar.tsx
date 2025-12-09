@@ -22,7 +22,7 @@ export function Navbar() {
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2">
           <div className="flex items-center justify-center rounded-lg">
-          <img src="public/logo.png" alt="TutorsPool Logo" className="h-12 w-auto" />
+          <img src="/src/assets/logo.png" alt="TutorsPool Logo" className="h-12 w-auto" />
           </div>
           {/* <span className="font-display text-xl font-bold">
             <span className="text-secondary">Tutors</span>
