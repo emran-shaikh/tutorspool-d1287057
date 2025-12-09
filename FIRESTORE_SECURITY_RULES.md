@@ -139,6 +139,21 @@ service cloud.firestore {
       // Only admins can delete reviews
       allow delete: if isAdmin();
     }
+    
+    // Blog posts collection
+    match /blogPosts/{postId} {
+      // Anyone can read published blog posts
+      allow read: if resource.data.isPublished == true || isAdmin();
+      
+      // Only admins can create blog posts
+      allow create: if isAdmin();
+      
+      // Only admins can update blog posts
+      allow update: if isAdmin();
+      
+      // Only admins can delete blog posts
+      allow delete: if isAdmin();
+    }
   }
 }
 ```
