@@ -2,7 +2,6 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Users, BookOpen, Star, Mail, Info, GraduationCap, Globe, Menu, X, FileText } from "lucide-react";
 import { useState } from "react";
-import logo from "@/assets/logo.png";
 
 const navLinks = [
   { label: "Subjects", href: "/subjects", icon: BookOpen },
@@ -23,7 +22,7 @@ export function Navbar() {
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2">
           <div className="flex items-center justify-center rounded-lg">
-          <img src={logo} alt="TutorsPool Logo" className="h-12 w-auto" />
+          <img src="/logo.png" alt="TutorsPool Logo" className="h-12 w-auto" />
           </div>
           {/* <span className="font-display text-xl font-bold">
             <span className="text-secondary">Tutors</span>
