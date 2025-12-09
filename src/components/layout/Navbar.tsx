@@ -21,13 +21,13 @@ export function Navbar() {
       <div className="container flex h-16 items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg gradient-primary">
-            <GraduationCap className="h-6 w-6 text-primary-foreground" />
+          <div className="flex items-center justify-center rounded-lg">
+          <img src="public/logo.png" alt="TutorsPool Logo" className="h-12 w-auto" />
           </div>
-          <span className="font-display text-xl font-bold">
+          {/* <span className="font-display text-xl font-bold">
             <span className="text-secondary">Tutors</span>
             <span className="text-primary">Pool</span>
-          </span>
+          </span> */}
         </Link>
 
         {/* Desktop Navigation */}
