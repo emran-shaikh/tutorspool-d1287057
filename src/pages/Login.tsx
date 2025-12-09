@@ -71,13 +71,13 @@ export default function Login() {
         <div className="w-full max-w-md space-y-8">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 justify-center">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg gradient-primary">
-              <GraduationCap className="h-6 w-6 text-primary-foreground" />
-            </div>
-            <span className="font-display text-xl font-bold">
+          <div className="flex items-center justify-center rounded-lg">
+          <img src="public/logo.png" alt="TutorsPool Logo" className="h-12 w-auto" />
+          </div>
+            {/* <span className="font-display text-xl font-bold">
               <span className="text-secondary">Tutors</span>
               <span className="text-primary">Pool</span>
-            </span>
+            </span> */}
           </Link>
 
           {/* Header */}
