@@ -36,13 +36,13 @@ export default function DashboardLayout({ children, role }: DashboardLayoutProps
       <header className="bg-background border-b border-border sticky top-0 z-50">
         <div className="container flex h-16 items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg gradient-primary">
-              <GraduationCap className="h-5 w-5 text-primary-foreground" />
+            <div className="flex items-center justify-center rounded-lg gradient-primary">
+              <img src="/logo.png" alt="TutorsPool Logo" className="h-12 w-auto" />
             </div>
-            <span className="font-display text-lg font-bold">
+            {/* <span className="font-display text-lg font-bold">
               <span className="text-secondary">Tutors</span>
               <span className="text-primary">Pool</span>
-            </span>
+            </span> */}
             {role === 'admin' && (
               <Badge variant="secondary" className="ml-2">Admin</Badge>
             )}
