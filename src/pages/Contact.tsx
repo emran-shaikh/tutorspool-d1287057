@@ -29,14 +29,14 @@ const contactInfo = [
   {
     icon: Phone,
     title: "Call Us",
-    value: "+1 (555) 123-4567",
+    value: "+92 (345) 3284 284",
     description: "Mon-Fri, 9am-6pm EST"
   },
   {
     icon: MapPin,
     title: "Visit Us",
-    value: "123 Education Lane",
-    description: "San Francisco, CA 94102"
+    value: "TutorPool.com",
+    description: "Global Platform"
   },
   {
     icon: Clock,
