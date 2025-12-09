@@ -37,12 +37,12 @@ export function Footer() {
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
             <Link to="/" className="flex items-center gap-2 mb-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
-                <GraduationCap className="h-6 w-6 text-primary-foreground" />
-              </div>
-              <span className="font-display text-xl font-bold text-secondary-foreground">
+            <div className="flex items-center justify-center rounded-lg">
+          <img src="public/logo.png" alt="TutorsPool Logo" className="h-12 w-auto" />
+          </div>
+              {/* <span className="font-display text-xl font-bold text-secondary-foreground">
                 TutorsPool
-              </span>
+              </span> */}
             </Link>
             <p className="text-secondary-foreground/70 text-sm mb-4">
               Connect with world-class tutors for personalized 1-on-1 sessions.
