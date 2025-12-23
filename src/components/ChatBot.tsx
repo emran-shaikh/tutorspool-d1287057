@@ -137,7 +137,8 @@ export const ChatBot = () => {
   };
 
   const openWhatsApp = () => {
-    window.open(`https://wa.me/923453284284`, "_blank");
+    const message = encodeURIComponent("Hi, I need help with TutorsPool");
+    window.open(`https://wa.me/923453284284?text=${message}`, "_blank");
   };
 
   return (

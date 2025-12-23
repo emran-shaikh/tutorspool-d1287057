@@ -30,6 +30,25 @@ export interface TutorProfile {
   isApproved: boolean;
   photoURL?: string;
   createdAt: string;
+  // Optional fields
+  qualifications?: string;
+  degreeLevel?: string;
+  majorSubjects?: string[];
+  teachingStyle?: string;
+}
+
+export interface StudentProfile {
+  uid: string;
+  fullName: string;
+  email: string;
+  photoURL?: string;
+  createdAt: string;
+  // Optional fields
+  currentlyStudying?: string;
+  gradeLevel?: string;
+  interests?: string[];
+  learningGoals?: string;
+  preferredSubjects?: string[];
 }
 
 // Blog Types and Functions
