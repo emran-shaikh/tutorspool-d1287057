@@ -9,8 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Search, Star, Clock, DollarSign, GraduationCap, Users, Filter, ChevronRight } from "lucide-react";
-import { getTutors, TutorProfile } from "@/lib/firestore";
+import { Search, Star, Clock, DollarSign, GraduationCap, Users, Filter, ChevronRight, Award } from "lucide-react";
+import { getTutors, TutorProfile, getAllReviews, Review } from "@/lib/firestore";
 import { useAuth } from "@/contexts/AuthContext";
 
 const subjectFilters = [
@@ -26,22 +26,49 @@ const subjectFilters = [
   "Arts"
 ];
 
+interface TutorWithRating extends TutorProfile {
+  avgRating: number;
+  reviewCount: number;
+}
+
 export default function FindTutors() {
   const { user, userProfile } = useAuth();
-  const [tutors, setTutors] = useState<TutorProfile[]>([]);
+  const [tutors, setTutors] = useState<TutorWithRating[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [subjectFilter, setSubjectFilter] = useState("All Subjects");
-  const [selectedTutor, setSelectedTutor] = useState<TutorProfile | null>(null);
+  const [selectedTutor, setSelectedTutor] = useState<TutorWithRating | null>(null);
 
   useEffect(() => {
-    fetchTutors();
+    fetchTutorsWithRatings();
   }, []);
 
-  const fetchTutors = async () => {
-    const data = await getTutors();
-    setTutors(data);
-    setLoading(false);
+  const fetchTutorsWithRatings = async () => {
+    try {
+      const [tutorsData, reviewsData] = await Promise.all([
+        getTutors(),
+        getAllReviews()
+      ]);
+
+      // Calculate average ratings for each tutor
+      const tutorsWithRatings: TutorWithRating[] = tutorsData.map(tutor => {
+        const tutorReviews = reviewsData.filter(r => r.tutorId === tutor.uid);
+        const avgRating = tutorReviews.length > 0
+          ? tutorReviews.reduce((sum, r) => sum + r.rating, 0) / tutorReviews.length
+          : 0;
+        return {
+          ...tutor,
+          avgRating: Math.round(avgRating * 10) / 10,
+          reviewCount: tutorReviews.length
+        };
+      });
+
+      setTutors(tutorsWithRatings);
+    } catch (error) {
+      console.error('Error fetching tutors:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const filteredTutors = tutors.filter((tutor) => {
@@ -54,6 +81,18 @@ export default function FindTutors() {
 
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  };
+
+  const renderRating = (avgRating: number, reviewCount: number) => {
+    if (reviewCount === 0) {
+      return <span className="text-muted-foreground text-sm">New tutor</span>;
+    }
+    return (
+      <>
+        <Star className="h-4 w-4 text-warning fill-warning" />
+        <span>{avgRating.toFixed(1)} ({reviewCount} {reviewCount === 1 ? 'review' : 'reviews'})</span>
+      </>
+    );
   };
 
   return (
@@ -131,16 +170,24 @@ export default function FindTutors() {
                         </Avatar>
                         <CardTitle className="text-xl mb-1">{tutor.fullName}</CardTitle>
                         <CardDescription className="flex items-center gap-2">
-                          <Star className="h-4 w-4 text-warning fill-warning" />
-                          <span>4.9 (23 reviews)</span>
+                          {renderRating(tutor.avgRating, tutor.reviewCount)}
                         </CardDescription>
                         {tutor.degreeLevel && (
-                          <p className="text-xs text-muted-foreground mt-1">{tutor.degreeLevel}</p>
+                          <Badge variant="outline" className="mt-2 text-xs">
+                            <GraduationCap className="h-3 w-3 mr-1" />
+                            {tutor.degreeLevel}
+                          </Badge>
+                        )}
+                        {tutor.qualifications && (
+                          <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                            <Award className="h-3 w-3" />
+                            {tutor.qualifications}
+                          </p>
                         )}
                       </div>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      <div className="flex flex-wrap gap-2">
+                      <div className="flex flex-wrap justify-center gap-2">
                         {tutor.subjects.slice(0, 3).map((subject) => (
                           <Badge key={subject} variant="secondary">
                             {subject}
@@ -151,7 +198,7 @@ export default function FindTutors() {
                         )}
                       </div>
                       
-                      <p className="text-sm text-muted-foreground line-clamp-2">
+                      <p className="text-sm text-muted-foreground line-clamp-2 text-center">
                         {tutor.bio || "Experienced tutor ready to help you achieve your learning goals."}
                       </p>
 
@@ -188,15 +235,25 @@ export default function FindTutors() {
                                 </Avatar>
                                 <DialogTitle className="text-2xl">{tutor.fullName}</DialogTitle>
                                 <DialogDescription className="flex items-center gap-2 mt-1">
-                                  <Star className="h-4 w-4 text-warning fill-warning" />
-                                  4.9 rating • 23 reviews
+                                  {renderRating(tutor.avgRating, tutor.reviewCount)}
                                 </DialogDescription>
                                 {tutor.degreeLevel && (
-                                  <p className="text-sm text-muted-foreground mt-1">{tutor.degreeLevel}</p>
+                                  <Badge variant="outline" className="mt-2">
+                                    <GraduationCap className="h-3 w-3 mr-1" />
+                                    {tutor.degreeLevel}
+                                  </Badge>
                                 )}
                               </div>
                             </DialogHeader>
                             <div className="space-y-4 py-4">
+                              {tutor.qualifications && (
+                                <div className="p-3 rounded-lg bg-primary/5 border border-primary/10">
+                                  <p className="text-sm font-medium flex items-center gap-2">
+                                    <Award className="h-4 w-4 text-primary" />
+                                    {tutor.qualifications}
+                                  </p>
+                                </div>
+                              )}
                               <div>
                                 <h4 className="font-medium mb-2">Subjects</h4>
                                 <div className="flex flex-wrap gap-2">
@@ -211,6 +268,12 @@ export default function FindTutors() {
                                   {tutor.bio || "Passionate educator with years of experience helping students achieve their goals. I believe in personalized learning and creating an engaging environment."}
                                 </p>
                               </div>
+                              {tutor.teachingStyle && (
+                                <div>
+                                  <h4 className="font-medium mb-2">Teaching Style</h4>
+                                  <p className="text-sm text-muted-foreground">{tutor.teachingStyle}</p>
+                                </div>
+                              )}
                               <div className="grid grid-cols-2 gap-4 text-sm">
                                 <div className="p-3 rounded-lg bg-muted/50">
                                   <p className="text-muted-foreground">Experience</p>
