@@ -137,7 +137,7 @@ export const ChatBot = () => {
   };
 
   const openWhatsApp = () => {
-    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=Hi, I need help with TutorsPool`, "_blank");
+    window.open(`https://wa.me/923453284284`, "_blank");
   };
 
   return (
@@ -269,7 +269,7 @@ export const ChatBot = () => {
             className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-green-500/10 hover:bg-green-500/20 text-green-600 dark:text-green-400 transition-colors text-sm font-medium"
           >
             <Phone className="h-4 w-4" />
-            <span>Need help? WhatsApp: {WHATSAPP_DISPLAY}</span>
+            <span>Need Help? {WHATSAPP_DISPLAY}</span>
           </button>
         </div>
 
