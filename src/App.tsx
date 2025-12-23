@@ -25,6 +25,7 @@ import LearningGoals from "./pages/student/LearningGoals";
 import TutorSessions from "./pages/tutor/TutorSessions";
 import TutorAvailability from "./pages/tutor/TutorAvailability";
 import EditTutorProfile from "./pages/tutor/EditTutorProfile";
+import EditStudentProfile from "./pages/student/EditStudentProfile";
 import ManageUsers from "./pages/admin/ManageUsers";
 import SessionMonitoring from "./pages/admin/SessionMonitoring";
 import Reports from "./pages/admin/Reports";
@@ -99,6 +100,7 @@ const App = () => (
             <Route path="/student/book/:tutorId" element={<ProtectedRoute allowedRoles={['student']}><BookSession /></ProtectedRoute>} />
             <Route path="/student/sessions" element={<ProtectedRoute allowedRoles={['student']}><MySessions /></ProtectedRoute>} />
             <Route path="/student/goals" element={<ProtectedRoute allowedRoles={['student']}><LearningGoals /></ProtectedRoute>} />
+            <Route path="/student/profile" element={<ProtectedRoute allowedRoles={['student']}><EditStudentProfile /></ProtectedRoute>} />
             
             {/* Tutor Routes */}
             <Route path="/tutor/dashboard" element={<ProtectedRoute allowedRoles={['tutor']}><TutorDashboard /></ProtectedRoute>} />

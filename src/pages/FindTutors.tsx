@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Search, Star, Clock, DollarSign, GraduationCap, Users, Filter, ChevronRight } from "lucide-react";
 import { getTutors, TutorProfile } from "@/lib/firestore";
@@ -121,20 +121,22 @@ export default function FindTutors() {
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredTutors.map((tutor) => (
                   <Card key={tutor.uid} className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-                    <CardHeader>
-                      <div className="flex items-start gap-4">
-                        <Avatar className="h-16 w-16">
-                          <AvatarFallback className="bg-primary/10 text-primary text-lg">
+                    <CardHeader className="pb-2">
+                      <div className="flex flex-col items-center text-center">
+                        <Avatar className="h-24 w-24 mb-3 ring-4 ring-primary/10 shadow-lg">
+                          <AvatarImage src={tutor.photoURL} alt={tutor.fullName} className="object-cover" />
+                          <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/10 text-primary text-2xl font-semibold">
                             {getInitials(tutor.fullName)}
                           </AvatarFallback>
                         </Avatar>
-                        <div className="flex-1">
-                          <CardTitle className="text-lg">{tutor.fullName}</CardTitle>
-                          <CardDescription className="flex items-center gap-2 mt-1">
-                            <Star className="h-4 w-4 text-warning fill-warning" />
-                            <span>4.9 (23 reviews)</span>
-                          </CardDescription>
-                        </div>
+                        <CardTitle className="text-xl mb-1">{tutor.fullName}</CardTitle>
+                        <CardDescription className="flex items-center gap-2">
+                          <Star className="h-4 w-4 text-warning fill-warning" />
+                          <span>4.9 (23 reviews)</span>
+                        </CardDescription>
+                        {tutor.degreeLevel && (
+                          <p className="text-xs text-muted-foreground mt-1">{tutor.degreeLevel}</p>
+                        )}
                       </div>
                     </CardHeader>
                     <CardContent className="space-y-4">
@@ -177,19 +179,21 @@ export default function FindTutors() {
                           </DialogTrigger>
                           <DialogContent className="max-w-lg">
                             <DialogHeader>
-                              <div className="flex items-center gap-4">
-                                <Avatar className="h-20 w-20">
-                                  <AvatarFallback className="bg-primary/10 text-primary text-xl">
+                              <div className="flex flex-col items-center text-center">
+                                <Avatar className="h-28 w-28 mb-4 ring-4 ring-primary/10 shadow-xl">
+                                  <AvatarImage src={tutor.photoURL} alt={tutor.fullName} className="object-cover" />
+                                  <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/10 text-primary text-3xl font-semibold">
                                     {getInitials(tutor.fullName)}
                                   </AvatarFallback>
                                 </Avatar>
-                                <div>
-                                  <DialogTitle className="text-xl">{tutor.fullName}</DialogTitle>
-                                  <DialogDescription className="flex items-center gap-2 mt-1">
-                                    <Star className="h-4 w-4 text-warning fill-warning" />
-                                    4.9 rating • 23 reviews
-                                  </DialogDescription>
-                                </div>
+                                <DialogTitle className="text-2xl">{tutor.fullName}</DialogTitle>
+                                <DialogDescription className="flex items-center gap-2 mt-1">
+                                  <Star className="h-4 w-4 text-warning fill-warning" />
+                                  4.9 rating • 23 reviews
+                                </DialogDescription>
+                                {tutor.degreeLevel && (
+                                  <p className="text-sm text-muted-foreground mt-1">{tutor.degreeLevel}</p>
+                                )}
                               </div>
                             </DialogHeader>
                             <div className="space-y-4 py-4">

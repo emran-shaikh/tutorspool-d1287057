@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { GraduationCap, LogOut } from "lucide-react";
+import { GraduationCap, LogOut, User } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface DashboardLayoutProps {
@@ -51,6 +51,14 @@ export default function DashboardLayout({ children, role }: DashboardLayoutProps
             <span className="text-sm text-muted-foreground">
               Welcome, {userProfile?.fullName || getRoleLabel()}
             </span>
+            {(role === 'student' || role === 'tutor') && (
+              <Button variant="ghost" size="sm" asChild>
+                <Link to={`/${role}/profile`}>
+                  <User className="h-4 w-4 mr-2" />
+                  Profile
+                </Link>
+              </Button>
+            )}
             <Button variant="outline" size="sm" onClick={handleLogout}>
               <LogOut className="h-4 w-4 mr-2" />
               Logout

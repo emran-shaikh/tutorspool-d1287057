@@ -6,12 +6,37 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, User, Save, X, Plus } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ArrowLeft, User, Save, X, Plus, GraduationCap } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { PhotoUpload } from "@/components/PhotoUpload";
 import { getTutorProfile, createTutorProfile, TutorProfile } from "@/lib/firestore";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+
+const DEGREE_LEVELS = [
+  "High School Diploma",
+  "Associate Degree",
+  "Bachelor's Degree",
+  "Master's Degree",
+  "Doctorate (PhD)",
+  "Professional Degree",
+  "Other"
+];
+
+const POPULAR_SUBJECTS = [
+  "Mathematics",
+  "Physics",
+  "Chemistry",
+  "Biology",
+  "English",
+  "History",
+  "Computer Science",
+  "Economics",
+  "Languages",
+  "Music",
+  "Arts"
+];
 
 export default function EditTutorProfile() {
   const { userProfile } = useAuth();
@@ -28,6 +53,12 @@ export default function EditTutorProfile() {
   const [subjects, setSubjects] = useState<string[]>([]);
   const [newSubject, setNewSubject] = useState("");
   const [photoURL, setPhotoURL] = useState<string>("");
+  
+  // New optional fields
+  const [qualifications, setQualifications] = useState("");
+  const [degreeLevel, setDegreeLevel] = useState("");
+  const [majorSubjects, setMajorSubjects] = useState<string[]>([]);
+  const [teachingStyle, setTeachingStyle] = useState("");
 
   useEffect(() => {
     fetchProfile();
@@ -43,6 +74,11 @@ export default function EditTutorProfile() {
       setHourlyRate(data.hourlyRate || 0);
       setSubjects(data.subjects || []);
       setPhotoURL(data.photoURL || "");
+      // Load optional fields
+      setQualifications(data.qualifications || "");
+      setDegreeLevel(data.degreeLevel || "");
+      setMajorSubjects(data.majorSubjects || []);
+      setTeachingStyle(data.teachingStyle || "");
     }
     setLoading(false);
   };
@@ -56,6 +92,14 @@ export default function EditTutorProfile() {
 
   const removeSubject = (subject: string) => {
     setSubjects(subjects.filter(s => s !== subject));
+  };
+
+  const toggleMajorSubject = (subject: string) => {
+    if (majorSubjects.includes(subject)) {
+      setMajorSubjects(majorSubjects.filter(s => s !== subject));
+    } else {
+      setMajorSubjects([...majorSubjects, subject]);
+    }
   };
 
   const handleSave = async () => {
@@ -73,10 +117,14 @@ export default function EditTutorProfile() {
         subjects,
         photoURL: photoURL || undefined,
         isApproved: profile?.isApproved || false,
-        createdAt: profile?.createdAt || new Date().toISOString()
+        createdAt: profile?.createdAt || new Date().toISOString(),
+        // Optional fields
+        qualifications,
+        degreeLevel,
+        majorSubjects,
+        teachingStyle
       };
 
-      // Always use createTutorProfile which uses setDoc (creates or overwrites)
       await createTutorProfile(profileData);
       
       toast({ title: "Profile saved!", description: "Your tutor profile has been updated" });
@@ -127,10 +175,10 @@ export default function EditTutorProfile() {
                 <Label htmlFor="bio">Bio</Label>
                 <Textarea
                   id="bio"
-                  placeholder="Tell students about yourself, your teaching style, and qualifications..."
+                  placeholder="Tell students about yourself and your teaching style..."
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
-                  rows={4}
+                  rows={3}
                 />
               </div>
 
@@ -157,7 +205,7 @@ export default function EditTutorProfile() {
               </div>
 
               <div className="space-y-2">
-                <Label>Subjects</Label>
+                <Label>Subjects You Teach</Label>
                 <div className="flex flex-wrap gap-2 mb-2">
                   {subjects.map((subject) => (
                     <Badge key={subject} variant="secondary" className="gap-1">
@@ -178,6 +226,68 @@ export default function EditTutorProfile() {
                   <Button type="button" variant="outline" onClick={addSubject}>
                     <Plus className="h-4 w-4" />
                   </Button>
+                </div>
+              </div>
+
+              {/* Optional Fields Section */}
+              <div className="pt-4 border-t border-border">
+                <h3 className="font-medium mb-4 flex items-center gap-2">
+                  <GraduationCap className="h-4 w-4 text-primary" />
+                  Additional Information (Optional)
+                </h3>
+                
+                <div className="space-y-4">
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="degree">Degree Level</Label>
+                      <Select value={degreeLevel} onValueChange={setDegreeLevel}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select degree level" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {DEGREE_LEVELS.map((level) => (
+                            <SelectItem key={level} value={level}>{level}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="qualifications">Qualifications</Label>
+                      <Input
+                        id="qualifications"
+                        placeholder="e.g., Certified Teacher, PhD in Math"
+                        value={qualifications}
+                        onChange={(e) => setQualifications(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Major/Specialization Subjects</Label>
+                    <div className="flex flex-wrap gap-2">
+                      {POPULAR_SUBJECTS.map((subject) => (
+                        <Badge
+                          key={subject}
+                          variant={majorSubjects.includes(subject) ? "default" : "outline"}
+                          className="cursor-pointer transition-colors"
+                          onClick={() => toggleMajorSubject(subject)}
+                        >
+                          {subject}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="teachingStyle">Teaching Style</Label>
+                    <Textarea
+                      id="teachingStyle"
+                      placeholder="Describe your teaching methodology and approach..."
+                      value={teachingStyle}
+                      onChange={(e) => setTeachingStyle(e.target.value)}
+                      rows={2}
+                    />
+                  </div>
                 </div>
               </div>
 
