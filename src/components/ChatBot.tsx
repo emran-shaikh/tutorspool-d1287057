@@ -210,11 +210,12 @@ export const ChatBot = () => {
                 )}
                 <div
                   className={cn(
-                    "max-w-[80%] rounded-2xl px-3.5 py-2 text-sm leading-relaxed shadow-sm",
+                    "max-w-[85%] rounded-2xl px-3.5 py-2.5 text-[13px] leading-[1.5]",
                     message.role === "user"
                       ? "bg-gradient-to-br from-primary to-primary/90 text-white rounded-br-sm"
                       : "bg-white dark:bg-card text-foreground rounded-bl-sm border border-border/50"
                   )}
+                  style={{ wordBreak: "break-word" }}
                 >
                   {message.content}
                 </div>
