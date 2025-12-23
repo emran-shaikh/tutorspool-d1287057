@@ -2,3 +2,6 @@ project_id = "yafjkpckhzpkrptmzcms"
 
 [functions.create-zoom-meeting]
 verify_jwt = false
+
+[functions.chat]
+verify_jwt = false
