@@ -444,11 +444,11 @@ export const getAllBlogPosts = async (): Promise<BlogPost[]> => {
 
 export const getPublishedBlogPosts = async (): Promise<BlogPost[]> => {
   try {
-    const snapshot = await getDocs(collection(db, 'blogPosts'));
+    // Use a query to only fetch published posts - required by Firestore security rules
+    const q = query(collection(db, 'blogPosts'), where('isPublished', '==', true));
+    const snapshot = await getDocs(q);
     const posts = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as BlogPost));
-    return posts
-      .filter(p => p.isPublished)
-      .sort((a, b) => new Date(b.publishedAt || b.createdAt).getTime() - new Date(a.publishedAt || a.createdAt).getTime());
+    return posts.sort((a, b) => new Date(b.publishedAt || b.createdAt).getTime() - new Date(a.publishedAt || a.createdAt).getTime());
   } catch (error) {
     if (isDev) console.error('Error fetching published blog posts:', error);
     return [];
