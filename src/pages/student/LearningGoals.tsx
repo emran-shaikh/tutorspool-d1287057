@@ -188,11 +188,11 @@ export default function LearningGoals() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
           {goals.map((goal) => (
-            <Card key={goal.id}>
+            <Card key={goal.id} className="h-full">
               <CardHeader className="pb-2">
-                <div className="flex items-start justify-between">
+                <div className="flex items-start justify-between gap-2">
                   <div>
                     <CardTitle className="text-lg">{goal.title}</CardTitle>
                     <CardDescription>{goal.subject}</CardDescription>
