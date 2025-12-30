@@ -160,29 +160,29 @@ export default function StudentDashboard() {
         <p className="text-muted-foreground">Track your progress and continue learning.</p>
       </div>
 
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 mb-6 sm:mb-8">
         {[
           { label: "Sessions Completed", value: completedSessions.toString(), icon: Video, color: "text-primary" },
           { label: "Learning Goals", value: goals.length.toString(), icon: Target, color: "text-success" },
           { label: "Hours Learned", value: totalHours.toString(), icon: Clock, color: "text-warning" },
           { label: "Avg Goal Progress", value: `${avgGoalProgress}%`, icon: TrendingUp, color: "text-primary" },
         ].map((stat) => (
-          <Card key={stat.label}>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
+          <Card key={stat.label} className="h-full">
+            <CardContent className="pt-4 sm:pt-6">
+              <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-2xl font-bold">{stat.value}</p>
-                  <p className="text-sm text-muted-foreground">{stat.label}</p>
+                  <p className="text-xl sm:text-2xl font-bold">{stat.value}</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">{stat.label}</p>
                 </div>
-                <stat.icon className={`h-8 w-8 ${stat.color}`} />
+                <stat.icon className={`h-6 w-6 sm:h-8 sm:w-8 ${stat.color}`} />
               </div>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-6">
-        <Card className="lg:col-span-2">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+        <Card className="md:col-span-2">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Calendar className="h-5 w-5 text-primary" />
@@ -251,7 +251,7 @@ export default function StudentDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="lg:col-span-2">
+        <Card className="md:col-span-2">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Target className="h-5 w-5 text-primary" />
