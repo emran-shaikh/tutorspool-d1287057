@@ -161,7 +161,11 @@ export default function TutorSessions() {
 
   const handleComplete = async (sessionId: string) => {
     try {
+      const session = sessions.find(s => s.id === sessionId);
       await updateSessionStatus(sessionId, 'completed');
+      if (session) {
+        await sendSessionStatusEmail(session, 'session_update', 'completed');
+      }
       toast({ title: "Session marked as completed" });
       fetchSessions();
     } catch (error) {

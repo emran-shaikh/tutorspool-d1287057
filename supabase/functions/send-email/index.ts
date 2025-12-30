@@ -16,7 +16,9 @@ type EmailType =
   | "session_booking"
   | "session_update"
   | "session_cancel"
-  | "session_reminder";
+  | "session_reminder"
+  | "session_completed"
+  | "review_thankyou";
 
 interface BaseEmailRequest {
   type: EmailType;
@@ -57,11 +59,29 @@ interface SessionReminderEmailRequest extends BaseEmailRequest {
   sessionStartIso: string; // ISO string for session start
 }
 
+interface SessionCompletedEmailRequest extends BaseEmailRequest {
+  type: "session_completed";
+  to: string;
+  studentName: string;
+  tutorName: string;
+  date: string;
+  time: string;
+}
+
+interface ReviewThankYouEmailRequest extends BaseEmailRequest {
+  type: "review_thankyou";
+  to: string;
+  studentName: string;
+  tutorName: string;
+}
+
 type EmailRequest =
   | WelcomeEmailRequest
   | SessionBookingEmailRequest
   | SessionUpdateEmailRequest
-  | SessionReminderEmailRequest;
+  | SessionReminderEmailRequest
+  | SessionCompletedEmailRequest
+  | ReviewThankYouEmailRequest;
 
 function renderLayout(title: string, body: string): string {
   return `
@@ -204,6 +224,44 @@ async function scheduleReminderEmails(payload: SessionReminderEmailRequest) {
   return { reminder24h, reminder1h };
 }
 
+async function sendSessionCompletedEmail(payload: SessionCompletedEmailRequest) {
+  const html = renderLayout(
+    "Nice work on completing your session!",
+    `
+    <p>Hi ${payload.studentName},</p>
+    <p>Great job completing your tutoring session with <strong>${payload.tutorName}</strong>.</p>
+    <p><strong>Session time:</strong> ${payload.date} at ${payload.time}</p>
+    <p style="margin-top:12px;">Keep your momentum going by booking your next session and continuing your learning journey.</p>
+  `,
+  );
+
+  return resend.emails.send({
+    from: FROM_ADDRESS,
+    to: [payload.to],
+    subject: "You completed a TutorsPool session 🎉",
+    html,
+  });
+}
+
+async function sendReviewThankYouEmail(payload: ReviewThankYouEmailRequest) {
+  const html = renderLayout(
+    "Thank you for your review!",
+    `
+    <p>Hi ${payload.studentName},</p>
+    <p>Thank you for taking the time to review your session with <strong>${payload.tutorName}</strong>.</p>
+    <p>Your feedback helps other students find the right tutor and helps tutors improve their sessions.</p>
+    <p style="margin-top:12px;">When you're ready, you can book another session to keep learning.</p>
+  `,
+  );
+
+  return resend.emails.send({
+    from: FROM_ADDRESS,
+    to: [payload.to],
+    subject: "Thanks for reviewing your TutorsPool session",
+    html,
+  });
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -237,6 +295,12 @@ serve(async (req) => {
         break;
       case "session_reminder":
         result = await scheduleReminderEmails(payload);
+        break;
+      case "session_completed":
+        result = await sendSessionCompletedEmail(payload);
+        break;
+      case "review_thankyou":
+        result = await sendReviewThankYouEmail(payload);
         break;
       default:
         return new Response(

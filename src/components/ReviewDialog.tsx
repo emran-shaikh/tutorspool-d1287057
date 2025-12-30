@@ -39,6 +39,30 @@ export default function ReviewDialog({ open, onOpenChange, session, onReviewSubm
         subject: session.subject,
         createdAt: new Date().toISOString()
       });
+
+      // Fire-and-forget thank you email for review
+      try {
+        if (session.studentEmail) {
+          const baseUrl = import.meta.env.VITE_SUPABASE_URL;
+          const apiKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+
+          await fetch(`${baseUrl}/functions/v1/send-email`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              apikey: apiKey,
+            },
+            body: JSON.stringify({
+              type: 'review_thankyou',
+              to: session.studentEmail,
+              studentName: userProfile.fullName,
+              tutorName: session.tutorName,
+            }),
+          });
+        }
+      } catch (err) {
+        console.error('Failed to trigger review thank you email:', err);
+      }
       
       toast({ 
         title: "Review submitted!", 
