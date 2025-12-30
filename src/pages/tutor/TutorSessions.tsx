@@ -51,6 +51,34 @@ export default function TutorSessions() {
     }
   };
 
+  const sendSessionStatusEmail = async (session: Session, type: 'session_update' | 'session_cancel', status: string) => {
+    if (!session.studentEmail) return;
+
+    try {
+      const baseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const apiKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+
+      await fetch(`${baseUrl}/functions/v1/send-email`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          apikey: apiKey,
+        },
+        body: JSON.stringify({
+          type,
+          to: session.studentEmail,
+          studentName: session.studentName,
+          tutorName: session.tutorName,
+          date: session.date,
+          time: session.time,
+          status,
+        }),
+      });
+    } catch (error) {
+      console.error('Failed to send session update email:', error);
+    }
+  };
+
   const handleAccept = (session: Session) => {
     setSelectedSession(session);
     setZoomLink("");
@@ -108,6 +136,7 @@ export default function TutorSessions() {
     try {
       const meetingLink = zoomLink || `https://zoom.us/j/${Date.now()}`;
       await updateSessionStatus(selectedSession.id, 'accepted', meetingLink);
+      await sendSessionStatusEmail({ ...selectedSession, zoomLink: meetingLink }, 'session_update', 'accepted');
       toast({ title: "Session accepted!", description: "Student has been notified" });
       setZoomDialogOpen(false);
       fetchSessions();
@@ -118,7 +147,11 @@ export default function TutorSessions() {
 
   const handleDecline = async (sessionId: string) => {
     try {
+      const session = sessions.find(s => s.id === sessionId);
       await updateSessionStatus(sessionId, 'declined');
+      if (session) {
+        await sendSessionStatusEmail(session, 'session_cancel', 'declined');
+      }
       toast({ title: "Session declined" });
       fetchSessions();
     } catch (error) {
@@ -133,6 +166,20 @@ export default function TutorSessions() {
       fetchSessions();
     } catch (error) {
       toast({ title: "Error", description: "Failed to complete session", variant: "destructive" });
+    }
+  };
+
+  const handleCancel = async (sessionId: string) => {
+    try {
+      const session = sessions.find(s => s.id === sessionId);
+      await updateSessionStatus(sessionId, 'cancelled');
+      if (session) {
+        await sendSessionStatusEmail(session, 'session_cancel', 'cancelled');
+      }
+      toast({ title: "Session cancelled" });
+      fetchSessions();
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to cancel session", variant: "destructive" });
     }
   };
 

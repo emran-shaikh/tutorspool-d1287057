@@ -68,6 +68,7 @@ export default function BookSession() {
       await createSession({
         studentId: userProfile.uid,
         studentName: userProfile.fullName,
+        studentEmail: userProfile.email,
         tutorId: tutor.uid,
         tutorName: tutor.fullName,
         subject: selectedSubject,
