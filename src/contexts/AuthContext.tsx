@@ -100,6 +100,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         createdAt: newUserProfile.createdAt.toISOString()
       });
       setUserProfile(newUserProfile);
+
+      // Fire-and-forget welcome email
+      try {
+        const baseUrl = import.meta.env.VITE_SUPABASE_URL;
+        const apiKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+        await fetch(`${baseUrl}/functions/v1/send-email`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            apikey: apiKey,
+          },
+          body: JSON.stringify({
+            type: 'welcome',
+            to: email,
+            name: fullName,
+          }),
+        });
+      } catch (err) {
+        if (isDev) console.error('Failed to trigger welcome email:', err);
+      }
     } catch (error) {
       if (isDev) console.error("SignUp error:", error);
       throw error;
