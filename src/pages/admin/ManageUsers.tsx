@@ -79,14 +79,23 @@ export default function ManageUsers() {
         </div>
       ) : (
         <Tabs defaultValue="pending" className="space-y-6">
-          <TabsList>
-            <TabsTrigger value="pending">
+          <TabsList className="w-full flex flex-wrap justify-start gap-2 sm:gap-3">
+            <TabsTrigger
+              value="pending"
+              className="flex-1 min-w-[140px] sm:flex-none sm:min-w-0 text-xs sm:text-sm"
+            >
               Pending Tutors ({pendingTutors.length})
             </TabsTrigger>
-            <TabsTrigger value="tutors">
+            <TabsTrigger
+              value="tutors"
+              className="flex-1 min-w-[140px] sm:flex-none sm:min-w-0 text-xs sm:text-sm"
+            >
               Approved Tutors ({approvedTutors.length})
             </TabsTrigger>
-            <TabsTrigger value="students">
+            <TabsTrigger
+              value="students"
+              className="flex-1 min-w-[140px] sm:flex-none sm:min-w-0 text-xs sm:text-sm"
+            >
               Students ({students.length})
             </TabsTrigger>
           </TabsList>
