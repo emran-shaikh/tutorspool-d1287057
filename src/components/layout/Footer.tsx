@@ -23,10 +23,10 @@ const footerLinks = {
 };
 
 const socialLinks = [
-  { icon: Facebook, href: "#", label: "Facebook" },
-  { icon: Twitter, href: "#", label: "Twitter" },
+  { icon: Facebook, href: "https://www.facebook.com/tutorspoolglobal", label: "Facebook" },
+  { icon: Twitter, href: "https://x.com/tutorspool", label: "X (Twitter)" },
   { icon: Linkedin, href: "#", label: "LinkedIn" },
-  { icon: Instagram, href: "#", label: "Instagram" },
+  { icon: Instagram, href: "https://instagram.com/tutors_pool", label: "Instagram" },
 ];
 
 export function Footer() {
