@@ -4,7 +4,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, User, ArrowLeft, Clock } from "lucide-react";
+import { Calendar, User, ArrowLeft, Clock, Facebook, Twitter, Linkedin, Link2 } from "lucide-react";
 import { getBlogPostBySlug, BlogPost as BlogPostType } from "@/lib/firestore";
 import { format } from "date-fns";
 import { Helmet } from "react-helmet-async";
@@ -141,7 +141,7 @@ export default function BlogPost() {
                   {post.title}
                 </h1>
                 
-                <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-4">
                   <span className="flex items-center gap-1">
                     <User className="h-4 w-4" />
                     {post.authorName}
@@ -154,6 +154,47 @@ export default function BlogPost() {
                     <Clock className="h-4 w-4" />
                     {getReadingTime(post.content)}
                   </span>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-3 text-sm">
+                  <span className="text-muted-foreground">Share this article:</span>
+                  <div className="flex flex-wrap gap-2">
+                    <a
+                      href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.origin + '/blog/' + post.slug)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border text-muted-foreground hover:text-primary hover:border-primary transition-colors"
+                      aria-label="Share on Facebook"
+                    >
+                      <Facebook className="h-4 w-4" />
+                    </a>
+                    <a
+                      href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.origin + '/blog/' + post.slug)}&text=${encodeURIComponent(post.title)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border text-muted-foreground hover:text-primary hover:border-primary transition-colors"
+                      aria-label="Share on X (Twitter)"
+                    >
+                      <Twitter className="h-4 w-4" />
+                    </a>
+                    <a
+                      href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.origin + '/blog/' + post.slug)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border text-muted-foreground hover:text-primary hover:border-primary transition-colors"
+                      aria-label="Share on LinkedIn"
+                    >
+                      <Linkedin className="h-4 w-4" />
+                    </a>
+                    <button
+                      type="button"
+                      onClick={() => navigator.clipboard.writeText(window.location.origin + '/blog/' + post.slug)}
+                      className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border text-muted-foreground hover:text-primary hover:border-primary transition-colors"
+                      aria-label="Copy link"
+                    >
+                      <Link2 className="h-4 w-4" />
+                    </button>
+                  </div>
                 </div>
               </header>
 
