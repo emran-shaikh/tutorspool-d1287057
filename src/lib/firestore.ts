@@ -457,9 +457,16 @@ export const getPublishedBlogPosts = async (): Promise<BlogPost[]> => {
 
 export const getBlogPostBySlug = async (slug: string): Promise<BlogPost | null> => {
   try {
-    const snapshot = await getDocs(collection(db, 'blogPosts'));
-    const posts = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as BlogPost));
-    return posts.find(p => p.slug === slug && p.isPublished) || null;
+    const normalizedSlug = decodeURIComponent(slug);
+    const q = query(
+      collection(db, 'blogPosts'),
+      where('slug', '==', normalizedSlug),
+      where('isPublished', '==', true)
+    );
+    const snapshot = await getDocs(q);
+    if (snapshot.empty) return null;
+    const docSnap = snapshot.docs[0];
+    return { ...(docSnap.data() as BlogPost), id: docSnap.id };
   } catch (error) {
     if (isDev) console.error('Error fetching blog post by slug:', error);
     return null;
