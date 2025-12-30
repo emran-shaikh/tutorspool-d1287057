@@ -71,6 +71,7 @@ export default function BookSession() {
         studentEmail: userProfile.email,
         tutorId: tutor.uid,
         tutorName: tutor.fullName,
+        tutorEmail: tutor.email,
         subject: selectedSubject,
         date: selectedDate,
         time: selectedTime,
@@ -79,7 +80,7 @@ export default function BookSession() {
         createdAt: new Date().toISOString()
       });
 
-      // Fire-and-forget booking + reminder emails
+      // Fire-and-forget booking + reminder + tutor emails
       try {
         const baseUrl = import.meta.env.VITE_SUPABASE_URL;
         const apiKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
@@ -116,10 +117,28 @@ export default function BookSession() {
             sessionStartIso,
           }),
         });
+
+        if (tutor.email) {
+          await fetch(`${baseUrl}/functions/v1/send-email`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              apikey: apiKey,
+            },
+            body: JSON.stringify({
+              type: 'tutor_session_booking',
+              to: tutor.email,
+              studentName: userProfile.fullName,
+              tutorName: tutor.fullName,
+              date: selectedDate,
+              time: selectedTime,
+            }),
+          });
+        }
       } catch (err) {
         console.error('Failed to trigger session emails:', err);
       }
-      
+
       toast({ title: "Success", description: "Session request sent to tutor!" });
       navigate('/student/sessions');
     } catch (error) {

@@ -151,6 +151,27 @@ export default function TutorSessions() {
       await updateSessionStatus(sessionId, 'declined');
       if (session) {
         await sendSessionStatusEmail(session, 'session_cancel', 'declined');
+        if (session.tutorEmail) {
+          const baseUrl = import.meta.env.VITE_SUPABASE_URL;
+          const apiKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+
+          await fetch(`${baseUrl}/functions/v1/send-email`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              apikey: apiKey,
+            },
+            body: JSON.stringify({
+              type: 'tutor_session_cancel',
+              to: session.tutorEmail,
+              studentName: session.studentName,
+              tutorName: session.tutorName,
+              date: session.date,
+              time: session.time,
+              cancelledBy: 'tutor',
+            }),
+          });
+        }
       }
       toast({ title: "Session declined" });
       fetchSessions();
@@ -179,6 +200,27 @@ export default function TutorSessions() {
       await updateSessionStatus(sessionId, 'cancelled');
       if (session) {
         await sendSessionStatusEmail(session, 'session_cancel', 'cancelled');
+        if (session.tutorEmail) {
+          const baseUrl = import.meta.env.VITE_SUPABASE_URL;
+          const apiKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+
+          await fetch(`${baseUrl}/functions/v1/send-email`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              apikey: apiKey,
+            },
+            body: JSON.stringify({
+              type: 'tutor_session_cancel',
+              to: session.tutorEmail,
+              studentName: session.studentName,
+              tutorName: session.tutorName,
+              date: session.date,
+              time: session.time,
+              cancelledBy: 'tutor',
+            }),
+          });
+        }
       }
       toast({ title: "Session cancelled" });
       fetchSessions();
