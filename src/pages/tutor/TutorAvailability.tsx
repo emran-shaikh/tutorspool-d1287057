@@ -119,7 +119,7 @@ export default function TutorAvailability() {
           </CardHeader>
           <CardContent className="space-y-4">
             {slots.map((slot, index) => (
-              <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-muted/50 rounded-lg">
+              <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-4 sm:gap-5 p-4 bg-muted/50 rounded-lg">
                 <div className="space-y-2">
                   <Label>Day</Label>
                   <Select
@@ -129,7 +129,7 @@ export default function TutorAvailability() {
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-card text-card-foreground shadow-lg z-50">
                       {dayNames.map((day, i) => (
                         <SelectItem key={i} value={String(i)}>{day}</SelectItem>
                       ))}
