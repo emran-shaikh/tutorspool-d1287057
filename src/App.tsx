@@ -31,6 +31,11 @@ import SessionMonitoring from "./pages/admin/SessionMonitoring";
 import Reports from "./pages/admin/Reports";
 import ManageBlogs from "./pages/admin/ManageBlogs";
 import BlogEditor from "./pages/admin/BlogEditor";
+import HelpCenter from "./pages/HelpCenter";
+import Terms from "./pages/Terms";
+import Privacy from "./pages/Privacy";
+import FAQ from "./pages/FAQ";
+import Careers from "./pages/Careers";
 import NotFound from "./pages/NotFound";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 
@@ -93,6 +98,11 @@ const App = () => (
               <Route path="/contact" element={<Contact />} />
               <Route path="/blog" element={<Blog />} />
               <Route path="/blog/:slug" element={<BlogPost />} />
+              <Route path="/help" element={<HelpCenter />} />
+              <Route path="/terms" element={<Terms />} />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/faq" element={<FAQ />} />
+              <Route path="/careers" element={<Careers />} />
               <Route path="/login" element={<AuthRoute><Login /></AuthRoute>} />
               <Route path="/register" element={<AuthRoute><Register /></AuthRoute>} />
               
