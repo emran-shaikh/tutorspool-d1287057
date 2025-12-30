@@ -11,16 +11,25 @@ import { getTutors, TutorProfile } from "@/lib/firestore";
 export default function BrowseTutors() {
   const [tutors, setTutors] = useState<TutorProfile[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     const fetchTutors = async () => {
-      const data = await getTutors();
-      setTutors(data);
-      setLoading(false);
+      setError(null);
+      try {
+        const data = await getTutors();
+        setTutors(data);
+      } catch (error) {
+        console.error('Error loading tutors', error);
+        setError('We could not load tutors right now. Please try again.');
+      } finally {
+        setLoading(false);
+      }
     };
     fetchTutors();
   }, []);
+
 
   const filteredTutors = tutors.filter(tutor => 
     tutor.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -51,7 +60,15 @@ export default function BrowseTutors() {
         <div className="flex justify-center py-12">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
+      ) : error ? (
+        <Card>
+          <CardContent className="py-12 text-center space-y-3">
+            <p className="text-muted-foreground">{error}</p>
+            <Button variant="outline" onClick={() => window.location.reload()}>Retry</Button>
+          </CardContent>
+        </Card>
       ) : filteredTutors.length === 0 ? (
+
         <Card>
           <CardContent className="py-12 text-center">
             <p className="text-muted-foreground">No tutors found. Check back later!</p>

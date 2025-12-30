@@ -18,6 +18,7 @@ export default function StudentDashboard() {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [goals, setGoals] = useState<LearningGoal[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [aiSuggestions, setAiSuggestions] = useState<CareerSuggestion[]>([]);
   const [aiLoading, setAiLoading] = useState(false);
 
@@ -27,7 +28,8 @@ export default function StudentDashboard() {
 
   const fetchData = async () => {
     if (!userProfile?.uid) return;
-    
+    setLoading(true);
+    setError(null);
     try {
       const [sessionsData, goalsData] = await Promise.all([
         getStudentSessions(userProfile.uid),
@@ -35,13 +37,12 @@ export default function StudentDashboard() {
       ]);
       setSessions(sessionsData);
       setGoals(goalsData);
-      
-      // Generate AI suggestions if user has goals
       if (goalsData.length > 0) {
         generateAISuggestions(goalsData);
       }
     } catch (error) {
-      console.error('Error fetching dashboard data');
+      console.error('Error fetching dashboard data', error);
+      setError('We could not load your dashboard data. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -135,6 +136,19 @@ export default function StudentDashboard() {
         <div className="flex justify-center py-12">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <DashboardLayout role="student">
+        <Card>
+          <CardContent className="py-8 text-center space-y-3">
+            <p className="text-muted-foreground">{error}</p>
+            <Button variant="outline" onClick={fetchData}>Retry</Button>
+          </CardContent>
+        </Card>
       </DashboardLayout>
     );
   }

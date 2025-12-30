@@ -25,28 +25,36 @@ export default function MySessions() {
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
   const [reviewedSessions, setReviewedSessions] = useState<Set<string>>(new Set());
+  const [error, setError] = useState<string | null>(null);
 
   const fetchSessions = async () => {
     if (!userProfile?.uid) return;
-    const data = await getStudentSessions(userProfile.uid);
-    setSessions(data);
-    
-    // Check which completed sessions have reviews
-    const completedSessions = data.filter(s => s.status === 'completed');
-    const reviewedIds = new Set<string>();
-    for (const session of completedSessions) {
-      if (session.id) {
-        const review = await getSessionReview(session.id);
-        if (review) reviewedIds.add(session.id);
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await getStudentSessions(userProfile.uid);
+      setSessions(data);
+      const completedSessions = data.filter(s => s.status === 'completed');
+      const reviewedIds = new Set<string>();
+      for (const session of completedSessions) {
+        if (session.id) {
+          const review = await getSessionReview(session.id);
+          if (review) reviewedIds.add(session.id);
+        }
       }
+      setReviewedSessions(reviewedIds);
+    } catch (error) {
+      console.error('Error loading sessions', error);
+      setError('We could not load your sessions. Please try again.');
+    } finally {
+      setLoading(false);
     }
-    setReviewedSessions(reviewedIds);
-    setLoading(false);
   };
 
   useEffect(() => {
     fetchSessions();
   }, [userProfile]);
+
 
   const handleLeaveReview = (session: Session) => {
     setSelectedSession(session);
@@ -122,16 +130,23 @@ export default function MySessions() {
         <div className="flex justify-center py-12">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
+      ) : error ? (
+        <Card>
+          <CardContent className="py-8 text-center space-y-3">
+            <p className="text-muted-foreground">{error}</p>
+            <Button variant="outline" onClick={fetchSessions}>Retry</Button>
+          </CardContent>
+        </Card>
       ) : (
         <Tabs defaultValue="upcoming" className="space-y-6">
-          <TabsList>
-            <TabsTrigger value="upcoming">
+          <TabsList className="w-full flex flex-wrap gap-2 justify-start sm:justify-center overflow-x-auto">
+            <TabsTrigger className="flex-1 min-w-[120px]" value="upcoming">
               Upcoming ({upcomingSessions.length})
             </TabsTrigger>
-            <TabsTrigger value="pending">
+            <TabsTrigger className="flex-1 min-w-[120px]" value="pending">
               Pending ({pendingSessions.length})
             </TabsTrigger>
-            <TabsTrigger value="past">
+            <TabsTrigger className="flex-1 min-w-[120px]" value="past">
               Past ({pastSessions.length})
             </TabsTrigger>
           </TabsList>

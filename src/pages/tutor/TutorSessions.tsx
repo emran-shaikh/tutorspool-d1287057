@@ -30,6 +30,7 @@ export default function TutorSessions() {
   const [zoomDialogOpen, setZoomDialogOpen] = useState(false);
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
   const [zoomLink, setZoomLink] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchSessions();
@@ -37,9 +38,17 @@ export default function TutorSessions() {
 
   const fetchSessions = async () => {
     if (!userProfile?.uid) return;
-    const data = await getTutorSessions(userProfile.uid);
-    setSessions(data);
-    setLoading(false);
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await getTutorSessions(userProfile.uid);
+      setSessions(data);
+    } catch (error) {
+      console.error('Error loading tutor sessions', error);
+      setError('We could not load your sessions. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleAccept = (session: Session) => {
@@ -195,16 +204,23 @@ export default function TutorSessions() {
         <div className="flex justify-center py-12">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
+      ) : error ? (
+        <Card>
+          <CardContent className="py-8 text-center space-y-3">
+            <p className="text-muted-foreground">{error}</p>
+            <Button variant="outline" onClick={fetchSessions}>Retry</Button>
+          </CardContent>
+        </Card>
       ) : (
         <Tabs defaultValue="pending" className="space-y-6">
-          <TabsList>
-            <TabsTrigger value="pending">
+          <TabsList className="w-full flex flex-wrap gap-2 justify-start sm:justify-center overflow-x-auto">
+            <TabsTrigger className="flex-1 min-w-[120px]" value="pending">
               Requests ({pendingSessions.length})
             </TabsTrigger>
-            <TabsTrigger value="upcoming">
+            <TabsTrigger className="flex-1 min-w-[120px]" value="upcoming">
               Upcoming ({upcomingSessions.length})
             </TabsTrigger>
-            <TabsTrigger value="past">
+            <TabsTrigger className="flex-1 min-w-[120px]" value="past">
               Past ({pastSessions.length})
             </TabsTrigger>
           </TabsList>
