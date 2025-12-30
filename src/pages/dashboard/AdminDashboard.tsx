@@ -85,29 +85,29 @@ export default function AdminDashboard() {
         <p className="text-muted-foreground">Manage users, sessions, and platform settings.</p>
       </div>
 
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 mb-6 sm:mb-8">
         {[
           { label: "Total Students", value: stats.totalStudents.toString(), icon: Users, color: "text-primary" },
           { label: "Active Tutors", value: stats.activeTutors.toString(), icon: UserCheck, color: "text-success" },
           { label: "Sessions Today", value: stats.sessionsToday.toString(), icon: Video, color: "text-warning" },
           { label: "Total Sessions", value: stats.totalSessions.toString(), icon: TrendingUp, color: "text-primary" },
         ].map((stat) => (
-          <Card key={stat.label}>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
+          <Card key={stat.label} className="h-full">
+            <CardContent className="pt-4 sm:pt-6">
+              <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-2xl font-bold">{stat.value}</p>
-                  <p className="text-sm text-muted-foreground">{stat.label}</p>
+                  <p className="text-xl sm:text-2xl font-bold">{stat.value}</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">{stat.label}</p>
                 </div>
-                <stat.icon className={`h-8 w-8 ${stat.color}`} />
+                <stat.icon className={`h-6 w-6 sm:h-8 sm:w-8 ${stat.color}`} />
               </div>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-6">
-        <Card className="lg:col-span-2">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+        <Card className="md:col-span-2">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Shield className="h-5 w-5 text-primary" />
@@ -120,7 +120,7 @@ export default function AdminDashboard() {
             </CardTitle>
             <CardDescription>Review and approve tutor registrations</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
             {stats.pendingTutors === 0 ? (
               <p className="text-muted-foreground text-center py-4">No pending approvals</p>
             ) : (
