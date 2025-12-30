@@ -24,6 +24,7 @@ export default function BookSession() {
   const [availability, setAvailability] = useState<AvailabilitySlot[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
@@ -33,16 +34,25 @@ export default function BookSession() {
   useEffect(() => {
     const fetchData = async () => {
       if (!tutorId) return;
-      const [tutorData, slots] = await Promise.all([
-        getTutorProfile(tutorId),
-        getTutorAvailability(tutorId)
-      ]);
-      setTutor(tutorData);
-      setAvailability(slots);
-      setLoading(false);
+      setLoading(true);
+      setError(null);
+      try {
+        const [tutorData, slots] = await Promise.all([
+          getTutorProfile(tutorId),
+          getTutorAvailability(tutorId)
+        ]);
+        setTutor(tutorData);
+        setAvailability(slots);
+      } catch (error) {
+        console.error('Error loading tutor for booking', error);
+        setError('We could not load this tutor right now. Please try again.');
+      } finally {
+        setLoading(false);
+      }
     };
     fetchData();
   }, [tutorId]);
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,6 +91,19 @@ export default function BookSession() {
         <div className="flex justify-center py-12">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <DashboardLayout role="student">
+        <Card>
+          <CardContent className="py-12 text-center space-y-3">
+            <p className="text-muted-foreground">{error}</p>
+            <Button variant="outline" onClick={() => window.location.reload()}>Retry</Button>
+          </CardContent>
+        </Card>
       </DashboardLayout>
     );
   }

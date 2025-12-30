@@ -19,6 +19,7 @@ export default function TutorAvailability() {
   const [slots, setSlots] = useState<AvailabilitySlot[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchAvailability();
@@ -26,10 +27,19 @@ export default function TutorAvailability() {
 
   const fetchAvailability = async () => {
     if (!userProfile?.uid) return;
-    const data = await getTutorAvailability(userProfile.uid);
-    setSlots(data.length > 0 ? data : [createEmptySlot()]);
-    setLoading(false);
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await getTutorAvailability(userProfile.uid);
+      setSlots(data.length > 0 ? data : [createEmptySlot()]);
+    } catch (error) {
+      console.error('Error loading availability', error);
+      setError('We could not load your availability. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
+
 
   const createEmptySlot = (): AvailabilitySlot => ({
     tutorId: userProfile?.uid || '',
@@ -91,6 +101,13 @@ export default function TutorAvailability() {
         <div className="flex justify-center py-12">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
+      ) : error ? (
+        <Card>
+          <CardContent className="py-8 text-center space-y-3">
+            <p className="text-muted-foreground">{error}</p>
+            <Button variant="outline" onClick={fetchAvailability}>Retry</Button>
+          </CardContent>
+        </Card>
       ) : (
         <Card>
           <CardHeader>
@@ -149,7 +166,7 @@ export default function TutorAvailability() {
               </div>
             ))}
 
-            <div className="flex gap-4 pt-4">
+            <div className="flex flex-wrap gap-4 pt-4">
               <Button variant="outline" onClick={addSlot}>
                 <Plus className="h-4 w-4 mr-2" /> Add Time Slot
               </Button>
@@ -163,3 +180,4 @@ export default function TutorAvailability() {
     </DashboardLayout>
   );
 }
+

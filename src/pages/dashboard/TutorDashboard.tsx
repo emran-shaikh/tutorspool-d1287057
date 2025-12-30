@@ -12,6 +12,7 @@ export default function TutorDashboard() {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [tutorProfile, setTutorProfile] = useState<TutorProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -19,7 +20,8 @@ export default function TutorDashboard() {
 
   const fetchData = async () => {
     if (!userProfile?.uid) return;
-    
+    setLoading(true);
+    setError(null);
     try {
       const [sessionsData, profileData] = await Promise.all([
         getTutorSessions(userProfile.uid),
@@ -28,7 +30,8 @@ export default function TutorDashboard() {
       setSessions(sessionsData);
       setTutorProfile(profileData);
     } catch (error) {
-      console.error('Error fetching tutor data');
+      console.error('Error fetching tutor data', error);
+      setError('We could not load your tutor overview. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -47,6 +50,19 @@ export default function TutorDashboard() {
         <div className="flex justify-center py-12">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <DashboardLayout role="tutor">
+        <Card>
+          <CardContent className="py-8 text-center space-y-3">
+            <p className="text-muted-foreground">{error}</p>
+            <Button variant="outline" onClick={fetchData}>Retry</Button>
+          </CardContent>
+        </Card>
       </DashboardLayout>
     );
   }

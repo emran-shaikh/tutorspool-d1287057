@@ -16,12 +16,15 @@ export default function AdminDashboard() {
     completedSessions: 0
   });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchStats();
   }, []);
 
   const fetchStats = async () => {
+    setLoading(true);
+    setError(null);
     try {
       const [users, tutors, sessions] = await Promise.all([
         getAllUsers(),
@@ -45,7 +48,8 @@ export default function AdminDashboard() {
         completedSessions: completedSessions.length
       });
     } catch (error) {
-      console.error('Error fetching admin stats');
+      console.error('Error fetching admin stats', error);
+      setError('We could not load your admin overview. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -57,6 +61,19 @@ export default function AdminDashboard() {
         <div className="flex justify-center py-12">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <DashboardLayout role="admin">
+        <Card>
+          <CardContent className="py-8 text-center space-y-3">
+            <p className="text-muted-foreground">{error}</p>
+            <Button variant="outline" onClick={fetchStats}>Retry</Button>
+          </CardContent>
+        </Card>
       </DashboardLayout>
     );
   }
