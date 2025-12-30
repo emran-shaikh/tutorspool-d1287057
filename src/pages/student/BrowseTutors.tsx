@@ -6,11 +6,12 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Search, Star, DollarSign, Clock, SlidersHorizontal } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import { getTutors, TutorProfile } from "@/lib/firestore";
+import { getTutors, TutorProfile, getAllReviews, Review } from "@/lib/firestore";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface TutorWithMeta extends TutorProfile {
-  rating?: number;
+  avgRating: number;
+  reviewCount: number;
 }
 
 export default function BrowseTutors() {
@@ -25,10 +26,25 @@ export default function BrowseTutors() {
     const fetchTutors = async () => {
       setError(null);
       try {
-        const data = await getTutors();
-        // For now, use a placeholder rating until wired to real reviews
-        const withMeta: TutorWithMeta[] = data.map((tutor) => ({ ...tutor, rating: 4.8 }));
-        setTutors(withMeta);
+        const [tutorsData, reviewsData] = await Promise.all([
+          getTutors(),
+          getAllReviews(),
+        ]);
+
+        const tutorsWithMeta: TutorWithMeta[] = tutorsData.map((tutor) => {
+          const tutorReviews = reviewsData.filter((r) => r.tutorId === tutor.uid);
+          const avgRating = tutorReviews.length
+            ? tutorReviews.reduce((sum, r) => sum + r.rating, 0) / tutorReviews.length
+            : 0;
+
+          return {
+            ...tutor,
+            avgRating: Math.round(avgRating * 10) / 10,
+            reviewCount: tutorReviews.length,
+          };
+        });
+
+        setTutors(tutorsWithMeta);
       } catch (error) {
         console.error("Error loading tutors", error);
         setError("We could not load tutors right now. Please try again.");
@@ -52,15 +68,17 @@ export default function BrowseTutors() {
   const sortedTutors = [...filteredTutors].sort((a, b) => {
     if (sortBy === "price-asc") return a.hourlyRate - b.hourlyRate;
     if (sortBy === "price-desc") return b.hourlyRate - a.hourlyRate;
-    if (sortBy === "rating-desc") return (b.rating || 0) - (a.rating || 0);
+    if (sortBy === "rating-desc") return b.avgRating - a.avgRating;
     return 0; // relevance: keep filtered order
   });
-
 
   return (
     <DashboardLayout role="student">
       <div className="mb-6">
-        <Link to="/student/dashboard" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-4">
+        <Link
+          to="/student/dashboard"
+          className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-4"
+        >
           <ArrowLeft className="h-4 w-4 mr-1" /> Back to Dashboard
         </Link>
         <h1 className="font-display text-3xl font-bold mb-2">Browse Tutors</h1>
@@ -112,7 +130,6 @@ export default function BrowseTutors() {
       </div>
 
       {loading ? (
-
         <div className="flex justify-center py-12">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
@@ -120,11 +137,12 @@ export default function BrowseTutors() {
         <Card>
           <CardContent className="py-12 text-center space-y-3">
             <p className="text-muted-foreground">{error}</p>
-            <Button variant="outline" onClick={() => window.location.reload()}>Retry</Button>
+            <Button variant="outline" onClick={() => window.location.reload()}>
+              Retry
+            </Button>
           </CardContent>
         </Card>
       ) : filteredTutors.length === 0 ? (
-
         <Card>
           <CardContent className="py-12 text-center">
             <p className="text-muted-foreground">No tutors found. Check back later!</p>
@@ -132,7 +150,7 @@ export default function BrowseTutors() {
         </Card>
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredTutors.map((tutor) => (
+          {sortedTutors.map((tutor) => (
             <Card key={tutor.uid} className="hover:shadow-elevated transition-shadow">
               <CardHeader>
                 <div className="flex items-start justify-between">
@@ -142,9 +160,15 @@ export default function BrowseTutors() {
                       <Clock className="h-3 w-3" /> {tutor.experience}
                     </CardDescription>
                   </div>
-                  <Badge variant="secondary" className="flex items-center gap-1">
-                    <Star className="h-3 w-3 fill-current" /> 4.8
-                  </Badge>
+                  {tutor.reviewCount > 0 ? (
+                    <Badge variant="secondary" className="flex items-center gap-1">
+                      <Star className="h-3 w-3 fill-current" /> {tutor.avgRating.toFixed(1)}
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline" className="text-xs text-muted-foreground">
+                      New tutor
+                    </Badge>
+                  )}
                 </div>
               </CardHeader>
               <CardContent>
@@ -158,7 +182,8 @@ export default function BrowseTutors() {
                 <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{tutor.bio}</p>
                 <div className="flex items-center justify-between">
                   <span className="flex items-center text-sm font-medium">
-                    <DollarSign className="h-4 w-4" />{tutor.hourlyRate}/hr
+                    <DollarSign className="h-4 w-4" />
+                    {tutor.hourlyRate}/hr
                   </span>
                   <Button size="sm" asChild>
                     <Link to={`/student/book/${tutor.uid}`}>Book Session</Link>
