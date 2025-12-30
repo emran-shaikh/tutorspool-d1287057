@@ -11,6 +11,7 @@ import DashboardLayout from "@/components/layout/DashboardLayout";
 import { getTutorProfile, getTutorAvailability, createSession, TutorProfile, AvailabilitySlot } from "@/lib/firestore";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -82,32 +83,19 @@ export default function BookSession() {
 
       // Fire-and-forget booking + reminder + tutor emails
       try {
-        const baseUrl = import.meta.env.VITE_SUPABASE_URL;
-        const apiKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-
-        await fetch(`${baseUrl}/functions/v1/send-email`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            apikey: apiKey,
-          },
-          body: JSON.stringify({
+        await supabase.functions.invoke('send-email', {
+          body: {
             type: 'session_booking',
             to: userProfile.email,
             studentName: userProfile.fullName,
             tutorName: tutor.fullName,
             date: selectedDate,
             time: selectedTime,
-          }),
+          },
         });
 
-        await fetch(`${baseUrl}/functions/v1/send-email`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            apikey: apiKey,
-          },
-          body: JSON.stringify({
+        await supabase.functions.invoke('send-email', {
+          body: {
             type: 'session_reminder',
             to: userProfile.email,
             studentName: userProfile.fullName,
@@ -115,30 +103,25 @@ export default function BookSession() {
             date: selectedDate,
             time: selectedTime,
             sessionStartIso,
-          }),
+          },
         });
 
         if (tutor.email) {
-          await fetch(`${baseUrl}/functions/v1/send-email`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              apikey: apiKey,
-            },
-            body: JSON.stringify({
+          await supabase.functions.invoke('send-email', {
+            body: {
               type: 'tutor_session_booking',
               to: tutor.email,
               studentName: userProfile.fullName,
               tutorName: tutor.fullName,
               date: selectedDate,
               time: selectedTime,
-            }),
+            },
           });
         }
       } catch (err) {
         console.error('Failed to trigger session emails:', err);
       }
-
+      
       toast({ title: "Success", description: "Session request sent to tutor!" });
       navigate('/student/sessions');
     } catch (error) {

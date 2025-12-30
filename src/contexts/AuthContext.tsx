@@ -8,6 +8,7 @@ import {
 } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
+import { supabase } from '@/integrations/supabase/client';
 
 // Environment check for conditional logging
 const isDev = import.meta.env.DEV;
@@ -103,19 +104,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       // Fire-and-forget welcome email
       try {
-        const baseUrl = import.meta.env.VITE_SUPABASE_URL;
-        const apiKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-        await fetch(`${baseUrl}/functions/v1/send-email`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            apikey: apiKey,
-          },
-          body: JSON.stringify({
+        await supabase.functions.invoke('send-email', {
+          body: {
             type: 'welcome',
             to: email,
             name: fullName,
-          }),
+          },
         });
       } catch (err) {
         if (isDev) console.error('Failed to trigger welcome email:', err);
