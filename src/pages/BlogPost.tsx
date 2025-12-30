@@ -8,6 +8,7 @@ import { Calendar, User, ArrowLeft, Clock, Facebook, Twitter, Linkedin, Link2 } 
 import { getBlogPostBySlug, BlogPost as BlogPostType } from "@/lib/firestore";
 import { format } from "date-fns";
 import { Helmet } from "react-helmet-async";
+import { toast } from "@/hooks/use-toast";
 
 export default function BlogPost() {
   const { slug } = useParams<{ slug: string }>();
@@ -188,7 +189,21 @@ export default function BlogPost() {
                     </a>
                     <button
                       type="button"
-                      onClick={() => navigator.clipboard.writeText(window.location.origin + '/blog/' + post.slug)}
+                      onClick={async () => {
+                        try {
+                          await navigator.clipboard.writeText(window.location.origin + '/blog/' + post.slug);
+                          toast({
+                            title: "Link copied",
+                            description: "The blog URL has been copied to your clipboard.",
+                          });
+                        } catch (error) {
+                          toast({
+                            title: "Copy failed",
+                            description: "Unable to copy the link. Please try again.",
+                            variant: "destructive",
+                          });
+                        }
+                      }}
                       className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border text-muted-foreground hover:text-primary hover:border-primary transition-colors"
                       aria-label="Copy link"
                     >
