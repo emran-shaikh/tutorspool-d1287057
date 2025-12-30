@@ -4,12 +4,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { supabase } from "@/integrations/supabase/client";
 
 type Message = {
   role: "user" | "assistant";
   content: string;
 };
+
+// IMPORTANT: In production, some hosts mistakenly set VITE_SUPABASE_URL with a path suffix.
+// Using `.origin` guarantees we always call the correct base domain.
+const SUPABASE_ORIGIN = new URL(import.meta.env.VITE_SUPABASE_URL).origin;
+const CHAT_URL = `${SUPABASE_ORIGIN}/functions/v1/chat`;
 
 const QUICK_REPLIES = [
   { label: "Find a Tutor", message: "How do I find a tutor?" },
@@ -41,66 +45,64 @@ export const ChatBot = () => {
   }, [messages]);
 
   const streamChat = async (userMessages: Message[]) => {
-    const { data, error } = await supabase.functions.invoke('chat', {
-      body: { messages: userMessages },
+    const resp = await fetch(CHAT_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      },
+      body: JSON.stringify({ messages: userMessages }),
     });
 
-    if (error) {
-      throw new Error(error.message || "Failed to get response");
+    if (!resp.ok || !resp.body) {
+      const errorData = await resp.json().catch(() => ({}));
+      throw new Error(errorData.error || `Failed to get response (${resp.status})`);
     }
 
-    // Handle streaming response
-    if (data instanceof ReadableStream) {
-      const reader = data.getReader();
-      const decoder = new TextDecoder();
-      let textBuffer = "";
-      let assistantContent = "";
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder();
+    let textBuffer = "";
+    let assistantContent = "";
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        
-        textBuffer += decoder.decode(value, { stream: true });
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
 
-        let newlineIndex: number;
-        while ((newlineIndex = textBuffer.indexOf("\n")) !== -1) {
-          let line = textBuffer.slice(0, newlineIndex);
-          textBuffer = textBuffer.slice(newlineIndex + 1);
+      textBuffer += decoder.decode(value, { stream: true });
 
-          if (line.endsWith("\r")) line = line.slice(0, -1);
-          if (line.startsWith(":") || line.trim() === "") continue;
-          if (!line.startsWith("data: ")) continue;
+      let newlineIndex: number;
+      while ((newlineIndex = textBuffer.indexOf("\n")) !== -1) {
+        let line = textBuffer.slice(0, newlineIndex);
+        textBuffer = textBuffer.slice(newlineIndex + 1);
 
-          const jsonStr = line.slice(6).trim();
-          if (jsonStr === "[DONE]") break;
+        if (line.endsWith("\r")) line = line.slice(0, -1);
+        if (line.startsWith(":") || line.trim() === "") continue;
+        if (!line.startsWith("data: ")) continue;
 
-          try {
-            const parsed = JSON.parse(jsonStr);
-            const content = parsed.choices?.[0]?.delta?.content as string | undefined;
-            if (content) {
-              assistantContent += content;
-              setMessages((prev) => {
-                const last = prev[prev.length - 1];
-                if (last?.role === "assistant" && prev.length > 1) {
-                  return prev.map((m, i) =>
-                    i === prev.length - 1 ? { ...m, content: assistantContent } : m
-                  );
-                }
-                return [...prev, { role: "assistant", content: assistantContent }];
-              });
-            }
-          } catch {
-            textBuffer = line + "\n" + textBuffer;
-            break;
+        const jsonStr = line.slice(6).trim();
+        if (jsonStr === "[DONE]") break;
+
+        try {
+          const parsed = JSON.parse(jsonStr);
+          const content = parsed.choices?.[0]?.delta?.content as string | undefined;
+          if (content) {
+            assistantContent += content;
+            setMessages((prev) => {
+              const last = prev[prev.length - 1];
+              if (last?.role === "assistant" && prev.length > 1) {
+                return prev.map((m, i) =>
+                  i === prev.length - 1 ? { ...m, content: assistantContent } : m
+                );
+              }
+              return [...prev, { role: "assistant", content: assistantContent }];
+            });
           }
+        } catch {
+          // Incomplete JSON split across chunks: put it back and wait for more data
+          textBuffer = line + "\n" + textBuffer;
+          break;
         }
       }
-    } else if (typeof data === 'string') {
-      // Non-streaming text response
-      setMessages((prev) => [...prev, { role: "assistant", content: data }]);
-    } else if (data?.choices?.[0]?.message?.content) {
-      // Standard JSON response
-      setMessages((prev) => [...prev, { role: "assistant", content: data.choices[0].message.content }]);
     }
   };
 
