@@ -18,16 +18,12 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between">
+      <div className="container flex h-16 items-center justify-between gap-2">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2">
+        <Link to="/" className="flex items-center gap-2 min-w-0">
           <div className="flex items-center justify-center rounded-lg">
-          <img src="/logo.png" alt="TutorsPool Logo" className="h-12 w-auto" />
+            <img src="/logo.png" alt="TutorsPool logo" className="h-8 w-auto sm:h-10" />
           </div>
-          {/* <span className="font-display text-xl font-bold">
-            <span className="text-secondary">Tutors</span>
-            <span className="text-primary">Pool</span>
-          </span> */}
         </Link>
 
         {/* Desktop Navigation */}
@@ -42,7 +38,7 @@ export function Navbar() {
         </nav>
 
         {/* Right Side Actions */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <Button variant="ghost" size="sm" className="hidden sm:flex items-center gap-1">
             <Globe className="h-4 w-4" />
             <span>Global</span>
@@ -52,7 +48,7 @@ export function Navbar() {
             <Button variant="ghost" size="sm">Sign In</Button>
           </Link>
           
-          <Link to="/register">
+          <Link to="/register" className="hidden sm:block">
             <Button variant="hero" size="sm">Get Started</Button>
           </Link>
 
