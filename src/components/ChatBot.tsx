@@ -37,12 +37,11 @@ export const ChatBot = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showQuickReplies, setShowQuickReplies] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-  }, [messages]);
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, isLoading]);
 
   const streamChat = async (userMessages: Message[]) => {
     const resp = await fetch(CHAT_URL, {
@@ -264,6 +263,7 @@ export const ChatBot = () => {
                 </div>
               </div>
             )}
+            <div ref={messagesEndRef} />
           </div>
         </ScrollArea>
 
