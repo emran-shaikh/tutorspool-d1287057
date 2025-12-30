@@ -4,25 +4,34 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Search, Star, DollarSign, Clock } from "lucide-react";
+import { ArrowLeft, Search, Star, DollarSign, Clock, SlidersHorizontal } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { getTutors, TutorProfile } from "@/lib/firestore";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+interface TutorWithMeta extends TutorProfile {
+  rating?: number;
+}
 
 export default function BrowseTutors() {
-  const [tutors, setTutors] = useState<TutorProfile[]>([]);
+  const [tutors, setTutors] = useState<TutorWithMeta[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [subjectFilter, setSubjectFilter] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<"relevance" | "price-asc" | "price-desc" | "rating-desc">("relevance");
 
   useEffect(() => {
     const fetchTutors = async () => {
       setError(null);
       try {
         const data = await getTutors();
-        setTutors(data);
+        // For now, use a placeholder rating until wired to real reviews
+        const withMeta: TutorWithMeta[] = data.map((tutor) => ({ ...tutor, rating: 4.8 }));
+        setTutors(withMeta);
       } catch (error) {
-        console.error('Error loading tutors', error);
-        setError('We could not load tutors right now. Please try again.');
+        console.error("Error loading tutors", error);
+        setError("We could not load tutors right now. Please try again.");
       } finally {
         setLoading(false);
       }
@@ -30,11 +39,23 @@ export default function BrowseTutors() {
     fetchTutors();
   }, []);
 
+  const uniqueSubjects = Array.from(new Set(tutors.flatMap((t) => t.subjects))).sort();
 
-  const filteredTutors = tutors.filter(tutor => 
-    tutor.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    tutor.subjects.some(s => s.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+  const filteredTutors = tutors.filter((tutor) => {
+    const matchesSearch =
+      tutor.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      tutor.subjects.some((s) => s.toLowerCase().includes(searchQuery.toLowerCase()));
+    const matchesSubject = subjectFilter === "all" || tutor.subjects.includes(subjectFilter);
+    return matchesSearch && matchesSubject;
+  });
+
+  const sortedTutors = [...filteredTutors].sort((a, b) => {
+    if (sortBy === "price-asc") return a.hourlyRate - b.hourlyRate;
+    if (sortBy === "price-desc") return b.hourlyRate - a.hourlyRate;
+    if (sortBy === "rating-desc") return (b.rating || 0) - (a.rating || 0);
+    return 0; // relevance: keep filtered order
+  });
+
 
   return (
     <DashboardLayout role="student">
@@ -46,7 +67,7 @@ export default function BrowseTutors() {
         <p className="text-muted-foreground">Find the perfect tutor for your learning goals</p>
       </div>
 
-      <div className="relative mb-6">
+      <div className="relative mb-4">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           placeholder="Search by name or subject..."
@@ -56,7 +77,42 @@ export default function BrowseTutors() {
         />
       </div>
 
+      <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <SlidersHorizontal className="h-4 w-4" />
+          <span>Filter & sort tutors</span>
+        </div>
+        <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+          <Select value={subjectFilter} onValueChange={setSubjectFilter}>
+            <SelectTrigger className="w-full sm:w-48">
+              <SelectValue placeholder="All subjects" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All subjects</SelectItem>
+              {uniqueSubjects.map((subject) => (
+                <SelectItem key={subject} value={subject}>
+                  {subject}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select value={sortBy} onValueChange={(val) => setSortBy(val as typeof sortBy)}>
+            <SelectTrigger className="w-full sm:w-48">
+              <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="relevance">Relevance</SelectItem>
+              <SelectItem value="price-asc">Price: Low to High</SelectItem>
+              <SelectItem value="price-desc">Price: High to Low</SelectItem>
+              <SelectItem value="rating-desc">Rating: High to Low</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
       {loading ? (
+
         <div className="flex justify-center py-12">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
