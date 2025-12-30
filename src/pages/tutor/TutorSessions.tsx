@@ -13,6 +13,7 @@ import { getTutorSessions, updateSessionStatus, Session } from "@/lib/firestore"
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { auth } from "@/lib/firebase";
+import { supabase } from "@/integrations/supabase/client";
 
 const statusColors: Record<Session['status'], string> = {
   pending: "bg-warning/10 text-warning border-warning/20",
@@ -55,16 +56,8 @@ export default function TutorSessions() {
     if (!session.studentEmail) return;
 
     try {
-      const baseUrl = import.meta.env.VITE_SUPABASE_URL;
-      const apiKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-
-      await fetch(`${baseUrl}/functions/v1/send-email`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          apikey: apiKey,
-        },
-        body: JSON.stringify({
+      await supabase.functions.invoke('send-email', {
+        body: {
           type,
           to: session.studentEmail,
           studentName: session.studentName,
@@ -72,7 +65,7 @@ export default function TutorSessions() {
           date: session.date,
           time: session.time,
           status,
-        }),
+        },
       });
     } catch (error) {
       console.error('Failed to send session update email:', error);
@@ -152,16 +145,8 @@ export default function TutorSessions() {
       if (session) {
         await sendSessionStatusEmail(session, 'session_cancel', 'declined');
         if (session.tutorEmail) {
-          const baseUrl = import.meta.env.VITE_SUPABASE_URL;
-          const apiKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-
-          await fetch(`${baseUrl}/functions/v1/send-email`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              apikey: apiKey,
-            },
-            body: JSON.stringify({
+          await supabase.functions.invoke('send-email', {
+            body: {
               type: 'tutor_session_cancel',
               to: session.tutorEmail,
               studentName: session.studentName,
@@ -169,7 +154,7 @@ export default function TutorSessions() {
               date: session.date,
               time: session.time,
               cancelledBy: 'tutor',
-            }),
+            },
           });
         }
       }
@@ -201,16 +186,8 @@ export default function TutorSessions() {
       if (session) {
         await sendSessionStatusEmail(session, 'session_cancel', 'cancelled');
         if (session.tutorEmail) {
-          const baseUrl = import.meta.env.VITE_SUPABASE_URL;
-          const apiKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-
-          await fetch(`${baseUrl}/functions/v1/send-email`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              apikey: apiKey,
-            },
-            body: JSON.stringify({
+          await supabase.functions.invoke('send-email', {
+            body: {
               type: 'tutor_session_cancel',
               to: session.tutorEmail,
               studentName: session.studentName,
@@ -218,7 +195,7 @@ export default function TutorSessions() {
               date: session.date,
               time: session.time,
               cancelledBy: 'tutor',
-            }),
+            },
           });
         }
       }

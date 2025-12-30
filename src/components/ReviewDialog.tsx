@@ -7,6 +7,7 @@ import { Star, Loader2 } from "lucide-react";
 import { createReview, Session } from "@/lib/firestore";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ReviewDialogProps {
   open: boolean;
@@ -42,39 +43,26 @@ export default function ReviewDialog({ open, onOpenChange, session, onReviewSubm
 
       // Fire-and-forget thank you emails
       try {
-        const baseUrl = import.meta.env.VITE_SUPABASE_URL;
-        const apiKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-
         if (session.studentEmail) {
-          await fetch(`${baseUrl}/functions/v1/send-email`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              apikey: apiKey,
-            },
-            body: JSON.stringify({
+          await supabase.functions.invoke('send-email', {
+            body: {
               type: 'review_thankyou',
               to: session.studentEmail,
               studentName: userProfile.fullName,
               tutorName: session.tutorName,
-            }),
+            },
           });
         }
 
         if (session.tutorEmail) {
-          await fetch(`${baseUrl}/functions/v1/send-email`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              apikey: apiKey,
-            },
-            body: JSON.stringify({
+          await supabase.functions.invoke('send-email', {
+            body: {
               type: 'tutor_review_received',
               to: session.tutorEmail,
               studentName: userProfile.fullName,
               tutorName: session.tutorName,
               subject: session.subject,
-            }),
+            },
           });
         }
       } catch (err) {
