@@ -85,6 +85,7 @@ export interface Session {
   studentEmail?: string;
   tutorId: string;
   tutorName: string;
+  tutorEmail?: string;
   subject: string;
   date: string;
   time: string;

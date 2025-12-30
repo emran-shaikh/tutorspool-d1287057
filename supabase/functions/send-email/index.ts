@@ -18,7 +18,10 @@ type EmailType =
   | "session_cancel"
   | "session_reminder"
   | "session_completed"
-  | "review_thankyou";
+  | "review_thankyou"
+  | "tutor_session_booking"
+  | "tutor_session_cancel"
+  | "tutor_review_received";
 
 interface BaseEmailRequest {
   type: EmailType;
@@ -75,13 +78,43 @@ interface ReviewThankYouEmailRequest extends BaseEmailRequest {
   tutorName: string;
 }
 
+interface TutorSessionBookingEmailRequest extends BaseEmailRequest {
+  type: "tutor_session_booking";
+  to: string; // tutor email
+  studentName: string;
+  tutorName: string;
+  date: string;
+  time: string;
+}
+
+interface TutorSessionCancelEmailRequest extends BaseEmailRequest {
+  type: "tutor_session_cancel";
+  to: string; // tutor email
+  studentName: string;
+  tutorName: string;
+  date: string;
+  time: string;
+  cancelledBy: "student" | "tutor";
+}
+
+interface TutorReviewReceivedEmailRequest extends BaseEmailRequest {
+  type: "tutor_review_received";
+  to: string; // tutor email
+  studentName: string;
+  tutorName: string;
+  subject: string;
+}
+
 type EmailRequest =
   | WelcomeEmailRequest
   | SessionBookingEmailRequest
   | SessionUpdateEmailRequest
   | SessionReminderEmailRequest
   | SessionCompletedEmailRequest
-  | ReviewThankYouEmailRequest;
+  | ReviewThankYouEmailRequest
+  | TutorSessionBookingEmailRequest
+  | TutorSessionCancelEmailRequest
+  | TutorReviewReceivedEmailRequest;
 
 function renderLayout(title: string, body: string): string {
   return `
@@ -262,6 +295,62 @@ async function sendReviewThankYouEmail(payload: ReviewThankYouEmailRequest) {
   });
 }
 
+async function sendTutorSessionBookingEmail(payload: TutorSessionBookingEmailRequest) {
+  const html = renderLayout(
+    "New session request received",
+    `
+    <p>Hi ${payload.tutorName},</p>
+    <p>You have a new session request from <strong>${payload.studentName}</strong>.</p>
+    <p><strong>Requested time:</strong> ${payload.date} at ${payload.time}</p>
+    <p>Please log in to your TutorsPool dashboard to accept or decline this request.</p>
+  `,
+  );
+
+  return resend.emails.send({
+    from: FROM_ADDRESS,
+    to: [payload.to],
+    subject: "New TutorsPool session request",
+    html,
+  });
+}
+
+async function sendTutorSessionCancelEmail(payload: TutorSessionCancelEmailRequest) {
+  const by = payload.cancelledBy === "student" ? "the student" : "you";
+
+  const html = renderLayout(
+    "Session cancelled",
+    `
+    <p>Hi ${payload.tutorName},</p>
+    <p>Your session with <strong>${payload.studentName}</strong> scheduled for ${payload.date} at ${payload.time} has been cancelled by ${by}.</p>
+  `,
+  );
+
+  return resend.emails.send({
+    from: FROM_ADDRESS,
+    to: [payload.to],
+    subject: "TutorsPool session cancelled",
+    html,
+  });
+}
+
+async function sendTutorReviewReceivedEmail(payload: TutorReviewReceivedEmailRequest) {
+  const html = renderLayout(
+    "You received a new review",
+    `
+    <p>Hi ${payload.tutorName},</p>
+    <p>${payload.studentName} just left a review for your <strong>${payload.subject}</strong> session.</p>
+    <p>Log in to your TutorsPool dashboard to read the full review.</p>
+  `,
+  );
+
+  return resend.emails.send({
+    from: FROM_ADDRESS,
+    to: [payload.to],
+    subject: "New TutorsPool review received",
+    html,
+  });
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -301,6 +390,15 @@ serve(async (req) => {
         break;
       case "review_thankyou":
         result = await sendReviewThankYouEmail(payload);
+        break;
+      case "tutor_session_booking":
+        result = await sendTutorSessionBookingEmail(payload);
+        break;
+      case "tutor_session_cancel":
+        result = await sendTutorSessionCancelEmail(payload);
+        break;
+      case "tutor_review_received":
+        result = await sendTutorReviewReceivedEmail(payload);
         break;
       default:
         return new Response(
