@@ -151,7 +151,7 @@ export default function TutorSessions() {
           {session.status}
         </Badge>
       </div>
-      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+      <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
         <span className="flex items-center gap-1">
           <Calendar className="h-3 w-3" /> {session.date}
         </span>
