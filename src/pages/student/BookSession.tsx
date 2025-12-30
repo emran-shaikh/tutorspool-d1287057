@@ -133,7 +133,7 @@ export default function BookSession() {
         <p className="text-muted-foreground">Schedule a session with {tutor.fullName}</p>
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6">
         <Card className="lg:col-span-1">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -147,7 +147,9 @@ export default function BookSession() {
             <p className="text-sm mb-4">{tutor.bio}</p>
             <div className="flex flex-wrap gap-1 mb-3">
               {tutor.subjects.map((subject) => (
-                <span key={subject} className="text-xs bg-muted px-2 py-1 rounded">{subject}</span>
+                <span key={subject} className="text-xs bg-muted px-2 py-1 rounded">
+                  {subject}
+                </span>
               ))}
             </div>
             <p className="font-semibold text-primary">${tutor.hourlyRate}/hour</p>
@@ -194,9 +196,11 @@ export default function BookSession() {
                   <SelectTrigger>
                     <SelectValue placeholder="Select a subject" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-card text-card-foreground shadow-lg z-50">
                     {tutor.subjects.map((subject) => (
-                      <SelectItem key={subject} value={subject}>{subject}</SelectItem>
+                      <SelectItem key={subject} value={subject}>
+                        {subject}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -218,7 +222,7 @@ export default function BookSession() {
                   <p className="text-sm font-medium mb-2 flex items-center gap-2">
                     <Clock className="h-4 w-4" /> Tutor's Availability
                   </p>
-                  <div className="text-sm text-muted-foreground">
+                  <div className="text-sm text-muted-foreground space-y-1">
                     {availability.map((slot) => (
                       <p key={slot.id}>
                         {dayNames[slot.dayOfWeek]}: {slot.startTime} - {slot.endTime}

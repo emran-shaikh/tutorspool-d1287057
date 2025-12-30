@@ -105,7 +105,7 @@ export default function BrowseTutors() {
             <SelectTrigger className="w-full sm:w-48">
               <SelectValue placeholder="All subjects" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-card text-card-foreground shadow-lg z-50">
               <SelectItem value="all">All subjects</SelectItem>
               {uniqueSubjects.map((subject) => (
                 <SelectItem key={subject} value={subject}>
@@ -119,7 +119,7 @@ export default function BrowseTutors() {
             <SelectTrigger className="w-full sm:w-48">
               <SelectValue placeholder="Sort by" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-card text-card-foreground shadow-lg z-50">
               <SelectItem value="relevance">Relevance</SelectItem>
               <SelectItem value="price-asc">Price: Low to High</SelectItem>
               <SelectItem value="price-desc">Price: High to Low</SelectItem>
@@ -149,11 +149,11 @@ export default function BrowseTutors() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
           {sortedTutors.map((tutor) => (
-            <Card key={tutor.uid} className="hover:shadow-elevated transition-shadow">
+            <Card key={tutor.uid} className="h-full hover:shadow-elevated transition-shadow">
               <CardHeader>
-                <div className="flex items-start justify-between">
+                <div className="flex items-start justify-between gap-3">
                   <div>
                     <CardTitle className="text-lg">{tutor.fullName}</CardTitle>
                     <CardDescription className="flex items-center gap-1 mt-1">
