@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { useAuth, UserRole } from "@/contexts/AuthContext";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
+import { createAdminNotification } from "@/lib/firestore";
 
 // Admin security key - in production, this should be stored securely and rotated
 const ADMIN_SECURITY_KEY = "TutorsPool2024Admin!";
@@ -100,11 +101,20 @@ export default function Register() {
       
       // Send admin notification for new registrations (fire and forget)
       if (role === "student" || role === "tutor") {
+        // Email notification
         supabase.functions.invoke("send-email", {
           body: role === "student" 
             ? { type: "admin_new_student", studentName: name, studentEmail: email }
             : { type: "admin_new_tutor", tutorName: name, tutorEmail: email }
-        }).catch(console.error); // Don't block registration if email fails
+        }).catch(console.error);
+        
+        // In-app notification
+        createAdminNotification({
+          type: role === "student" ? "new_student" : "new_tutor",
+          title: role === "student" ? "New Student Registered" : "New Tutor Registration",
+          message: `${name} has registered as a ${role}${role === "tutor" ? " and is pending approval" : ""}`,
+          metadata: { userName: name, userEmail: email }
+        }).catch(console.error);
       }
       
       toast({

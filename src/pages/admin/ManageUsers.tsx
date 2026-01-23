@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, Users, UserCheck, Ban, CheckCircle, Eye, X } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import { getAllUsers, getAllTutors, approveTutor, updateUserStatus, TutorProfile } from "@/lib/firestore";
+import { getAllUsers, getAllTutors, approveTutor, updateUserStatus, TutorProfile, createAdminNotification } from "@/lib/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -62,6 +62,14 @@ export default function ManageUsers() {
           }
         }).catch(console.error);
       }
+      
+      // Create in-app notification
+      createAdminNotification({
+        type: "tutor_approved",
+        title: "Tutor Approved",
+        message: `${tutor?.fullName || "A tutor"} has been approved and can now accept students`,
+        metadata: { tutorId, userName: tutor?.fullName, userEmail: tutor?.email }
+      }).catch(console.error);
       
       toast({ title: "Tutor approved!", description: "They can now accept students and have been notified via email." });
       fetchData();

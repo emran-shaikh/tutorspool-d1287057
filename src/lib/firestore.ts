@@ -333,6 +333,83 @@ export const updateUserStatus = async (uid: string, isActive: boolean): Promise<
   }
 };
 
+// Admin Notification Types and Functions
+export interface AdminNotification {
+  id?: string;
+  type: 'new_student' | 'new_tutor' | 'session_booked' | 'session_completed' | 'tutor_approved' | 'new_review';
+  title: string;
+  message: string;
+  isRead: boolean;
+  createdAt: string;
+  metadata?: {
+    userId?: string;
+    userName?: string;
+    userEmail?: string;
+    sessionId?: string;
+    tutorId?: string;
+  };
+}
+
+export const createAdminNotification = async (notification: Omit<AdminNotification, 'id' | 'isRead' | 'createdAt'>): Promise<string> => {
+  try {
+    const docRef = await addDoc(collection(db, 'adminNotifications'), {
+      ...notification,
+      isRead: false,
+      createdAt: new Date().toISOString()
+    });
+    return docRef.id;
+  } catch (error) {
+    if (isDev) console.error('Error creating notification:', error);
+    throw error;
+  }
+};
+
+export const getAdminNotifications = async (limit?: number): Promise<AdminNotification[]> => {
+  try {
+    const snapshot = await getDocs(collection(db, 'adminNotifications'));
+    let notifications = snapshot.docs
+      .map(doc => ({ ...doc.data(), id: doc.id } as AdminNotification))
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    
+    if (limit) {
+      notifications = notifications.slice(0, limit);
+    }
+    return notifications;
+  } catch (error) {
+    if (isDev) console.error('Error fetching notifications:', error);
+    return [];
+  }
+};
+
+export const markNotificationAsRead = async (notificationId: string): Promise<void> => {
+  try {
+    await updateDoc(doc(db, 'adminNotifications', notificationId), { isRead: true });
+  } catch (error) {
+    if (isDev) console.error('Error marking notification as read:', error);
+    throw error;
+  }
+};
+
+export const markAllNotificationsAsRead = async (): Promise<void> => {
+  try {
+    const snapshot = await getDocs(collection(db, 'adminNotifications'));
+    const unreadDocs = snapshot.docs.filter(doc => !doc.data().isRead);
+    await Promise.all(unreadDocs.map(d => updateDoc(doc(db, 'adminNotifications', d.id), { isRead: true })));
+  } catch (error) {
+    if (isDev) console.error('Error marking all notifications as read:', error);
+    throw error;
+  }
+};
+
+export const deleteNotification = async (notificationId: string): Promise<void> => {
+  try {
+    await deleteDoc(doc(db, 'adminNotifications', notificationId));
+  } catch (error) {
+    if (isDev) console.error('Error deleting notification:', error);
+    throw error;
+  }
+};
+
 // Review Types and Functions
 export interface Review {
   id?: string;

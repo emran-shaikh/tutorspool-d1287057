@@ -154,6 +154,21 @@ service cloud.firestore {
       // Only admins can delete blog posts
       allow delete: if isAdmin();
     }
+    
+    // Admin notifications collection
+    match /adminNotifications/{notificationId} {
+      // Only admins can read notifications
+      allow read: if isAdmin();
+      
+      // Authenticated users can create notifications (for registration events)
+      allow create: if isAuthenticated();
+      
+      // Only admins can update notifications (mark as read)
+      allow update: if isAdmin();
+      
+      // Only admins can delete notifications
+      allow delete: if isAdmin();
+    }
   }
 }
 ```
@@ -169,6 +184,8 @@ service cloud.firestore {
 4. **Data Ownership**: Users can only create/modify data that belongs to them.
 
 5. **Admin Override**: Admins have elevated permissions for user management.
+
+6. **Admin Notifications**: Only admins can read/update/delete notifications, but authenticated users can create them to support registration events.
 
 ## How to Apply These Rules
 
