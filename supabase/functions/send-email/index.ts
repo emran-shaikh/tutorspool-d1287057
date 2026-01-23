@@ -10,6 +10,7 @@ const corsHeaders = {
 const resend = new Resend(Deno.env.get("RESEND_API_KEY") as string);
 
 const FROM_ADDRESS = "TutorsPool <no-reply@tutorspool.com>";
+const ADMIN_EMAILS = ["info@tutorspool.com", "itsartificialimran@gmail.com"];
 
 type EmailType =
   | "welcome"
@@ -21,7 +22,10 @@ type EmailType =
   | "review_thankyou"
   | "tutor_session_booking"
   | "tutor_session_cancel"
-  | "tutor_review_received";
+  | "tutor_review_received"
+  | "admin_new_student"
+  | "admin_new_tutor"
+  | "tutor_approved";
 
 interface BaseEmailRequest {
   type: EmailType;
@@ -105,6 +109,24 @@ interface TutorReviewReceivedEmailRequest extends BaseEmailRequest {
   subject: string;
 }
 
+interface AdminNewStudentEmailRequest extends BaseEmailRequest {
+  type: "admin_new_student";
+  studentName: string;
+  studentEmail: string;
+}
+
+interface AdminNewTutorEmailRequest extends BaseEmailRequest {
+  type: "admin_new_tutor";
+  tutorName: string;
+  tutorEmail: string;
+}
+
+interface TutorApprovedEmailRequest extends BaseEmailRequest {
+  type: "tutor_approved";
+  to: string;
+  tutorName: string;
+}
+
 type EmailRequest =
   | WelcomeEmailRequest
   | SessionBookingEmailRequest
@@ -114,7 +136,10 @@ type EmailRequest =
   | ReviewThankYouEmailRequest
   | TutorSessionBookingEmailRequest
   | TutorSessionCancelEmailRequest
-  | TutorReviewReceivedEmailRequest;
+  | TutorReviewReceivedEmailRequest
+  | AdminNewStudentEmailRequest
+  | AdminNewTutorEmailRequest
+  | TutorApprovedEmailRequest;
 
 function renderLayout(title: string, body: string): string {
   return `
@@ -351,6 +376,83 @@ async function sendTutorReviewReceivedEmail(payload: TutorReviewReceivedEmailReq
   });
 }
 
+async function sendAdminNewStudentEmail(payload: AdminNewStudentEmailRequest) {
+  const html = renderLayout(
+    "New Student Registration",
+    `
+    <p>Hello Admin,</p>
+    <p>A new student has registered on TutorsPool.</p>
+    <div style="background:#f3f4f6;padding:16px;border-radius:8px;margin:16px 0;">
+      <p style="margin:0;"><strong>Name:</strong> ${payload.studentName}</p>
+      <p style="margin:8px 0 0;"><strong>Email:</strong> ${payload.studentEmail}</p>
+    </div>
+    <p>The student can now browse tutors and book sessions.</p>
+    <p style="margin-top:16px;">
+      <a href="https://tutorspool.com/admin/users" style="display:inline-block;padding:10px 18px;border-radius:999px;background:linear-gradient(135deg,#4f46e5,#6366f1);color:#f9fafb;text-decoration:none;font-weight:600;font-size:13px;">View All Users</a>
+    </p>
+  `,
+  );
+
+  return resend.emails.send({
+    from: FROM_ADDRESS,
+    to: ADMIN_EMAILS,
+    subject: `New Student Registration: ${payload.studentName}`,
+    html,
+  });
+}
+
+async function sendAdminNewTutorEmail(payload: AdminNewTutorEmailRequest) {
+  const html = renderLayout(
+    "New Tutor Registration - Approval Required",
+    `
+    <p>Hello Admin,</p>
+    <p>A new tutor has registered on TutorsPool and is <strong>awaiting approval</strong>.</p>
+    <div style="background:#fef3c7;padding:16px;border-radius:8px;margin:16px 0;border-left:4px solid #f59e0b;">
+      <p style="margin:0;"><strong>Name:</strong> ${payload.tutorName}</p>
+      <p style="margin:8px 0 0;"><strong>Email:</strong> ${payload.tutorEmail}</p>
+    </div>
+    <p>Please review their profile and approve or reject their application.</p>
+    <p style="margin-top:16px;">
+      <a href="https://tutorspool.com/admin/users" style="display:inline-block;padding:10px 18px;border-radius:999px;background:linear-gradient(135deg,#f59e0b,#eab308);color:#1f2937;text-decoration:none;font-weight:600;font-size:13px;">Review Pending Tutors</a>
+    </p>
+  `,
+  );
+
+  return resend.emails.send({
+    from: FROM_ADDRESS,
+    to: ADMIN_EMAILS,
+    subject: `⚠️ New Tutor Pending Approval: ${payload.tutorName}`,
+    html,
+  });
+}
+
+async function sendTutorApprovedEmail(payload: TutorApprovedEmailRequest) {
+  const html = renderLayout(
+    "Congratulations! You're Approved! 🎉",
+    `
+    <p>Hi ${payload.tutorName},</p>
+    <p>Great news! Your tutor application has been <strong>approved</strong> by our admin team.</p>
+    <p>You can now:</p>
+    <ul style="padding-left:20px;">
+      <li>Set up your availability schedule</li>
+      <li>Receive session bookings from students</li>
+      <li>Start conducting tutoring sessions</li>
+    </ul>
+    <p style="margin-top:16px;">
+      <a href="https://tutorspool.com/tutor/dashboard" style="display:inline-block;padding:10px 18px;border-radius:999px;background:linear-gradient(135deg,#10b981,#059669);color:#f9fafb;text-decoration:none;font-weight:600;font-size:13px;">Go to Your Dashboard</a>
+    </p>
+    <p style="margin-top:16px;">Welcome to the TutorsPool community!</p>
+  `,
+  );
+
+  return resend.emails.send({
+    from: FROM_ADDRESS,
+    to: [payload.to],
+    subject: "🎉 Your TutorsPool Tutor Application is Approved!",
+    html,
+  });
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -399,6 +501,15 @@ serve(async (req) => {
         break;
       case "tutor_review_received":
         result = await sendTutorReviewReceivedEmail(payload);
+        break;
+      case "admin_new_student":
+        result = await sendAdminNewStudentEmail(payload);
+        break;
+      case "admin_new_tutor":
+        result = await sendAdminNewTutorEmail(payload);
+        break;
+      case "tutor_approved":
+        result = await sendTutorApprovedEmail(payload);
         break;
       default:
         return new Response(

@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { useAuth, UserRole } from "@/contexts/AuthContext";
 import { z } from "zod";
+import { supabase } from "@/integrations/supabase/client";
 
 // Admin security key - in production, this should be stored securely and rotated
 const ADMIN_SECURITY_KEY = "TutorsPool2024Admin!";
@@ -96,9 +97,21 @@ export default function Register() {
 
     try {
       await signUp(email, password, name, role);
+      
+      // Send admin notification for new registrations (fire and forget)
+      if (role === "student" || role === "tutor") {
+        supabase.functions.invoke("send-email", {
+          body: role === "student" 
+            ? { type: "admin_new_student", studentName: name, studentEmail: email }
+            : { type: "admin_new_tutor", tutorName: name, tutorEmail: email }
+        }).catch(console.error); // Don't block registration if email fails
+      }
+      
       toast({
         title: "Account created!",
-        description: "Welcome to TutorsPool. Redirecting to your dashboard...",
+        description: role === "tutor" 
+          ? "Welcome to TutorsPool! Your profile is pending admin approval."
+          : "Welcome to TutorsPool. Redirecting to your dashboard...",
       });
       navigate(`/${role}/dashboard`);
     } catch (error: any) {
