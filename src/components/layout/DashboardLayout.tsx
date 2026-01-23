@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { GraduationCap, LogOut, User } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { NotificationBell } from "@/components/admin/NotificationCenter";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -51,6 +52,9 @@ export default function DashboardLayout({ children, role }: DashboardLayoutProps
             <span className="truncate text-sm text-muted-foreground max-w-full sm:max-w-xs text-right">
               Welcome, {userProfile?.fullName || getRoleLabel()}
             </span>
+            {role === 'admin' && (
+              <NotificationBell />
+            )}
             {(role === 'student' || role === 'tutor') && (
               <Button variant="ghost" size="sm" asChild>
                 <Link to={`/${role}/profile`}>

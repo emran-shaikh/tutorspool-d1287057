@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Users, UserCheck, Video, TrendingUp, Download, Shield, BookOpen, FileText, Plus } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { getAllUsers, getAllTutors, getAllSessions } from "@/lib/firestore";
+import { NotificationCard } from "@/components/admin/NotificationCenter";
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({
@@ -104,6 +105,11 @@ export default function AdminDashboard() {
             </CardContent>
           </Card>
         ))}
+      </div>
+
+      {/* Notification Center */}
+      <div className="mb-6">
+        <NotificationCard />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
