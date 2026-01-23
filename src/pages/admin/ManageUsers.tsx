@@ -8,6 +8,7 @@ import { ArrowLeft, Users, UserCheck, Ban, CheckCircle, Eye, X } from "lucide-re
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { getAllUsers, getAllTutors, approveTutor, updateUserStatus, TutorProfile } from "@/lib/firestore";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Dialog,
   DialogContent,
@@ -47,9 +48,22 @@ export default function ManageUsers() {
   };
 
   const handleApprove = async (tutorId: string) => {
+    const tutor = tutors.find(t => t.uid === tutorId);
     try {
       await approveTutor(tutorId);
-      toast({ title: "Tutor approved!", description: "They can now accept students" });
+      
+      // Send approval notification to tutor
+      if (tutor?.email) {
+        supabase.functions.invoke("send-email", {
+          body: { 
+            type: "tutor_approved", 
+            to: tutor.email, 
+            tutorName: tutor.fullName 
+          }
+        }).catch(console.error);
+      }
+      
+      toast({ title: "Tutor approved!", description: "They can now accept students and have been notified via email." });
       fetchData();
     } catch (error) {
       toast({ title: "Error", description: "Failed to approve tutor", variant: "destructive" });
