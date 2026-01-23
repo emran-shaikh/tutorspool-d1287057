@@ -4,10 +4,17 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Users, UserCheck, Ban, CheckCircle, Eye } from "lucide-react";
+import { ArrowLeft, Users, UserCheck, Ban, CheckCircle, Eye, X } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { getAllUsers, getAllTutors, approveTutor, updateUserStatus, TutorProfile } from "@/lib/firestore";
 import { useToast } from "@/hooks/use-toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface UserData {
   uid: string;
@@ -23,6 +30,7 @@ export default function ManageUsers() {
   const [users, setUsers] = useState<UserData[]>([]);
   const [tutors, setTutors] = useState<TutorProfile[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedTutor, setSelectedTutor] = useState<TutorProfile | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -130,7 +138,7 @@ export default function ManageUsers() {
                           <Button size="sm" onClick={() => handleApprove(tutor.uid)}>
                             <CheckCircle className="h-4 w-4 mr-1" /> Approve
                           </Button>
-                          <Button size="sm" variant="outline">
+                          <Button size="sm" variant="outline" onClick={() => setSelectedTutor(tutor)}>
                             <Eye className="h-4 w-4 mr-1" /> Review
                           </Button>
                         </div>
@@ -217,6 +225,73 @@ export default function ManageUsers() {
           </TabsContent>
         </Tabs>
       )}
+
+      {/* Tutor Review Dialog */}
+      <Dialog open={!!selectedTutor} onOpenChange={(open) => !open && setSelectedTutor(null)}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Review Tutor Application</DialogTitle>
+            <DialogDescription>Review the tutor's profile before approving</DialogDescription>
+          </DialogHeader>
+          {selectedTutor && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">Full Name</p>
+                  <p className="font-medium">{selectedTutor.fullName}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Email</p>
+                  <p className="font-medium">{selectedTutor.email}</p>
+                </div>
+              </div>
+              
+              <div>
+                <p className="text-sm text-muted-foreground mb-2">Subjects</p>
+                <div className="flex flex-wrap gap-1">
+                  {selectedTutor.subjects?.map((subject) => (
+                    <Badge key={subject} variant="outline">{subject}</Badge>
+                  ))}
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">Experience</p>
+                  <p className="font-medium">{selectedTutor.experience || "Not specified"}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Hourly Rate</p>
+                  <p className="font-medium">${selectedTutor.hourlyRate || "Not set"}/hr</p>
+                </div>
+              </div>
+              
+              {selectedTutor.bio && (
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">Bio</p>
+                  <p className="text-sm">{selectedTutor.bio}</p>
+                </div>
+              )}
+              
+              
+              <div className="flex gap-2 pt-4 border-t">
+                <Button 
+                  className="flex-1" 
+                  onClick={() => {
+                    handleApprove(selectedTutor.uid);
+                    setSelectedTutor(null);
+                  }}
+                >
+                  <CheckCircle className="h-4 w-4 mr-1" /> Approve Tutor
+                </Button>
+                <Button variant="outline" onClick={() => setSelectedTutor(null)}>
+                  <X className="h-4 w-4 mr-1" /> Close
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 }
