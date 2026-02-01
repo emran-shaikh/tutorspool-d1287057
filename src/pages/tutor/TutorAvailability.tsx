@@ -89,7 +89,8 @@ export default function TutorAvailability() {
 
   return (
     <DashboardLayout role="tutor">
-      <div className="mb-6">
+      {/* Tutor Availability Header - Emerald/Green Theme */}
+      <div className="mb-6 p-6 rounded-xl bg-gradient-to-r from-emerald-600/15 via-green-500/15 to-teal-500/15 border-2 border-emerald-300/50 dark:border-emerald-700/50 shadow-lg shadow-emerald-500/5">
         <Link to="/tutor/dashboard" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-4">
           <ArrowLeft className="h-4 w-4 mr-1" /> Back to Dashboard
         </Link>
@@ -99,27 +100,29 @@ export default function TutorAvailability() {
 
       {loading ? (
         <div className="flex justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500"></div>
         </div>
       ) : error ? (
-        <Card>
+        <Card className="border-emerald-100 dark:border-emerald-900">
           <CardContent className="py-8 text-center space-y-3">
             <p className="text-muted-foreground">{error}</p>
-            <Button variant="outline" onClick={fetchAvailability}>Retry</Button>
+            <Button variant="outline" onClick={fetchAvailability} className="border-emerald-200 hover:bg-emerald-50 dark:border-emerald-800 dark:hover:bg-emerald-950">Retry</Button>
           </CardContent>
         </Card>
       ) : (
-        <Card>
+        <Card className="border-emerald-100 dark:border-emerald-900">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Clock className="h-5 w-5 text-primary" />
+              <div className="p-1.5 rounded-md bg-gradient-to-br from-emerald-500 to-green-500">
+                <Clock className="h-4 w-4 text-white" />
+              </div>
               Weekly Schedule
             </CardTitle>
             <CardDescription>Define when students can book sessions with you</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {slots.map((slot, index) => (
-              <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-4 sm:gap-5 p-4 bg-muted/50 rounded-lg">
+              <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-4 sm:gap-5 p-4 bg-emerald-50/50 dark:bg-emerald-950/30 rounded-lg border border-emerald-100 dark:border-emerald-900">
                 <div className="space-y-2">
                   <Label>Day</Label>
                   <Select
@@ -167,10 +170,10 @@ export default function TutorAvailability() {
             ))}
 
             <div className="flex flex-wrap gap-4 pt-4">
-              <Button variant="outline" onClick={addSlot}>
+              <Button variant="outline" onClick={addSlot} className="border-emerald-200 hover:bg-emerald-50 dark:border-emerald-800 dark:hover:bg-emerald-950">
                 <Plus className="h-4 w-4 mr-2" /> Add Time Slot
               </Button>
-              <Button onClick={handleSave} disabled={saving}>
+              <Button onClick={handleSave} disabled={saving} className="bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 shadow-lg shadow-emerald-500/25">
                 <Save className="h-4 w-4 mr-2" /> {saving ? "Saving..." : "Save Availability"}
               </Button>
             </div>

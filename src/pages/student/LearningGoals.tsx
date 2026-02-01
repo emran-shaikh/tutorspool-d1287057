@@ -102,87 +102,90 @@ export default function LearningGoals() {
 
   return (
     <DashboardLayout role="student">
-      <div className="mb-6 flex items-start justify-between">
-        <div>
-          <Link to="/student/dashboard" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-4">
-            <ArrowLeft className="h-4 w-4 mr-1" /> Back to Dashboard
-          </Link>
-          <h1 className="font-display text-3xl font-bold mb-2">Learning Goals</h1>
-          <p className="text-muted-foreground">Track your progress and achieve your learning objectives</p>
-        </div>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={() => handleOpenDialog()}>
-              <Plus className="h-4 w-4 mr-2" /> Add Goal
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <form onSubmit={handleSubmit}>
-              <DialogHeader>
-                <DialogTitle>{editingGoal ? "Edit Goal" : "Add New Goal"}</DialogTitle>
-                <DialogDescription>
-                  {editingGoal ? "Update your learning goal" : "Set a new learning objective to track"}
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4 py-4">
-                <div className="space-y-2">
-                  <Label htmlFor="title">Goal Title</Label>
-                  <Input
-                    id="title"
-                    placeholder="e.g., Master Calculus"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="subject">Subject</Label>
-                  <Input
-                    id="subject"
-                    placeholder="e.g., Mathematics"
-                    value={subject}
-                    onChange={(e) => setSubject(e.target.value)}
-                    required
-                  />
-                </div>
-                {editingGoal && (
+      {/* Student Learning Goals Header - Blue/Cyan Theme */}
+      <div className="mb-6 p-6 rounded-xl bg-gradient-to-r from-blue-600/15 via-cyan-500/15 to-sky-500/15 border-2 border-blue-300/50 dark:border-blue-700/50 shadow-lg shadow-blue-500/5">
+        <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
+          <div>
+            <Link to="/student/dashboard" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-4">
+              <ArrowLeft className="h-4 w-4 mr-1" /> Back to Dashboard
+            </Link>
+            <h1 className="font-display text-3xl font-bold mb-2">Learning Goals</h1>
+            <p className="text-muted-foreground">Track your progress and achieve your learning objectives</p>
+          </div>
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+              <Button onClick={() => handleOpenDialog()} className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 shadow-lg shadow-blue-500/25">
+                <Plus className="h-4 w-4 mr-2" /> Add Goal
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <form onSubmit={handleSubmit}>
+                <DialogHeader>
+                  <DialogTitle>{editingGoal ? "Edit Goal" : "Add New Goal"}</DialogTitle>
+                  <DialogDescription>
+                    {editingGoal ? "Update your learning goal" : "Set a new learning objective to track"}
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
                   <div className="space-y-2">
-                    <Label htmlFor="progress">Progress ({progress}%)</Label>
+                    <Label htmlFor="title">Goal Title</Label>
                     <Input
-                      id="progress"
-                      type="range"
-                      min="0"
-                      max="100"
-                      value={progress}
-                      onChange={(e) => setProgress(Number(e.target.value))}
-                      className="cursor-pointer"
+                      id="title"
+                      placeholder="e.g., Master Calculus"
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                      required
                     />
                   </div>
-                )}
-              </div>
-              <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button type="submit">
-                  {editingGoal ? "Update" : "Create"} Goal
-                </Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
+                  <div className="space-y-2">
+                    <Label htmlFor="subject">Subject</Label>
+                    <Input
+                      id="subject"
+                      placeholder="e.g., Mathematics"
+                      value={subject}
+                      onChange={(e) => setSubject(e.target.value)}
+                      required
+                    />
+                  </div>
+                  {editingGoal && (
+                    <div className="space-y-2">
+                      <Label htmlFor="progress">Progress ({progress}%)</Label>
+                      <Input
+                        id="progress"
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={progress}
+                        onChange={(e) => setProgress(Number(e.target.value))}
+                        className="cursor-pointer"
+                      />
+                    </div>
+                  )}
+                </div>
+                <DialogFooter>
+                  <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button type="submit">
+                    {editingGoal ? "Update" : "Create"} Goal
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       {loading ? (
         <div className="flex justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
         </div>
       ) : goals.length === 0 ? (
-        <Card>
+        <Card className="border-blue-100 dark:border-blue-900">
           <CardContent className="py-12 text-center">
-            <Target className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+            <Target className="h-12 w-12 mx-auto text-blue-400 mb-4" />
             <p className="text-muted-foreground mb-4">No learning goals yet</p>
-            <Button onClick={() => handleOpenDialog()}>
+            <Button onClick={() => handleOpenDialog()} className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 shadow-lg shadow-blue-500/25">
               <Plus className="h-4 w-4 mr-2" /> Create Your First Goal
             </Button>
           </CardContent>
@@ -190,7 +193,7 @@ export default function LearningGoals() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
           {goals.map((goal) => (
-            <Card key={goal.id} className="h-full">
+            <Card key={goal.id} className="h-full border-blue-100 dark:border-blue-900">
               <CardHeader className="pb-2">
                 <div className="flex items-start justify-between gap-2">
                   <div>

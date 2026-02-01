@@ -180,10 +180,12 @@ export default function BookSession() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6">
-        <Card className="lg:col-span-1">
+        <Card className="lg:col-span-1 border-blue-100 dark:border-blue-900 bg-gradient-to-br from-blue-50/50 to-cyan-50/50 dark:from-blue-950/30 dark:to-cyan-950/30">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <User className="h-5 w-5 text-primary" />
+              <div className="p-1.5 rounded-md bg-gradient-to-br from-blue-500 to-cyan-500">
+                <User className="h-4 w-4 text-white" />
+              </div>
               Tutor Info
             </CardTitle>
           </CardHeader>
@@ -193,19 +195,21 @@ export default function BookSession() {
             <p className="text-sm mb-4">{tutor.bio}</p>
             <div className="flex flex-wrap gap-1 mb-3">
               {tutor.subjects.map((subject) => (
-                <span key={subject} className="text-xs bg-muted px-2 py-1 rounded">
+                <span key={subject} className="text-xs bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 px-2 py-1 rounded">
                   {subject}
                 </span>
               ))}
             </div>
-            <p className="font-semibold text-primary">${tutor.hourlyRate}/hour</p>
+            <p className="font-semibold text-blue-600 dark:text-blue-400">${tutor.hourlyRate}/hour</p>
           </CardContent>
         </Card>
 
-        <Card className="lg:col-span-2">
+        <Card className="lg:col-span-2 border-blue-100 dark:border-blue-900">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-primary" />
+              <div className="p-1.5 rounded-md bg-gradient-to-br from-cyan-500 to-blue-500">
+                <Calendar className="h-4 w-4 text-white" />
+              </div>
               Schedule Session
             </CardTitle>
             <CardDescription>Choose your preferred date and time</CardDescription>
@@ -264,9 +268,9 @@ export default function BookSession() {
               </div>
 
               {availability.length > 0 && (
-                <div className="p-4 bg-muted/50 rounded-lg">
+                <div className="p-4 bg-blue-50/50 dark:bg-blue-950/30 rounded-lg border border-blue-100 dark:border-blue-900">
                   <p className="text-sm font-medium mb-2 flex items-center gap-2">
-                    <Clock className="h-4 w-4" /> Tutor's Availability
+                    <Clock className="h-4 w-4 text-blue-600 dark:text-blue-400" /> Tutor's Availability
                   </p>
                   <div className="text-sm text-muted-foreground space-y-1">
                     {availability.map((slot) => (
@@ -278,7 +282,7 @@ export default function BookSession() {
                 </div>
               )}
 
-              <Button type="submit" className="w-full" disabled={submitting}>
+              <Button type="submit" className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 shadow-lg shadow-blue-500/25" disabled={submitting}>
                 {submitting ? "Sending Request..." : "Request Session"}
               </Button>
             </form>
