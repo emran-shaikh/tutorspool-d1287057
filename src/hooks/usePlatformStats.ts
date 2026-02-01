@@ -38,10 +38,11 @@ export function usePlatformStats(): PlatformStats {
           tutor.subjects?.forEach((subject) => allSubjects.add(subject));
         });
 
-        // Calculate average rating
+        // Calculate average rating (ensure rating is parsed as number)
+        const validReviews = reviews.filter((r) => r.rating != null && !isNaN(Number(r.rating)));
         const avgRating =
-          reviews.length > 0
-            ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+          validReviews.length > 0
+            ? validReviews.reduce((sum, r) => sum + Number(r.rating), 0) / validReviews.length
             : 0;
 
         setStats({
