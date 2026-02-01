@@ -133,7 +133,8 @@ export default function EditStudentProfile() {
 
   return (
     <DashboardLayout role="student">
-      <div className="mb-6">
+      {/* Student Profile Header - Blue/Cyan Theme */}
+      <div className="mb-6 p-6 rounded-xl bg-gradient-to-r from-blue-600/15 via-cyan-500/15 to-sky-500/15 border-2 border-blue-300/50 dark:border-blue-700/50 shadow-lg shadow-blue-500/5">
         <Link to="/student/dashboard" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-4">
           <ArrowLeft className="h-4 w-4 mr-1" /> Back to Dashboard
         </Link>
@@ -143,14 +144,16 @@ export default function EditStudentProfile() {
 
       {loading ? (
         <div className="flex justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
         </div>
       ) : (
         <div className="grid lg:grid-cols-3 gap-6">
-          <Card className="lg:col-span-2">
+          <Card className="lg:col-span-2 border-blue-100 dark:border-blue-900">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5 text-primary" />
+                <div className="p-1.5 rounded-md bg-gradient-to-br from-blue-500 to-cyan-500">
+                  <User className="h-4 w-4 text-white" />
+                </div>
                 Profile Information
               </CardTitle>
               <CardDescription>All fields are optional</CardDescription>
@@ -242,30 +245,32 @@ export default function EditStudentProfile() {
                 </div>
               </div>
 
-              <Button onClick={handleSave} disabled={saving} className="w-full">
+              <Button onClick={handleSave} disabled={saving} className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 shadow-lg shadow-blue-500/25">
                 <Save className="h-4 w-4 mr-2" /> {saving ? "Saving..." : "Save Profile"}
               </Button>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-blue-100 dark:border-blue-900">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <GraduationCap className="h-5 w-5 text-primary" />
+                <div className="p-1.5 rounded-md bg-gradient-to-br from-cyan-500 to-blue-500">
+                  <GraduationCap className="h-4 w-4 text-white" />
+                </div>
                 Your Info
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="p-4 rounded-lg bg-muted/50">
+              <div className="p-4 rounded-lg bg-blue-50/50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900">
                 <p className="text-sm font-medium mb-1">Name</p>
                 <p className="text-sm text-muted-foreground">{userProfile?.fullName}</p>
               </div>
-              <div className="p-4 rounded-lg bg-muted/50">
+              <div className="p-4 rounded-lg bg-blue-50/50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900">
                 <p className="text-sm font-medium mb-1">Email</p>
                 <p className="text-sm text-muted-foreground">{userProfile?.email}</p>
               </div>
-              <div className="p-4 rounded-lg bg-primary/5 border border-primary/20">
-                <p className="text-sm font-medium mb-1 text-primary">Tip</p>
+              <div className="p-4 rounded-lg bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/50 dark:to-cyan-950/50 border border-blue-200 dark:border-blue-800">
+                <p className="text-sm font-medium mb-1 text-blue-600 dark:text-blue-400">Tip</p>
                 <p className="text-xs text-muted-foreground">
                   Complete your profile to get better tutor recommendations based on your goals.
                 </p>

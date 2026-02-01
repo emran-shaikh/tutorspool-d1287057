@@ -262,7 +262,8 @@ export default function TutorSessions() {
 
   return (
     <DashboardLayout role="tutor">
-      <div className="mb-6">
+      {/* Tutor Sessions Header - Emerald/Green Theme */}
+      <div className="mb-6 p-6 rounded-xl bg-gradient-to-r from-emerald-600/15 via-green-500/15 to-teal-500/15 border-2 border-emerald-300/50 dark:border-emerald-700/50 shadow-lg shadow-emerald-500/5">
         <Link to="/tutor/dashboard" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-4">
           <ArrowLeft className="h-4 w-4 mr-1" /> Back to Dashboard
         </Link>
@@ -272,13 +273,13 @@ export default function TutorSessions() {
 
       {loading ? (
         <div className="flex justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500"></div>
         </div>
       ) : error ? (
-        <Card>
+        <Card className="border-emerald-100 dark:border-emerald-900">
           <CardContent className="py-8 text-center space-y-3">
             <p className="text-muted-foreground">{error}</p>
-            <Button variant="outline" onClick={fetchSessions}>Retry</Button>
+            <Button variant="outline" onClick={fetchSessions} className="border-emerald-200 hover:bg-emerald-50 dark:border-emerald-800 dark:hover:bg-emerald-950">Retry</Button>
           </CardContent>
         </Card>
       ) : (
@@ -296,10 +297,12 @@ export default function TutorSessions() {
           </TabsList>
 
           <TabsContent value="pending">
-            <Card>
+            <Card className="border-emerald-100 dark:border-emerald-900">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Clock className="h-5 w-5 text-warning" />
+                  <div className="p-1.5 rounded-md bg-gradient-to-br from-amber-500 to-orange-500">
+                    <Clock className="h-4 w-4 text-white" />
+                  </div>
                   Pending Requests
                 </CardTitle>
                 <CardDescription>Review and respond to session requests</CardDescription>
@@ -319,10 +322,12 @@ export default function TutorSessions() {
           </TabsContent>
 
           <TabsContent value="upcoming">
-            <Card>
+            <Card className="border-emerald-100 dark:border-emerald-900">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Video className="h-5 w-5 text-primary" />
+                  <div className="p-1.5 rounded-md bg-gradient-to-br from-emerald-500 to-green-500">
+                    <Video className="h-4 w-4 text-white" />
+                  </div>
                   Upcoming Sessions
                 </CardTitle>
                 <CardDescription>Sessions ready to start</CardDescription>
@@ -342,10 +347,12 @@ export default function TutorSessions() {
           </TabsContent>
 
           <TabsContent value="past">
-            <Card>
+            <Card className="border-emerald-100 dark:border-emerald-900">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Calendar className="h-5 w-5 text-muted-foreground" />
+                  <div className="p-1.5 rounded-md bg-gradient-to-br from-teal-500 to-cyan-500">
+                    <Calendar className="h-4 w-4 text-white" />
+                  </div>
                   Past Sessions
                 </CardTitle>
                 <CardDescription>Your session history</CardDescription>

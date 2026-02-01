@@ -118,7 +118,8 @@ export default function MySessions() {
 
   return (
     <DashboardLayout role="student">
-      <div className="mb-6">
+      {/* Student My Sessions Header - Blue/Cyan Theme */}
+      <div className="mb-6 p-6 rounded-xl bg-gradient-to-r from-blue-600/15 via-cyan-500/15 to-sky-500/15 border-2 border-blue-300/50 dark:border-blue-700/50 shadow-lg shadow-blue-500/5">
         <Link to="/student/dashboard" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-4">
           <ArrowLeft className="h-4 w-4 mr-1" /> Back to Dashboard
         </Link>
@@ -128,13 +129,13 @@ export default function MySessions() {
 
       {loading ? (
         <div className="flex justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
         </div>
       ) : error ? (
-        <Card>
+        <Card className="border-blue-100 dark:border-blue-900">
           <CardContent className="py-8 text-center space-y-3">
             <p className="text-muted-foreground">{error}</p>
-            <Button variant="outline" onClick={fetchSessions}>Retry</Button>
+            <Button variant="outline" onClick={fetchSessions} className="border-blue-200 hover:bg-blue-50 dark:border-blue-800 dark:hover:bg-blue-950">Retry</Button>
           </CardContent>
         </Card>
       ) : (
@@ -152,10 +153,12 @@ export default function MySessions() {
           </TabsList>
 
           <TabsContent value="upcoming">
-            <Card>
+            <Card className="border-blue-100 dark:border-blue-900">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Video className="h-5 w-5 text-primary" />
+                  <div className="p-1.5 rounded-md bg-gradient-to-br from-blue-500 to-cyan-500">
+                    <Video className="h-4 w-4 text-white" />
+                  </div>
                   Upcoming Sessions
                 </CardTitle>
                 <CardDescription>Sessions ready to join</CardDescription>
@@ -177,10 +180,12 @@ export default function MySessions() {
           </TabsContent>
 
           <TabsContent value="pending">
-            <Card>
+            <Card className="border-blue-100 dark:border-blue-900">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Clock className="h-5 w-5 text-warning" />
+                  <div className="p-1.5 rounded-md bg-gradient-to-br from-cyan-500 to-sky-500">
+                    <Clock className="h-4 w-4 text-white" />
+                  </div>
                   Pending Requests
                 </CardTitle>
                 <CardDescription>Waiting for tutor confirmation</CardDescription>
@@ -200,10 +205,12 @@ export default function MySessions() {
           </TabsContent>
 
           <TabsContent value="past">
-            <Card>
+            <Card className="border-blue-100 dark:border-blue-900">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Calendar className="h-5 w-5 text-muted-foreground" />
+                  <div className="p-1.5 rounded-md bg-gradient-to-br from-sky-500 to-blue-500">
+                    <Calendar className="h-4 w-4 text-white" />
+                  </div>
                   Past Sessions
                 </CardTitle>
                 <CardDescription>Your session history</CardDescription>

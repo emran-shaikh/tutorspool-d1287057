@@ -74,7 +74,8 @@ export default function BrowseTutors() {
 
   return (
     <DashboardLayout role="student">
-      <div className="mb-6">
+      {/* Student Browse Tutors Header - Blue/Cyan Theme */}
+      <div className="mb-6 p-6 rounded-xl bg-gradient-to-r from-blue-600/15 via-cyan-500/15 to-sky-500/15 border-2 border-blue-300/50 dark:border-blue-700/50 shadow-lg shadow-blue-500/5">
         <Link
           to="/student/dashboard"
           className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-4"
@@ -151,7 +152,7 @@ export default function BrowseTutors() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
           {sortedTutors.map((tutor) => (
-            <Card key={tutor.uid} className="h-full hover:shadow-elevated transition-shadow">
+            <Card key={tutor.uid} className="h-full hover:shadow-elevated transition-shadow border-blue-100 dark:border-blue-900">
               <CardHeader>
                 <div className="flex items-start justify-between gap-3">
                   <div>
@@ -161,11 +162,11 @@ export default function BrowseTutors() {
                     </CardDescription>
                   </div>
                   {tutor.reviewCount > 0 ? (
-                    <Badge variant="secondary" className="flex items-center gap-1">
+                    <Badge className="flex items-center gap-1 bg-gradient-to-r from-blue-500 to-cyan-500 text-white border-0">
                       <Star className="h-3 w-3 fill-current" /> {tutor.avgRating.toFixed(1)}
                     </Badge>
                   ) : (
-                    <Badge variant="outline" className="text-xs text-muted-foreground">
+                    <Badge variant="outline" className="text-xs text-muted-foreground border-blue-200 dark:border-blue-800">
                       New tutor
                     </Badge>
                   )}
@@ -174,18 +175,18 @@ export default function BrowseTutors() {
               <CardContent>
                 <div className="flex flex-wrap gap-1 mb-3">
                   {tutor.subjects.map((subject) => (
-                    <Badge key={subject} variant="outline" className="text-xs">
+                    <Badge key={subject} variant="outline" className="text-xs border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300">
                       {subject}
                     </Badge>
                   ))}
                 </div>
                 <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{tutor.bio}</p>
                 <div className="flex items-center justify-between">
-                  <span className="flex items-center text-sm font-medium">
+                  <span className="flex items-center text-sm font-medium text-blue-600 dark:text-blue-400">
                     <DollarSign className="h-4 w-4" />
                     {tutor.hourlyRate}/hr
                   </span>
-                  <Button size="sm" asChild>
+                  <Button size="sm" className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 shadow-lg shadow-blue-500/25" asChild>
                     <Link to={`/student/book/${tutor.uid}`}>Book Session</Link>
                   </Button>
                 </div>

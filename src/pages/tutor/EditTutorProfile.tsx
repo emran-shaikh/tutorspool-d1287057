@@ -139,7 +139,8 @@ export default function EditTutorProfile() {
 
   return (
     <DashboardLayout role="tutor">
-      <div className="mb-6">
+      {/* Tutor Profile Header - Emerald/Green Theme */}
+      <div className="mb-6 p-6 rounded-xl bg-gradient-to-r from-emerald-600/15 via-green-500/15 to-teal-500/15 border-2 border-emerald-300/50 dark:border-emerald-700/50 shadow-lg shadow-emerald-500/5">
         <Link to="/tutor/dashboard" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-4">
           <ArrowLeft className="h-4 w-4 mr-1" /> Back to Dashboard
         </Link>
@@ -149,14 +150,16 @@ export default function EditTutorProfile() {
 
       {loading ? (
         <div className="flex justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500"></div>
         </div>
       ) : (
         <div className="grid lg:grid-cols-3 gap-6">
-          <Card className="lg:col-span-2">
+          <Card className="lg:col-span-2 border-emerald-100 dark:border-emerald-900">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5 text-primary" />
+                <div className="p-1.5 rounded-md bg-gradient-to-br from-emerald-500 to-green-500">
+                  <User className="h-4 w-4 text-white" />
+                </div>
                 Profile Information
               </CardTitle>
               <CardDescription>This information will be visible to students</CardDescription>
@@ -232,7 +235,9 @@ export default function EditTutorProfile() {
               {/* Optional Fields Section */}
               <div className="pt-4 border-t border-border">
                 <h3 className="font-medium mb-4 flex items-center gap-2">
-                  <GraduationCap className="h-4 w-4 text-primary" />
+                  <div className="p-1 rounded-md bg-gradient-to-br from-green-500 to-teal-500">
+                    <GraduationCap className="h-4 w-4 text-white" />
+                  </div>
                   Additional Information (Optional)
                 </h3>
                 
@@ -291,20 +296,20 @@ export default function EditTutorProfile() {
                 </div>
               </div>
 
-              <Button onClick={handleSave} disabled={saving} className="w-full">
+              <Button onClick={handleSave} disabled={saving} className="w-full bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 shadow-lg shadow-emerald-500/25">
                 <Save className="h-4 w-4 mr-2" /> {saving ? "Saving..." : "Save Profile"}
               </Button>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-emerald-100 dark:border-emerald-900">
             <CardHeader>
               <CardTitle>Profile Status</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="p-4 rounded-lg bg-muted/50">
+              <div className="p-4 rounded-lg bg-emerald-50/50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900">
                 <p className="text-sm font-medium mb-1">Approval Status</p>
-                <Badge variant={profile?.isApproved ? "default" : "secondary"}>
+                <Badge variant={profile?.isApproved ? "default" : "secondary"} className={profile?.isApproved ? "bg-gradient-to-r from-emerald-500 to-green-500 text-white border-0" : ""}>
                   {profile?.isApproved ? "Approved" : "Pending Approval"}
                 </Badge>
                 {!profile?.isApproved && (
@@ -313,11 +318,11 @@ export default function EditTutorProfile() {
                   </p>
                 )}
               </div>
-              <div className="p-4 rounded-lg bg-muted/50">
+              <div className="p-4 rounded-lg bg-emerald-50/50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900">
                 <p className="text-sm font-medium mb-1">Display Name</p>
                 <p className="text-sm text-muted-foreground">{userProfile?.fullName}</p>
               </div>
-              <div className="p-4 rounded-lg bg-muted/50">
+              <div className="p-4 rounded-lg bg-emerald-50/50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900">
                 <p className="text-sm font-medium mb-1">Email</p>
                 <p className="text-sm text-muted-foreground">{userProfile?.email}</p>
               </div>
