@@ -87,6 +87,10 @@ export function HeroSection() {
                 src={heroImage}
                 alt="Students learning with tutor"
                 className="w-full h-auto aspect-[4/3] object-cover"
+                width={800}
+                height={600}
+                fetchPriority="high"
+                decoding="async"
               />
 
               {/* Floating Cards */}
