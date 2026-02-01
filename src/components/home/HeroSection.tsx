@@ -1,17 +1,20 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Users, Clock, TrendingUp, Star, Radio } from "lucide-react";
+import { ArrowRight, Users, Clock, TrendingUp, Star, Radio, BookOpen, Loader2 } from "lucide-react";
 import heroImage from "@/assets/hero-tutoring.jpg";
-
-const stats = [
-  { icon: Users, label: "Expert Tutors" },
-  { icon: Clock, label: "12/7 Available" },
-  { icon: TrendingUp, label: "92% Success Rate" },
-];
-
-const avatars = ["S1", "S2", "S3", "S4", "S5"];
+import { usePlatformStats } from "@/hooks/usePlatformStats";
 
 export function HeroSection() {
+  const { tutorCount, studentCount, subjectCount, avgRating, loading } = usePlatformStats();
+
+  const stats = [
+    { icon: Users, label: `${tutorCount}+ Expert Tutors` },
+    { icon: Clock, label: "12/7 Available" },
+    { icon: TrendingUp, label: "92% Success Rate" },
+  ];
+
+  const avatars = ["S1", "S2", "S3", "S4", "S5"];
+
   return (
     <section className="relative overflow-hidden gradient-hero">
       <div className="container py-12 lg:py-20">
@@ -21,7 +24,9 @@ export function HeroSection() {
             {/* Trust Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-border bg-background shadow-sm animate-fade-in">
               <span className="flex h-2 w-2 rounded-full bg-success animate-pulse" />
-              <span className="text-sm font-medium">Trusted by 250+ students worldwide</span>
+              <span className="text-sm font-medium">
+                Trusted by {loading ? "..." : `${studentCount}+`} students worldwide
+              </span>
             </div>
 
             {/* Heading */}
@@ -107,7 +112,9 @@ export function HeroSection() {
               <div className="absolute bottom-4 left-4 bg-background rounded-lg px-3 py-2 shadow-card">
                 <div className="flex items-center gap-2">
                   <Star className="h-4 w-4 text-warning fill-warning" />
-                  <span className="text-sm font-semibold">4.8/5 Rating</span>
+                  <span className="text-sm font-semibold">
+                    {loading ? "..." : `${avgRating}/5`} Rating
+                  </span>
                 </div>
               </div>
 
@@ -126,9 +133,9 @@ export function HeroSection() {
         <div className="mt-16 pt-12 border-t border-border">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {[
-              { value: "250+", label: "Happy Students" },
-              { value: "35+", label: "Expert Tutors" },
-              { value: "15+", label: "Subjects" },
+              { value: loading ? "..." : `${studentCount}+`, label: "Happy Students" },
+              { value: loading ? "..." : `${tutorCount}+`, label: "Expert Tutors" },
+              { value: loading ? "..." : `${subjectCount}+`, label: "Subjects" },
               { value: "92%", label: "Success Rate" },
             ].map((stat, i) => (
               <div

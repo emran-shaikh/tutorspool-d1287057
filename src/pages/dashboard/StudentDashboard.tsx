@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Target, Calendar, TrendingUp, Clock, ArrowRight, Brain, Video, Users, Sparkles, Loader2 } from "lucide-react";
+import { Target, Calendar, TrendingUp, Clock, ArrowRight, Brain, Video, Users, Sparkles, Loader2, BookOpen, GraduationCap } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { getStudentSessions, getStudentGoals, Session, LearningGoal } from "@/lib/firestore";
@@ -134,7 +134,7 @@ export default function StudentDashboard() {
     return (
       <DashboardLayout role="student">
         <div className="flex justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
         </div>
       </DashboardLayout>
     );
@@ -143,10 +143,10 @@ export default function StudentDashboard() {
   if (error) {
     return (
       <DashboardLayout role="student">
-        <Card>
+        <Card className="border-blue-200 dark:border-blue-800">
           <CardContent className="py-8 text-center space-y-3">
             <p className="text-muted-foreground">{error}</p>
-            <Button variant="outline" onClick={fetchData}>Retry</Button>
+            <Button variant="outline" onClick={fetchData} className="border-blue-300 hover:bg-blue-50 dark:hover:bg-blue-950">Retry</Button>
           </CardContent>
         </Card>
       </DashboardLayout>
@@ -155,32 +155,37 @@ export default function StudentDashboard() {
 
   return (
     <DashboardLayout role="student">
-      {/* Student Dashboard Header */}
-      <div className="mb-8 p-6 rounded-xl bg-gradient-to-r from-blue-500/10 via-cyan-500/10 to-teal-500/10 border border-blue-200/50 dark:border-blue-800/50">
+      {/* Student Dashboard Header - Blue Theme */}
+      <div className="mb-8 p-6 rounded-xl bg-gradient-to-r from-blue-600/15 via-cyan-500/15 to-sky-500/15 border-2 border-blue-300/50 dark:border-blue-700/50 shadow-lg shadow-blue-500/5">
         <div className="flex items-center gap-3 mb-2">
-          <div className="p-2 rounded-lg bg-blue-500/20">
-            <Target className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+          <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 shadow-lg shadow-blue-500/30">
+            <BookOpen className="h-7 w-7 text-white" />
           </div>
-          <h1 className="font-display text-3xl font-bold">Welcome back, {userProfile?.fullName?.split(' ')[0] || 'Student'}!</h1>
+          <div>
+            <span className="text-xs font-semibold uppercase tracking-wider text-blue-600 dark:text-blue-400">Student Portal</span>
+            <h1 className="font-display text-3xl font-bold">Welcome back, {userProfile?.fullName?.split(' ')[0] || 'Student'}!</h1>
+          </div>
         </div>
-        <p className="text-muted-foreground ml-12">Track your progress and continue your learning journey.</p>
+        <p className="text-muted-foreground ml-14">Track your progress and continue your learning journey.</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 mb-6 sm:mb-8">
         {[
-          { label: "Sessions Completed", value: completedSessions.toString(), icon: Video, color: "text-primary" },
-          { label: "Learning Goals", value: goals.length.toString(), icon: Target, color: "text-success" },
-          { label: "Hours Learned", value: totalHours.toString(), icon: Clock, color: "text-warning" },
-          { label: "Avg Goal Progress", value: `${avgGoalProgress}%`, icon: TrendingUp, color: "text-primary" },
+          { label: "Sessions Completed", value: completedSessions.toString(), icon: Video, color: "from-blue-500 to-cyan-500", bgColor: "bg-blue-50 dark:bg-blue-950/50", textColor: "text-blue-600 dark:text-blue-400" },
+          { label: "Learning Goals", value: goals.length.toString(), icon: Target, color: "from-cyan-500 to-teal-500", bgColor: "bg-cyan-50 dark:bg-cyan-950/50", textColor: "text-cyan-600 dark:text-cyan-400" },
+          { label: "Hours Learned", value: totalHours.toString(), icon: Clock, color: "from-sky-500 to-blue-500", bgColor: "bg-sky-50 dark:bg-sky-950/50", textColor: "text-sky-600 dark:text-sky-400" },
+          { label: "Avg Goal Progress", value: `${avgGoalProgress}%`, icon: TrendingUp, color: "from-indigo-500 to-blue-500", bgColor: "bg-indigo-50 dark:bg-indigo-950/50", textColor: "text-indigo-600 dark:text-indigo-400" },
         ].map((stat) => (
-          <Card key={stat.label} className="h-full">
+          <Card key={stat.label} className={`h-full border-blue-100 dark:border-blue-900 ${stat.bgColor}`}>
             <CardContent className="pt-4 sm:pt-6">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <p className="text-xl sm:text-2xl font-bold">{stat.value}</p>
                   <p className="text-xs sm:text-sm text-muted-foreground">{stat.label}</p>
                 </div>
-                <stat.icon className={`h-6 w-6 sm:h-8 sm:w-8 ${stat.color}`} />
+                <div className={`p-2 rounded-lg bg-gradient-to-br ${stat.color}`}>
+                  <stat.icon className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -188,10 +193,12 @@ export default function StudentDashboard() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
-        <Card className="md:col-span-2">
+        <Card className="md:col-span-2 border-blue-100 dark:border-blue-900">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-primary" />
+              <div className="p-1.5 rounded-md bg-gradient-to-br from-blue-500 to-cyan-500">
+                <Calendar className="h-4 w-4 text-white" />
+              </div>
               My Sessions
             </CardTitle>
             <CardDescription>Your upcoming tutoring sessions</CardDescription>
@@ -202,7 +209,7 @@ export default function StudentDashboard() {
             ) : (
               <div className="space-y-3">
                 {upcomingSessions.slice(0, 3).map((session) => (
-                  <div key={session.id} className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                  <div key={session.id} className="flex items-center justify-between p-3 bg-blue-50/50 dark:bg-blue-950/30 rounded-lg border border-blue-100 dark:border-blue-900">
                     <div>
                       <p className="font-medium">{session.subject}</p>
                       <p className="text-sm text-muted-foreground">with {session.tutorName}</p>
@@ -215,16 +222,18 @@ export default function StudentDashboard() {
                 ))}
               </div>
             )}
-            <Button variant="outline" className="w-full mt-4" asChild>
+            <Button variant="outline" className="w-full mt-4 border-blue-200 hover:bg-blue-50 dark:border-blue-800 dark:hover:bg-blue-950" asChild>
               <Link to="/student/sessions">View All Sessions</Link>
             </Button>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-blue-100 dark:border-blue-900">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Brain className="h-5 w-5 text-primary" />
+              <div className="p-1.5 rounded-md bg-gradient-to-br from-purple-500 to-pink-500">
+                <Brain className="h-4 w-4 text-white" />
+              </div>
               <Sparkles className="h-4 w-4 text-yellow-500" />
               AI Career Insights
             </CardTitle>
@@ -233,7 +242,7 @@ export default function StudentDashboard() {
           <CardContent>
             {aiLoading ? (
               <div className="flex items-center justify-center py-4">
-                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
               </div>
             ) : aiSuggestions.length === 0 ? (
               <p className="text-sm text-muted-foreground mb-4">
@@ -242,10 +251,10 @@ export default function StudentDashboard() {
             ) : (
               <div className="space-y-3">
                 {aiSuggestions.map((suggestion, idx) => (
-                  <div key={idx} className="p-3 bg-muted rounded-lg">
+                  <div key={idx} className="p-3 bg-blue-50/50 dark:bg-blue-950/30 rounded-lg border border-blue-100 dark:border-blue-900">
                     <div className="flex items-center justify-between mb-1">
                       <p className="font-medium text-sm">{suggestion.career}</p>
-                      <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                      <span className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded-full">
                         {suggestion.matchScore}% match
                       </span>
                     </div>
@@ -257,10 +266,12 @@ export default function StudentDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="md:col-span-2">
+        <Card className="md:col-span-2 border-blue-100 dark:border-blue-900">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Target className="h-5 w-5 text-primary" />
+              <div className="p-1.5 rounded-md bg-gradient-to-br from-cyan-500 to-teal-500">
+                <Target className="h-4 w-4 text-white" />
+              </div>
               Learning Goals
             </CardTitle>
             <CardDescription>Track your progress</CardDescription>
@@ -271,41 +282,43 @@ export default function StudentDashboard() {
             ) : (
               <div className="space-y-3">
                 {goals.slice(0, 3).map((goal) => (
-                  <div key={goal.id} className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                  <div key={goal.id} className="flex items-center justify-between p-3 bg-blue-50/50 dark:bg-blue-950/30 rounded-lg border border-blue-100 dark:border-blue-900">
                     <div>
                       <p className="font-medium">{goal.title}</p>
                       <p className="text-sm text-muted-foreground">{goal.subject}</p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-24 bg-background rounded-full h-2">
+                      <div className="w-24 bg-blue-100 dark:bg-blue-900 rounded-full h-2">
                         <div 
-                          className="bg-primary h-2 rounded-full transition-all" 
+                          className="bg-gradient-to-r from-blue-500 to-cyan-500 h-2 rounded-full transition-all" 
                           style={{ width: `${goal.progress}%` }}
                         />
                       </div>
-                      <span className="text-sm font-medium">{goal.progress}%</span>
+                      <span className="text-sm font-medium text-blue-600 dark:text-blue-400">{goal.progress}%</span>
                     </div>
                   </div>
                 ))}
               </div>
             )}
-            <Button variant="outline" className="w-full mt-4" asChild>
+            <Button variant="outline" className="w-full mt-4 border-blue-200 hover:bg-blue-50 dark:border-blue-800 dark:hover:bg-blue-950" asChild>
               <Link to="/student/goals">Manage Goals</Link>
             </Button>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-blue-100 dark:border-blue-900 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/50 dark:to-cyan-950/50">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Users className="h-5 w-5 text-primary" />
+              <div className="p-1.5 rounded-md bg-gradient-to-br from-blue-500 to-indigo-500">
+                <Users className="h-4 w-4 text-white" />
+              </div>
               Find Tutors
             </CardTitle>
             <CardDescription>Book your next session</CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground mb-4">Browse expert tutors and book a session.</p>
-            <Button className="w-full" asChild>
+            <Button className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 shadow-lg shadow-blue-500/25" asChild>
               <Link to="/student/tutors">Browse Tutors <ArrowRight className="h-4 w-4 ml-2" /></Link>
             </Button>
           </CardContent>
