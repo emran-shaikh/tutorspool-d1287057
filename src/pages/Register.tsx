@@ -3,13 +3,15 @@ import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { GraduationCap, Mail, Lock, User, Eye, EyeOff, Users, BookOpen, Shield, Key } from "lucide-react";
+import { Mail, Lock, User, Eye, EyeOff, Users, BookOpen, Shield, Key } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { useAuth, UserRole } from "@/contexts/AuthContext";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { createAdminNotification } from "@/lib/firestore";
+import { signOut } from "firebase/auth";
+import { auth } from "@/lib/firebase";
 
 // Admin security key - in production, this should be stored securely and rotated
 const ADMIN_SECURITY_KEY = "TutorsPool2024Admin!";
@@ -117,12 +119,14 @@ export default function Register() {
         }).catch(console.error);
       }
       
+      // Sign out the user after registration - they must verify email first
+      await signOut(auth);
+      
       toast({
         title: "Verification email sent!",
-        description: "Please check your email to verify your account before signing in.",
+        description: "Please check your email and verify your account before signing in.",
       });
       
-      // Sign out after registration so they must verify first
       navigate('/login');
     } catch (error: any) {
       let errorMessage = "Failed to create account. Please try again.";
