@@ -1,78 +1,71 @@
+import { useEffect, useState } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Star, Quote, Users, Award, ThumbsUp } from "lucide-react";
-
-const reviews = [
-  {
-    id: 1,
-    studentName: "Sarah Johnson",
-    tutorName: "Dr. Michael Chen",
-    subject: "Calculus",
-    rating: 5,
-    review: "Dr. Chen is an incredible tutor! His patient explanation of complex calculus concepts helped me go from struggling to excelling. I went from a C to an A in just one semester.",
-    date: "2 weeks ago"
-  },
-  {
-    id: 2,
-    studentName: "James Wilson",
-    tutorName: "Prof. Emily Parker",
-    subject: "Physics",
-    rating: 5,
-    review: "Professor Parker made physics fun and understandable. Her real-world examples and interactive sessions kept me engaged throughout. Highly recommend!",
-    date: "1 month ago"
-  },
-  {
-    id: 3,
-    studentName: "Maria Garcia",
-    tutorName: "Alex Thompson",
-    subject: "Python Programming",
-    rating: 5,
-    review: "Alex is a fantastic programming tutor. He helped me understand algorithms and data structures in a way that finally clicked. Now I'm confident in my coding skills.",
-    date: "3 weeks ago"
-  },
-  {
-    id: 4,
-    studentName: "David Kim",
-    tutorName: "Sarah Mitchell",
-    subject: "Spanish",
-    rating: 5,
-    review: "Sarah's immersive teaching style made learning Spanish enjoyable. Her conversational approach helped me gain confidence quickly. I can now hold conversations fluently!",
-    date: "1 month ago"
-  },
-  {
-    id: 5,
-    studentName: "Emma Thompson",
-    tutorName: "Dr. Robert Lee",
-    subject: "Chemistry",
-    rating: 4,
-    review: "Dr. Lee explains chemistry concepts clearly and provides excellent exam preparation strategies. My grades improved significantly after just a few sessions.",
-    date: "2 months ago"
-  },
-  {
-    id: 6,
-    studentName: "Ryan Brown",
-    tutorName: "Jessica Wang",
-    subject: "SAT Prep",
-    rating: 5,
-    review: "Jessica's SAT prep sessions were incredibly helpful. Her test-taking strategies and practice methods helped me improve my score by 200 points!",
-    date: "1 month ago"
-  }
-];
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Star, Quote, Users, Award, ThumbsUp, Loader2 } from "lucide-react";
+import { getAllReviews, Review, getTutorProfile } from "@/lib/firestore";
 
 const stats = [
-  { label: "Happy Students", value: "5,000+", icon: Users },
-  { label: "5-Star Reviews", value: "2,500+", icon: Star },
-  { label: "Expert Tutors", value: "200+", icon: Award },
-  { label: "Satisfaction Rate", value: "98%", icon: ThumbsUp }
+  { label: "Happy Students", value: "250+", icon: Users },
+  { label: "5-Star Reviews", value: "100+", icon: Star },
+  { label: "Expert Tutors", value: "35+", icon: Award },
+  { label: "Satisfaction Rate", value: "92%", icon: ThumbsUp }
 ];
 
 export default function Reviews() {
+  const [reviews, setReviews] = useState<(Review & { tutorPhoto?: string })[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchReviews();
+  }, []);
+
+  const fetchReviews = async () => {
+    try {
+      const reviewsData = await getAllReviews();
+      
+      // Fetch tutor photos for each review
+      const reviewsWithPhotos = await Promise.all(
+        reviewsData.map(async (review) => {
+          const tutorProfile = await getTutorProfile(review.tutorId);
+          return {
+            ...review,
+            tutorPhoto: tutorProfile?.photoURL
+          };
+        })
+      );
+      
+      setReviews(reviewsWithPhotos);
+    } catch (error) {
+      console.error("Error fetching reviews:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) return "Today";
+    if (diffDays === 1) return "Yesterday";
+    if (diffDays < 7) return `${diffDays} days ago`;
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)} week${Math.floor(diffDays / 7) > 1 ? 's' : ''} ago`;
+    if (diffDays < 365) return `${Math.floor(diffDays / 30)} month${Math.floor(diffDays / 30) > 1 ? 's' : ''} ago`;
+    return `${Math.floor(diffDays / 365)} year${Math.floor(diffDays / 365) > 1 ? 's' : ''} ago`;
+  };
+
+  const averageRating = reviews.length > 0 
+    ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
+    : "0.0";
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -83,7 +76,7 @@ export default function Reviews() {
           <div className="container text-center">
             <Badge variant="outline" className="mb-4">
               <Star className="h-3 w-3 mr-1 fill-warning text-warning" />
-              4.9 Average Rating
+              {reviews.length > 0 ? `${averageRating} Average Rating` : "Student Reviews"}
             </Badge>
             <h1 className="font-display text-4xl md:text-5xl font-bold mb-4">
               What Our <span className="text-primary">Students</span> Say
@@ -115,48 +108,73 @@ export default function Reviews() {
         {/* Reviews Grid */}
         <section className="py-16">
           <div className="container">
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {reviews.map((review) => (
-                <Card key={review.id} className="relative overflow-hidden">
-                  <div className="absolute top-4 right-4 text-primary/10">
-                    <Quote className="h-12 w-12" />
-                  </div>
-                  <CardContent className="pt-6">
-                    <div className="flex items-center gap-3 mb-4">
-                      <Avatar>
-                        <AvatarFallback className="bg-primary/10 text-primary">
-                          {getInitials(review.studentName)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="font-medium">{review.studentName}</p>
-                        <p className="text-sm text-muted-foreground">{review.date}</p>
+            {loading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            ) : reviews.length === 0 ? (
+              <div className="text-center py-12">
+                <Quote className="h-12 w-12 mx-auto text-muted-foreground/30 mb-4" />
+                <h3 className="text-xl font-semibold mb-2">No Reviews Yet</h3>
+                <p className="text-muted-foreground">
+                  Be the first to leave a review after completing a session with one of our tutors!
+                </p>
+              </div>
+            ) : (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {reviews.map((review) => (
+                  <Card key={review.id} className="relative overflow-hidden">
+                    <div className="absolute top-4 right-4 text-primary/10">
+                      <Quote className="h-12 w-12" />
+                    </div>
+                    <CardContent className="pt-6">
+                      <div className="flex items-center gap-3 mb-4">
+                        <Avatar>
+                          <AvatarFallback className="bg-primary/10 text-primary">
+                            {getInitials(review.studentName)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-medium">{review.studentName}</p>
+                          <p className="text-sm text-muted-foreground">{formatDate(review.createdAt)}</p>
+                        </div>
                       </div>
-                    </div>
 
-                    <div className="flex items-center gap-2 mb-3">
-                      {[...Array(5)].map((_, i) => (
-                        <Star 
-                          key={i} 
-                          className={`h-4 w-4 ${i < review.rating ? 'text-warning fill-warning' : 'text-muted'}`} 
-                        />
-                      ))}
-                    </div>
+                      <div className="flex items-center gap-2 mb-3">
+                        {[...Array(5)].map((_, i) => (
+                          <Star 
+                            key={i} 
+                            className={`h-4 w-4 ${i < review.rating ? 'text-warning fill-warning' : 'text-muted'}`} 
+                          />
+                        ))}
+                      </div>
 
-                    <p className="text-muted-foreground mb-4 line-clamp-4">
-                      "{review.review}"
-                    </p>
+                      {review.comment && (
+                        <p className="text-muted-foreground mb-4 line-clamp-4">
+                          "{review.comment}"
+                        </p>
+                      )}
 
-                    <div className="flex items-center gap-2 pt-4 border-t">
-                      <Badge variant="secondary">{review.subject}</Badge>
-                      <span className="text-sm text-muted-foreground">
-                        with {review.tutorName}
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                      <div className="flex items-center gap-2 pt-4 border-t">
+                        <Badge variant="secondary">{review.subject}</Badge>
+                        <span className="text-sm text-muted-foreground flex items-center gap-2">
+                          with
+                          {review.tutorPhoto && (
+                            <Avatar className="h-5 w-5">
+                              <AvatarImage src={review.tutorPhoto} alt={review.tutorName} />
+                              <AvatarFallback className="text-[10px]">
+                                {getInitials(review.tutorName)}
+                              </AvatarFallback>
+                            </Avatar>
+                          )}
+                          {review.tutorName}
+                        </span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
           </div>
         </section>
 
@@ -167,7 +185,7 @@ export default function Reviews() {
               Ready to Start Your Learning Journey?
             </h2>
             <p className="text-muted-foreground mb-6 max-w-lg mx-auto">
-              Join thousands of students who have improved their grades and achieved their goals.
+              Join hundreds of students who have improved their grades and achieved their goals.
             </p>
             <div className="flex justify-center gap-4">
               <a href="/tutors">

@@ -155,9 +155,15 @@ export default function StudentDashboard() {
 
   return (
     <DashboardLayout role="student">
-      <div className="mb-8">
-        <h1 className="font-display text-3xl font-bold mb-2">Welcome back, {userProfile?.fullName?.split(' ')[0] || 'Student'}!</h1>
-        <p className="text-muted-foreground">Track your progress and continue learning.</p>
+      {/* Student Dashboard Header */}
+      <div className="mb-8 p-6 rounded-xl bg-gradient-to-r from-blue-500/10 via-cyan-500/10 to-teal-500/10 border border-blue-200/50 dark:border-blue-800/50">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="p-2 rounded-lg bg-blue-500/20">
+            <Target className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+          </div>
+          <h1 className="font-display text-3xl font-bold">Welcome back, {userProfile?.fullName?.split(' ')[0] || 'Student'}!</h1>
+        </div>
+        <p className="text-muted-foreground ml-12">Track your progress and continue your learning journey.</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 mb-6 sm:mb-8">
