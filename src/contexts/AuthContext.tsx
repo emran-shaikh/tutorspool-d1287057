@@ -4,7 +4,8 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
-  onAuthStateChanged
+  onAuthStateChanged,
+  sendEmailVerification
 } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
@@ -88,6 +89,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       
+      // Send email verification
+      await sendEmailVerification(userCredential.user);
+      
       const newUserProfile: UserProfile = {
         uid: userCredential.user.uid,
         email,
@@ -122,7 +126,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signIn = async (email: string, password: string) => {
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const result = await signInWithEmailAndPassword(auth, email, password);
+      
+      // Check if email is verified
+      if (!result.user.emailVerified) {
+        await signOut(auth);
+        throw { code: 'auth/email-not-verified', message: 'email-not-verified' };
+      }
     } catch (error) {
       if (isDev) console.error("Sign in error:", error);
       throw error;

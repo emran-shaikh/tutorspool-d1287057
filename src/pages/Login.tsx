@@ -52,6 +52,8 @@ export default function Login() {
         errorMessage = "Too many failed attempts. Please try again later.";
       } else if (error.code === 'auth/user-disabled') {
         errorMessage = "This account has been disabled. Please contact support.";
+      } else if (error.message === 'email-not-verified') {
+        errorMessage = "Please verify your email before signing in. Check your inbox for the verification link.";
       }
       
       toast({

@@ -5,8 +5,8 @@ import heroImage from "@/assets/hero-tutoring.jpg";
 
 const stats = [
   { icon: Users, label: "Expert Tutors" },
-  { icon: Clock, label: "24/7 Available" },
-  { icon: TrendingUp, label: "95% Success Rate" },
+  { icon: Clock, label: "12/7 Available" },
+  { icon: TrendingUp, label: "92% Success Rate" },
 ];
 
 const avatars = ["S1", "S2", "S3", "S4", "S5"];
@@ -21,7 +21,7 @@ export function HeroSection() {
             {/* Trust Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-border bg-background shadow-sm animate-fade-in">
               <span className="flex h-2 w-2 rounded-full bg-success animate-pulse" />
-              <span className="text-sm font-medium">Trusted by 15,000+ students worldwide</span>
+              <span className="text-sm font-medium">Trusted by 250+ students worldwide</span>
             </div>
 
             {/* Heading */}
@@ -75,7 +75,7 @@ export function HeroSection() {
                 ))}
               </div>
               <span className="text-sm text-muted-foreground">
-                <strong className="text-foreground">500+</strong> students joined this week
+                <strong className="text-foreground">20+</strong> students joined this week
               </span>
             </div>
           </div>
@@ -109,7 +109,7 @@ export function HeroSection() {
 
               <div className="absolute bottom-4 right-4 bg-background rounded-lg px-3 py-2 shadow-card">
                 <div className="text-center">
-                  <p className="text-lg font-bold text-success">95%</p>
+                  <p className="text-lg font-bold text-success">92%</p>
                   <p className="text-[10px] text-muted-foreground">Success Rate</p>
                   <p className="text-[10px] text-muted-foreground">Student Satisfaction</p>
                 </div>
@@ -122,10 +122,10 @@ export function HeroSection() {
         <div className="mt-16 pt-12 border-t border-border">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {[
-              { value: "15,000+", label: "Happy Students" },
-              { value: "500+", label: "Expert Tutors" },
-              { value: "25+", label: "Subjects" },
-              { value: "95%", label: "Success Rate" },
+              { value: "250+", label: "Happy Students" },
+              { value: "35+", label: "Expert Tutors" },
+              { value: "15+", label: "Subjects" },
+              { value: "92%", label: "Success Rate" },
             ].map((stat, i) => (
               <div
                 key={stat.label}

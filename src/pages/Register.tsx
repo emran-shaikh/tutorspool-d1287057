@@ -118,12 +118,12 @@ export default function Register() {
       }
       
       toast({
-        title: "Account created!",
-        description: role === "tutor" 
-          ? "Welcome to TutorsPool! Your profile is pending admin approval."
-          : "Welcome to TutorsPool. Redirecting to your dashboard...",
+        title: "Verification email sent!",
+        description: "Please check your email to verify your account before signing in.",
       });
-      navigate(`/${role}/dashboard`);
+      
+      // Sign out after registration so they must verify first
+      navigate('/login');
     } catch (error: any) {
       let errorMessage = "Failed to create account. Please try again.";
       

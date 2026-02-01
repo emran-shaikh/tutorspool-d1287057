@@ -69,9 +69,15 @@ export default function TutorDashboard() {
 
   return (
     <DashboardLayout role="tutor">
-      <div className="mb-8">
-        <h1 className="font-display text-3xl font-bold mb-2">Welcome back, {userProfile?.fullName?.split(' ')[0] || 'Tutor'}!</h1>
-        <p className="text-muted-foreground">Manage your sessions and connect with students.</p>
+      {/* Tutor Dashboard Header */}
+      <div className="mb-8 p-6 rounded-xl bg-gradient-to-r from-emerald-500/10 via-green-500/10 to-lime-500/10 border border-emerald-200/50 dark:border-emerald-800/50">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="p-2 rounded-lg bg-emerald-500/20">
+            <Users className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+          </div>
+          <h1 className="font-display text-3xl font-bold">Welcome back, {userProfile?.fullName?.split(' ')[0] || 'Tutor'}!</h1>
+        </div>
+        <p className="text-muted-foreground ml-12">Manage your sessions and connect with students.</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 mb-6 sm:mb-8">
