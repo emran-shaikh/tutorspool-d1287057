@@ -104,6 +104,70 @@ export interface LearningGoal {
   createdAt: string;
 }
 
+// Quiz & Flashcard Types
+export interface Flashcard {
+  id?: string;
+  conceptTitle: string;
+  explanation: string;
+  formula?: string;
+  realLifeExample: string;
+  hint: string;
+  imageUrl?: string;
+}
+
+export interface QuizQuestion {
+  id: string;
+  type: 'mcq' | 'conceptual' | 'numerical';
+  question: string;
+  options?: string[];
+  correctAnswer: string;
+  explanation: string;
+  flashcardIndex: number; // Maps to which flashcard this question relates to
+  difficulty: 'easy' | 'medium' | 'hard';
+}
+
+export interface Quiz {
+  id?: string;
+  tutorId: string;
+  tutorName: string;
+  subject: string;
+  topic: string;
+  targetLevel: 'school' | 'college';
+  flashcards: Flashcard[];
+  questions: QuizQuestion[];
+  isPublished: boolean;
+  createdAt: string;
+  publishedAt?: string;
+}
+
+export interface QuizAssignment {
+  id?: string;
+  quizId: string;
+  studentId: string;
+  studentName: string;
+  studentEmail: string;
+  assignedAt: string;
+  startedAt?: string;
+  completedAt?: string;
+  status: 'pending' | 'in_progress' | 'completed';
+}
+
+export interface QuizResult {
+  id?: string;
+  quizId: string;
+  studentId: string;
+  studentName: string;
+  assignmentId: string;
+  totalQuestions: number;
+  correctAnswers: number;
+  wrongAnswers: number;
+  skipped: number;
+  accuracy: number;
+  answers: { questionId: string; selectedAnswer: string | null; isCorrect: boolean }[];
+  completedAt: string;
+  timeTaken: number; // in seconds
+}
+
 // Tutor functions
 export const getTutors = async (): Promise<TutorProfile[]> => {
   try {
@@ -585,6 +649,183 @@ export const getBlogPostById = async (postId: string): Promise<BlogPost | null> 
     return null;
   } catch (error) {
     if (isDev) console.error('Error fetching blog post:', error);
+    return null;
+  }
+};
+
+// Quiz functions
+export const createQuiz = async (quiz: Omit<Quiz, 'id'>): Promise<string> => {
+  try {
+    const docRef = await addDoc(collection(db, 'quizzes'), {
+      ...quiz,
+      createdAt: new Date().toISOString()
+    });
+    return docRef.id;
+  } catch (error) {
+    if (isDev) console.error('Error creating quiz:', error);
+    throw error;
+  }
+};
+
+export const getTutorQuizzes = async (tutorId: string): Promise<Quiz[]> => {
+  try {
+    const q = query(collection(db, 'quizzes'), where('tutorId', '==', tutorId));
+    const snapshot = await getDocs(q);
+    return snapshot.docs
+      .map(doc => ({ ...doc.data(), id: doc.id } as Quiz))
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  } catch (error) {
+    if (isDev) console.error('Error fetching tutor quizzes:', error);
+    return [];
+  }
+};
+
+export const getQuizById = async (quizId: string): Promise<Quiz | null> => {
+  try {
+    const docSnap = await getDoc(doc(db, 'quizzes', quizId));
+    if (docSnap.exists()) {
+      return { ...docSnap.data(), id: docSnap.id } as Quiz;
+    }
+    return null;
+  } catch (error) {
+    if (isDev) console.error('Error fetching quiz:', error);
+    return null;
+  }
+};
+
+export const updateQuiz = async (quizId: string, data: Partial<Quiz>): Promise<void> => {
+  try {
+    await updateDoc(doc(db, 'quizzes', quizId), data);
+  } catch (error) {
+    if (isDev) console.error('Error updating quiz:', error);
+    throw error;
+  }
+};
+
+export const publishQuiz = async (quizId: string): Promise<void> => {
+  try {
+    await updateDoc(doc(db, 'quizzes', quizId), { 
+      isPublished: true, 
+      publishedAt: new Date().toISOString() 
+    });
+  } catch (error) {
+    if (isDev) console.error('Error publishing quiz:', error);
+    throw error;
+  }
+};
+
+export const deleteQuiz = async (quizId: string): Promise<void> => {
+  try {
+    await deleteDoc(doc(db, 'quizzes', quizId));
+    // Also delete all assignments for this quiz
+    const assignmentsSnapshot = await getDocs(query(collection(db, 'quizAssignments'), where('quizId', '==', quizId)));
+    await Promise.all(assignmentsSnapshot.docs.map(d => deleteDoc(doc(db, 'quizAssignments', d.id))));
+  } catch (error) {
+    if (isDev) console.error('Error deleting quiz:', error);
+    throw error;
+  }
+};
+
+// Quiz Assignment functions
+export const createQuizAssignment = async (assignment: Omit<QuizAssignment, 'id'>): Promise<string> => {
+  try {
+    const docRef = await addDoc(collection(db, 'quizAssignments'), assignment);
+    return docRef.id;
+  } catch (error) {
+    if (isDev) console.error('Error creating quiz assignment:', error);
+    throw error;
+  }
+};
+
+export const getStudentAssignments = async (studentId: string): Promise<QuizAssignment[]> => {
+  try {
+    const q = query(collection(db, 'quizAssignments'), where('studentId', '==', studentId));
+    const snapshot = await getDocs(q);
+    return snapshot.docs
+      .map(doc => ({ ...doc.data(), id: doc.id } as QuizAssignment))
+      .sort((a, b) => new Date(b.assignedAt).getTime() - new Date(a.assignedAt).getTime());
+  } catch (error) {
+    if (isDev) console.error('Error fetching student assignments:', error);
+    return [];
+  }
+};
+
+export const getQuizAssignments = async (quizId: string): Promise<QuizAssignment[]> => {
+  try {
+    const q = query(collection(db, 'quizAssignments'), where('quizId', '==', quizId));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as QuizAssignment));
+  } catch (error) {
+    if (isDev) console.error('Error fetching quiz assignments:', error);
+    return [];
+  }
+};
+
+export const updateQuizAssignment = async (assignmentId: string, data: Partial<QuizAssignment>): Promise<void> => {
+  try {
+    await updateDoc(doc(db, 'quizAssignments', assignmentId), data);
+  } catch (error) {
+    if (isDev) console.error('Error updating quiz assignment:', error);
+    throw error;
+  }
+};
+
+// Quiz Result functions
+export const saveQuizResult = async (result: Omit<QuizResult, 'id'>): Promise<string> => {
+  try {
+    const docRef = await addDoc(collection(db, 'quizResults'), result);
+    return docRef.id;
+  } catch (error) {
+    if (isDev) console.error('Error saving quiz result:', error);
+    throw error;
+  }
+};
+
+export const getStudentResults = async (studentId: string): Promise<QuizResult[]> => {
+  try {
+    const q = query(collection(db, 'quizResults'), where('studentId', '==', studentId));
+    const snapshot = await getDocs(q);
+    return snapshot.docs
+      .map(doc => ({ ...doc.data(), id: doc.id } as QuizResult))
+      .sort((a, b) => new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime());
+  } catch (error) {
+    if (isDev) console.error('Error fetching student results:', error);
+    return [];
+  }
+};
+
+export const getQuizResults = async (quizId: string): Promise<QuizResult[]> => {
+  try {
+    const q = query(collection(db, 'quizResults'), where('quizId', '==', quizId));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as QuizResult));
+  } catch (error) {
+    if (isDev) console.error('Error fetching quiz results:', error);
+    return [];
+  }
+};
+
+// Get all students for quiz assignment
+export const getAllStudents = async (): Promise<StudentProfile[]> => {
+  try {
+    const snapshot = await getDocs(collection(db, 'studentProfiles'));
+    return snapshot.docs.map(doc => ({ ...doc.data(), uid: doc.id } as StudentProfile));
+  } catch (error) {
+    if (isDev) console.error('Error fetching all students:', error);
+    return [];
+  }
+};
+
+export const getStudentProfile = async (uid: string): Promise<StudentProfile | null> => {
+  try {
+    const docRef = doc(db, 'studentProfiles', uid);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      return { ...docSnap.data(), uid: docSnap.id } as StudentProfile;
+    }
+    return null;
+  } catch (error) {
+    if (isDev) console.error('Error fetching student profile:', error);
     return null;
   }
 };

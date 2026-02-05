@@ -8,3 +8,9 @@ verify_jwt = false
 
 [functions.send-email]
 verify_jwt = false
+
+[functions.generate-quiz]
+verify_jwt = false
+
+[functions.notify-quiz-assignment]
+verify_jwt = false
