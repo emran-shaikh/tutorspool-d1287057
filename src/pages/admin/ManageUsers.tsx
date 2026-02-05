@@ -4,9 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Users, UserCheck, Ban, CheckCircle, Eye, X } from "lucide-react";
+import { ArrowLeft, Users, UserCheck, Ban, CheckCircle, Eye, X, Trash2, ShieldAlert } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import { getAllUsers, getAllTutors, approveTutor, updateUserStatus, TutorProfile, createAdminNotification } from "@/lib/firestore";
+import { getAllUsers, getAllTutors, approveTutor, updateUserStatus, deleteUser, TutorProfile, createAdminNotification } from "@/lib/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -16,6 +16,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface UserData {
   uid: string;
@@ -32,6 +42,8 @@ export default function ManageUsers() {
   const [tutors, setTutors] = useState<TutorProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTutor, setSelectedTutor] = useState<TutorProfile | null>(null);
+  const [userToDelete, setUserToDelete] = useState<{ uid: string; name: string; role: string } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -88,8 +100,32 @@ export default function ManageUsers() {
     }
   };
 
+  const handleDeleteUser = async () => {
+    if (!userToDelete) return;
+    
+    setIsDeleting(true);
+    try {
+      await deleteUser(userToDelete.uid, userToDelete.role);
+      toast({ 
+        title: "User deleted", 
+        description: `${userToDelete.name} has been permanently removed from the platform.` 
+      });
+      setUserToDelete(null);
+      fetchData();
+    } catch (error) {
+      toast({ 
+        title: "Error", 
+        description: "Failed to delete user. Please try again.", 
+        variant: "destructive" 
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const students = users.filter(u => u.role === 'student');
   const tutorUsers = users.filter(u => u.role === 'tutor');
+  const adminUsers = users.filter(u => u.role === 'admin');
   const pendingTutors = tutors.filter(t => !t.isApproved);
   const approvedTutors = tutors.filter(t => t.isApproved);
 
@@ -112,21 +148,27 @@ export default function ManageUsers() {
           <TabsList className="w-full flex flex-wrap justify-start gap-2 sm:gap-3">
             <TabsTrigger
               value="pending"
-              className="flex-1 min-w-[140px] sm:flex-none sm:min-w-0 text-xs sm:text-sm"
+              className="flex-1 min-w-[120px] sm:flex-none sm:min-w-0 text-xs sm:text-sm"
             >
-              Pending Tutors ({pendingTutors.length})
+              Pending ({pendingTutors.length})
             </TabsTrigger>
             <TabsTrigger
               value="tutors"
-              className="flex-1 min-w-[140px] sm:flex-none sm:min-w-0 text-xs sm:text-sm"
+              className="flex-1 min-w-[120px] sm:flex-none sm:min-w-0 text-xs sm:text-sm"
             >
-              Approved Tutors ({approvedTutors.length})
+              Tutors ({approvedTutors.length})
             </TabsTrigger>
             <TabsTrigger
               value="students"
-              className="flex-1 min-w-[140px] sm:flex-none sm:min-w-0 text-xs sm:text-sm"
+              className="flex-1 min-w-[120px] sm:flex-none sm:min-w-0 text-xs sm:text-sm"
             >
               Students ({students.length})
+            </TabsTrigger>
+            <TabsTrigger
+              value="admins"
+              className="flex-1 min-w-[120px] sm:flex-none sm:min-w-0 text-xs sm:text-sm"
+            >
+              Admins ({adminUsers.length})
             </TabsTrigger>
           </TabsList>
 
@@ -163,6 +205,13 @@ export default function ManageUsers() {
                           <Button size="sm" variant="outline" onClick={() => setSelectedTutor(tutor)}>
                             <Eye className="h-4 w-4 mr-1" /> Review
                           </Button>
+                          <Button 
+                            size="sm" 
+                            variant="destructive"
+                            onClick={() => setUserToDelete({ uid: tutor.uid, name: tutor.fullName, role: 'tutor' })}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
                         </div>
                       </div>
                     ))}
@@ -197,7 +246,17 @@ export default function ManageUsers() {
                             ))}
                           </div>
                         </div>
-                        <Badge variant="default" className="bg-success">Active</Badge>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="default" className="bg-success">Active</Badge>
+                          <Button 
+                            size="sm" 
+                            variant="ghost"
+                            className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                            onClick={() => setUserToDelete({ uid: tutor.uid, name: tutor.fullName, role: 'tutor' })}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -236,6 +295,53 @@ export default function ManageUsers() {
                             onClick={() => handleSuspend(student.uid, student.isActive !== false)}
                           >
                             <Ban className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="ghost"
+                            className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                            onClick={() => setUserToDelete({ uid: student.uid, name: student.fullName, role: 'student' })}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="admins">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <ShieldAlert className="h-5 w-5 text-purple-600" />
+                  Administrators
+                </CardTitle>
+                <CardDescription>Platform administrators with full access</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {adminUsers.length === 0 ? (
+                  <p className="text-center text-muted-foreground py-8">No administrators found</p>
+                ) : (
+                  <div className="space-y-4">
+                    {adminUsers.map((admin) => (
+                      <div key={admin.uid} className="p-4 rounded-lg bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 flex items-center justify-between">
+                        <div>
+                          <p className="font-medium">{admin.fullName}</p>
+                          <p className="text-sm text-muted-foreground">{admin.email}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="default" className="bg-purple-600">Admin</Badge>
+                          <Button 
+                            size="sm" 
+                            variant="ghost"
+                            className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                            onClick={() => setUserToDelete({ uid: admin.uid, name: admin.fullName, role: 'admin' })}
+                          >
+                            <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
                       </div>
@@ -314,6 +420,43 @@ export default function ManageUsers() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!userToDelete} onOpenChange={(open) => !open && setUserToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-destructive">
+              <Trash2 className="h-5 w-5" />
+              Delete User Permanently
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              <p>
+                Are you sure you want to delete <strong>{userToDelete?.name}</strong>? 
+                This action cannot be undone.
+              </p>
+              <p className="text-destructive font-medium">
+                This will permanently remove:
+              </p>
+              <ul className="list-disc list-inside text-sm space-y-1">
+                <li>User account and profile</li>
+                {userToDelete?.role === 'tutor' && <li>All availability slots</li>}
+                {userToDelete?.role === 'student' && <li>All learning goals</li>}
+                <li>Associated data and records</li>
+              </ul>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteUser}
+              disabled={isDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeleting ? "Deleting..." : "Delete Permanently"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </DashboardLayout>
   );
 }

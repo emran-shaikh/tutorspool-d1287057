@@ -333,6 +333,30 @@ export const updateUserStatus = async (uid: string, isActive: boolean): Promise<
   }
 };
 
+// Delete user and all related data (Admin only)
+export const deleteUser = async (uid: string, role: string): Promise<void> => {
+  try {
+    // Delete from users collection
+    await deleteDoc(doc(db, 'users', uid));
+    
+    // Delete role-specific profile
+    if (role === 'tutor') {
+      await deleteDoc(doc(db, 'tutorProfiles', uid));
+      // Delete tutor's availability slots
+      const availabilitySnapshot = await getDocs(query(collection(db, 'availability'), where('tutorId', '==', uid)));
+      await Promise.all(availabilitySnapshot.docs.map(d => deleteDoc(doc(db, 'availability', d.id))));
+    } else if (role === 'student') {
+      await deleteDoc(doc(db, 'studentProfiles', uid));
+      // Delete student's learning goals
+      const goalsSnapshot = await getDocs(query(collection(db, 'learningGoals'), where('studentId', '==', uid)));
+      await Promise.all(goalsSnapshot.docs.map(d => deleteDoc(doc(db, 'learningGoals', d.id))));
+    }
+  } catch (error) {
+    if (isDev) console.error('Error deleting user:', error);
+    throw error;
+  }
+};
+
 // Admin Notification Types and Functions
 export interface AdminNotification {
   id?: string;
