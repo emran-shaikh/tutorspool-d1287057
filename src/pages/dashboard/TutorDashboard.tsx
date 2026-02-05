@@ -204,6 +204,24 @@ export default function TutorDashboard() {
           </CardContent>
         </Card>
 
+        <Card className="border-purple-100 dark:border-purple-900 bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-950/50 dark:to-violet-950/50">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <div className="p-1.5 rounded-md bg-gradient-to-br from-purple-500 to-violet-500">
+                <GraduationCap className="h-4 w-4 text-white" />
+              </div>
+              AI Quiz Creator
+            </CardTitle>
+            <CardDescription>Create interactive quizzes for students</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground mb-4">Generate AI-powered flashcards and quiz questions.</p>
+            <Button className="w-full bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 shadow-lg shadow-purple-500/25" asChild>
+              <Link to="/tutor/quizzes">Manage Quizzes</Link>
+            </Button>
+          </CardContent>
+        </Card>
+
         <Card className="border-emerald-100 dark:border-emerald-900 bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-950/50 dark:to-green-950/50">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">

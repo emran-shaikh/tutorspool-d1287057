@@ -306,6 +306,24 @@ export default function StudentDashboard() {
           </CardContent>
         </Card>
 
+        <Card className="border-violet-100 dark:border-violet-900 bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-950/50 dark:to-purple-950/50">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <div className="p-1.5 rounded-md bg-gradient-to-br from-violet-500 to-purple-500">
+                <Brain className="h-4 w-4 text-white" />
+              </div>
+              Interactive Quizzes
+            </CardTitle>
+            <CardDescription>Learn with AI-powered flashcards</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground mb-4">Study flashcards and test your knowledge.</p>
+            <Button className="w-full bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 shadow-lg shadow-violet-500/25" asChild>
+              <Link to="/student/quizzes">View My Quizzes</Link>
+            </Button>
+          </CardContent>
+        </Card>
+
         <Card className="border-blue-100 dark:border-blue-900 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/50 dark:to-cyan-950/50">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
