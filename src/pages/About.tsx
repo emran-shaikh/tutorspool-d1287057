@@ -14,6 +14,8 @@ import {
   CheckCircle,
   ArrowRight 
 } from "lucide-react";
+import uzairImage from "@/assets/team-uzair.jpg";
+import bilalImage from "@/assets/team-bilal.jpg";
 
 const values = [
   {
@@ -40,19 +42,16 @@ const values = [
 
 const team = [
   {
-    name: "Dr. Sarah Mitchell",
-    role: "Founder & CEO",
-    bio: "Former professor with 15+ years in education technology"
+    name: "Bilal Shakil",
+    role: "Founder",
+    image: bilalImage,
+    bio: "The Founder of TutorsPool with over 8 years of experience teaching O Level Additional Mathematics. He holds a degree in Mechanical Engineering from NED University and is passionate about delivering quality education through personalized online tutoring."
   },
   {
-    name: "Michael Chen",
-    role: "Head of Academics",
-    bio: "PhD in Educational Psychology from Stanford"
-  },
-  {
-    name: "Emily Rodriguez",
-    role: "Director of Operations",
-    bio: "10+ years experience in edtech startups"
+    name: "Uzair Syed",
+    role: "Co-Founder",
+    image: uzairImage,
+    bio: "Co-Founder at TutorsPool with an MS in Computer Science. He specializes in O and A Level subjects, focusing on making complex concepts accessible and helping students achieve academic success."
   }
 ];
 
@@ -159,18 +158,22 @@ export default function About() {
                 Meet the passionate people behind TutorsPool
               </p>
             </div>
-            <div className="grid md:grid-cols-3 gap-6 max-w-3xl mx-auto">
+            <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
               {team.map((member) => (
-                <Card key={member.name} className="text-center">
-                  <CardContent className="pt-6">
-                    <div className="w-20 h-20 mx-auto rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                      <span className="text-2xl font-bold text-primary">
-                        {member.name.split(' ').map(n => n[0]).join('')}
-                      </span>
+                <Card key={member.name} className="overflow-hidden">
+                  <CardContent className="p-6">
+                    <div className="flex flex-col sm:flex-row gap-6 items-center sm:items-start text-center sm:text-left">
+                      <img 
+                        src={member.image} 
+                        alt={member.name}
+                        className="w-28 h-28 rounded-full object-cover border-4 border-primary/20 flex-shrink-0"
+                      />
+                      <div>
+                        <h3 className="font-display text-xl font-semibold">{member.name}</h3>
+                        <p className="text-primary font-medium mb-3">{member.role}</p>
+                        <p className="text-sm text-muted-foreground leading-relaxed">{member.bio}</p>
+                      </div>
                     </div>
-                    <h3 className="font-semibold">{member.name}</h3>
-                    <p className="text-sm text-primary mb-2">{member.role}</p>
-                    <p className="text-sm text-muted-foreground">{member.bio}</p>
                   </CardContent>
                 </Card>
               ))}
