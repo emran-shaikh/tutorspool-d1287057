@@ -37,6 +37,7 @@ import Privacy from "./pages/Privacy";
 import FAQ from "./pages/FAQ";
 import Careers from "./pages/Careers";
 import NotFound from "./pages/NotFound";
+import ForgotPassword from "./pages/ForgotPassword";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 const queryClient = new QueryClient();
@@ -105,6 +106,7 @@ const App = () => (
               <Route path="/careers" element={<Careers />} />
               <Route path="/login" element={<AuthRoute><Login /></AuthRoute>} />
               <Route path="/register" element={<AuthRoute><Register /></AuthRoute>} />
+              <Route path="/forgot-password" element={<AuthRoute><ForgotPassword /></AuthRoute>} />
               
               {/* Student Routes */}
               <Route path="/student/dashboard" element={<ProtectedRoute allowedRoles={['student']}><StudentDashboard /></ProtectedRoute>} />
