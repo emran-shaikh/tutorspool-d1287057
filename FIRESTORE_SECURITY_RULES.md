@@ -245,16 +245,17 @@ service cloud.firestore {
     
     // Student profiles collection
     match /studentProfiles/{studentId} {
-      // Students can read their own profile, tutors and admins can read all
+      // Students can read their own profile (document ID matches their uid)
+      // Tutors and admins can read all student profiles for assignment purposes
       allow read: if isAuthenticated() && (
-        resource.data.studentId == request.auth.uid ||
+        isOwner(studentId) ||
         isTutor() ||
         isAdmin()
       );
       
       // Only the student themselves can create/update their profile
       allow create: if isOwner(studentId) && isStudent();
-      allow update: if isOwner(studentId) && isStudent() || isAdmin();
+      allow update: if (isOwner(studentId) && isStudent()) || isAdmin();
       
       // Only admins can delete student profiles
       allow delete: if isAdmin();

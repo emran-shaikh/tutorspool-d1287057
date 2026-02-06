@@ -146,6 +146,7 @@ export interface QuizAssignment {
   studentId: string;
   studentName: string;
   studentEmail: string;
+  tutorId: string;
   assignedAt: string;
   startedAt?: string;
   completedAt?: string;
