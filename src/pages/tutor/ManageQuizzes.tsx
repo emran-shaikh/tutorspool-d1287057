@@ -27,11 +27,11 @@ export default function ManageQuizzes() {
       const quizzesData = await getTutorQuizzes(userProfile.uid);
       setQuizzes(quizzesData);
 
-      // Fetch assignment counts for each quiz
+      // Fetch assignment counts for each quiz (include tutorId for security rules)
       const counts: Record<string, number> = {};
       for (const quiz of quizzesData) {
         if (quiz.id) {
-          const assignments = await getQuizAssignments(quiz.id);
+          const assignments = await getQuizAssignments(quiz.id, userProfile.uid);
           counts[quiz.id] = assignments.length;
         }
       }

@@ -45,14 +45,17 @@ export default function QuizDetail() {
     if (!quizId) return;
     setLoading(true);
     try {
-      const [quizData, studentsData, assignmentsData] = await Promise.all([
+      const [quizData, studentsData] = await Promise.all([
         getQuizById(quizId),
-        getAllStudents(),
-        getQuizAssignments(quizId)
+        getAllStudents()
       ]);
       setQuiz(quizData);
       setStudents(studentsData);
-      setAssignments(assignmentsData);
+      // Fetch assignments after getting quiz data to use tutorId
+      if (quizData && userProfile?.uid) {
+        const assignmentsData = await getQuizAssignments(quizId, userProfile.uid);
+        setAssignments(assignmentsData);
+      }
     } catch (error) {
       console.error("Error fetching data:", error);
       toast.error("Failed to load quiz");
