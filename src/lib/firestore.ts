@@ -751,9 +751,14 @@ export const getStudentAssignments = async (studentId: string): Promise<QuizAssi
   }
 };
 
-export const getQuizAssignments = async (quizId: string): Promise<QuizAssignment[]> => {
+export const getQuizAssignments = async (quizId: string, tutorId: string): Promise<QuizAssignment[]> => {
   try {
-    const q = query(collection(db, 'quizAssignments'), where('quizId', '==', quizId));
+    // Query must include tutorId to satisfy Firestore security rules
+    const q = query(
+      collection(db, 'quizAssignments'), 
+      where('quizId', '==', quizId),
+      where('tutorId', '==', tutorId)
+    );
     const snapshot = await getDocs(q);
     return snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as QuizAssignment));
   } catch (error) {

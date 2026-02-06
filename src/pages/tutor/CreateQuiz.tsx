@@ -33,6 +33,8 @@ export default function CreateQuiz() {
   const [subject, setSubject] = useState("");
   const [topic, setTopic] = useState("");
   const [targetLevel, setTargetLevel] = useState<"school" | "college">("school");
+  const [numFlashcards, setNumFlashcards] = useState(10);
+  const [numQuestions, setNumQuestions] = useState(50);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedContent, setGeneratedContent] = useState<{
     flashcards: Flashcard[];
@@ -62,7 +64,8 @@ export default function CreateQuiz() {
             subject,
             topic,
             targetLevel,
-            numQuestions: 50,
+            numFlashcards,
+            numQuestions,
           }),
         }
       );
@@ -180,6 +183,38 @@ export default function CreateQuiz() {
                   <SelectItem value="college">College/University</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="numFlashcards">Number of Flashcards</Label>
+                <Select value={numFlashcards.toString()} onValueChange={(v) => setNumFlashcards(parseInt(v))}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="5">5 flashcards</SelectItem>
+                    <SelectItem value="10">10 flashcards</SelectItem>
+                    <SelectItem value="15">15 flashcards</SelectItem>
+                    <SelectItem value="20">20 flashcards</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="numQuestions">Number of Questions</Label>
+                <Select value={numQuestions.toString()} onValueChange={(v) => setNumQuestions(parseInt(v))}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="10">10 questions</SelectItem>
+                    <SelectItem value="25">25 questions</SelectItem>
+                    <SelectItem value="50">50 questions</SelectItem>
+                    <SelectItem value="75">75 questions</SelectItem>
+                    <SelectItem value="100">100 questions</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             <Button

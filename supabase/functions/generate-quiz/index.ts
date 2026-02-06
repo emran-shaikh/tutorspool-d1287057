@@ -10,6 +10,7 @@ interface GenerateQuizRequest {
   subject: string;
   topic: string;
   targetLevel: "school" | "college";
+  numFlashcards?: number;
   numQuestions?: number;
 }
 
@@ -19,7 +20,7 @@ serve(async (req) => {
   }
 
   try {
-    const { subject, topic, targetLevel, numQuestions = 50 }: GenerateQuizRequest = await req.json();
+    const { subject, topic, targetLevel, numFlashcards = 10, numQuestions = 50 }: GenerateQuizRequest = await req.json();
 
     if (!subject || !topic) {
       return new Response(
@@ -49,7 +50,7 @@ Topic: ${topic}
 Target Level: ${targetLevel}
 
 Create exactly:
-1. 10 visual flashcards covering key concepts
+1. ${numFlashcards} visual flashcards covering key concepts
 2. ${numQuestions} quiz questions (mix of MCQs, conceptual, and numerical problems)
 
 Return a JSON object with this exact structure:
@@ -98,13 +99,13 @@ Return a JSON object with this exact structure:
 Requirements:
 - Distribute question types: ~60% MCQs, ~25% conceptual, ~15% numerical
 - Distribute difficulty: ~30% easy, ~50% medium, ~20% hard
-- Each question must map to a flashcard (flashcardIndex 0-9)
+- Each question must map to a flashcard (flashcardIndex 0-${numFlashcards - 1})
 - All content must be factually accurate for ${subject}
 - Use age-appropriate language for ${levelContext}
 - MCQs must have exactly 4 options labeled A), B), C), D)
 - Numerical problems should include units where applicable`;
 
-    console.log(`Generating quiz for ${subject} - ${topic} (${targetLevel})`);
+    console.log(`Generating quiz for ${subject} - ${topic} (${targetLevel}) with ${numFlashcards} flashcards and ${numQuestions} questions`);
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
