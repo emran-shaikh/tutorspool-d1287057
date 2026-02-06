@@ -104,6 +104,7 @@ export default function QuizDetail() {
           studentId,
           studentName: student.fullName,
           studentEmail: student.email,
+          tutorId: userProfile?.uid || '',
           assignedAt: new Date().toISOString(),
           status: "pending"
         });
