@@ -169,6 +169,96 @@ service cloud.firestore {
       // Only admins can delete notifications
       allow delete: if isAdmin();
     }
+    
+    // Quizzes collection - for AI-generated quizzes by tutors
+    match /quizzes/{quizId} {
+      // Anyone authenticated can read published quizzes, tutors can read their own
+      allow read: if isAuthenticated() && (
+        resource.data.isPublished == true ||
+        resource.data.tutorId == request.auth.uid ||
+        isAdmin()
+      );
+      
+      // Only tutors can create quizzes
+      allow create: if isAuthenticated() && isTutor() 
+        && request.resource.data.tutorId == request.auth.uid;
+      
+      // Tutors can update their own quizzes
+      allow update: if isAuthenticated() && (
+        (resource.data.tutorId == request.auth.uid && isTutor()) ||
+        isAdmin()
+      );
+      
+      // Only tutor owner or admin can delete
+      allow delete: if isAuthenticated() && (
+        (resource.data.tutorId == request.auth.uid && isTutor()) ||
+        isAdmin()
+      );
+    }
+    
+    // Quiz assignments collection
+    match /quizAssignments/{assignmentId} {
+      // Students can read their own assignments, tutors can read assignments they created
+      allow read: if isAuthenticated() && (
+        resource.data.studentId == request.auth.uid ||
+        resource.data.tutorId == request.auth.uid ||
+        isAdmin()
+      );
+      
+      // Tutors can create assignments
+      allow create: if isAuthenticated() && isTutor() 
+        && request.resource.data.tutorId == request.auth.uid;
+      
+      // Tutors can update assignments, students can update their own status
+      allow update: if isAuthenticated() && (
+        (resource.data.tutorId == request.auth.uid && isTutor()) ||
+        (resource.data.studentId == request.auth.uid && isStudent()) ||
+        isAdmin()
+      );
+      
+      // Only tutor owner or admin can delete
+      allow delete: if isAuthenticated() && (
+        (resource.data.tutorId == request.auth.uid && isTutor()) ||
+        isAdmin()
+      );
+    }
+    
+    // Quiz results collection
+    match /quizResults/{resultId} {
+      // Students can read their own results, tutors can read results for their quizzes
+      allow read: if isAuthenticated() && (
+        resource.data.studentId == request.auth.uid ||
+        resource.data.tutorId == request.auth.uid ||
+        isAdmin()
+      );
+      
+      // Students can create results when completing a quiz
+      allow create: if isAuthenticated() && isStudent() 
+        && request.resource.data.studentId == request.auth.uid;
+      
+      // Results are immutable after creation (no updates)
+      allow update: if false;
+      
+      // Only admins can delete results
+      allow delete: if isAdmin();
+    }
+    
+    // Student profiles collection
+    match /studentProfiles/{studentId} {
+      // Students can read their own profile, tutors and admins can read all
+      allow read: if isAuthenticated() && (
+        resource.data.studentId == request.auth.uid ||
+        isTutor() ||
+        isAdmin()
+      );
+      
+      // Only the student themselves can create/update their profile
+      allow create: if isOwner(studentId) && isStudent();
+      allow update: if isOwner(studentId) && isStudent() || isAdmin();
+      
+      // Only admins can delete student profiles
+      allow delete: if isAdmin();
+    }
   }
 }
 ```
