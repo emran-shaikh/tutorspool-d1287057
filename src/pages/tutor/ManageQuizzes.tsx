@@ -85,7 +85,7 @@ export default function ManageQuizzes() {
             </div>
             <h3 className="text-lg font-semibold mb-2">No Quizzes Yet</h3>
             <p className="text-muted-foreground mb-4">
-              Create your first AI-powered quiz to engage your students.
+              Create your first SmartGen quiz to engage your students.
             </p>
             <Button asChild className="bg-gradient-to-r from-purple-600 to-violet-600">
               <Link to="/tutor/quizzes/create">
