@@ -44,6 +44,7 @@ import FAQ from "./pages/FAQ";
 import Careers from "./pages/Careers";
 import NotFound from "./pages/NotFound";
 import ForgotPassword from "./pages/ForgotPassword";
+import SharedQuizResults from "./pages/SharedQuizResults";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 const queryClient = new QueryClient();
@@ -110,6 +111,7 @@ const App = () => (
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/faq" element={<FAQ />} />
               <Route path="/careers" element={<Careers />} />
+              <Route path="/results/:resultId" element={<SharedQuizResults />} />
               <Route path="/login" element={<AuthRoute><Login /></AuthRoute>} />
               <Route path="/register" element={<AuthRoute><Register /></AuthRoute>} />
               <Route path="/forgot-password" element={<AuthRoute><ForgotPassword /></AuthRoute>} />
