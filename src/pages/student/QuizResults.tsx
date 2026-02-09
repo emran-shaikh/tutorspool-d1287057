@@ -64,31 +64,28 @@ export default function QuizResults() {
     }
   };
 
+  const shareUrl = resultId ? `${window.location.origin}/results/${resultId}` : window.location.origin;
+
   const shareToTwitter = () => {
     if (!result || !quiz) return;
-    const text = `🎉 I scored ${result.accuracy}% on the ${quiz.topic} quiz! ${result.correctAnswers}/${result.totalQuestions} correct answers. Try it on TutorsPool!`;
-    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(window.location.origin)}`;
-    window.open(url, "_blank", "width=600,height=400");
+    const text = `🎉 I scored ${result.accuracy}% on the "${quiz.topic}" quiz on TutorsPool! ${result.correctAnswers}/${result.totalQuestions} correct. Challenge yourself →`;
+    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`, "_blank", "width=600,height=400");
   };
 
   const shareToFacebook = () => {
     if (!result || !quiz) return;
-    const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.origin)}&quote=${encodeURIComponent(`I scored ${result.accuracy}% on the ${quiz.topic} quiz!`)}`;
-    window.open(url, "_blank", "width=600,height=400");
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(`I scored ${result.accuracy}% on the "${quiz.topic}" quiz on TutorsPool!`)}`, "_blank", "width=600,height=400");
   };
 
   const shareToLinkedIn = () => {
     if (!result || !quiz) return;
-    const text = `I just completed the ${quiz.topic} quiz on TutorsPool and scored ${result.accuracy}%! Continuous learning is the key to success.`;
-    const url = `https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(window.location.origin)}&title=${encodeURIComponent(`Quiz Completed: ${quiz.topic}`)}&summary=${encodeURIComponent(text)}`;
-    window.open(url, "_blank", "width=600,height=400");
+    const text = `I just completed the "${quiz.topic}" quiz on TutorsPool and scored ${result.accuracy}%! Continuous learning is the key to success.`;
+    window.open(`https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(shareUrl)}&title=${encodeURIComponent(`Quiz Completed: ${quiz.topic}`)}&summary=${encodeURIComponent(text)}`, "_blank", "width=600,height=400");
   };
 
   const copyResults = () => {
-    if (!result || !quiz) return;
-    const text = `🎉 Quiz Complete!\n📚 ${quiz.subject}: ${quiz.topic}\n✅ Score: ${result.correctAnswers}/${result.totalQuestions}\n📊 Accuracy: ${result.accuracy}%\n\nLearn more at TutorsPool!`;
-    navigator.clipboard.writeText(text);
-    toast.success("Results copied to clipboard!");
+    navigator.clipboard.writeText(shareUrl);
+    toast.success("Share link copied to clipboard!");
   };
 
   const getPerformanceMessage = (accuracy: number) => {
