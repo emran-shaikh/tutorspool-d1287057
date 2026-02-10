@@ -106,7 +106,7 @@ export default function SharedQuizResults() {
             result={result}
             shareUrl={shareUrl}
           />
-          <SharedResultsCTA />
+          <SharedResultsCTA quizId={quiz.id} quizTopic={quiz.topic} />
           <div className="text-center mt-8 pb-8">
             <p className="text-white/30 text-xs">
               Powered by <span className="font-semibold text-white/50">TutorsPool</span> · SmartGen™ Learning
