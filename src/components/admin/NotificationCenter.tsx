@@ -172,7 +172,9 @@ export function NotificationBell({ className }: NotificationBellProps) {
 export function NotificationCard() {
   const [notifications, setNotifications] = useState<AdminNotification[]>([]);
   const [loading, setLoading] = useState(true);
+  const [expanded, setExpanded] = useState(false);
   const { toast } = useToast();
+  const VISIBLE_COUNT = 4;
 
   useEffect(() => {
     fetchNotifications();
@@ -180,7 +182,7 @@ export function NotificationCard() {
 
   const fetchNotifications = async () => {
     setLoading(true);
-    const data = await getAdminNotifications(10);
+    const data = await getAdminNotifications(20);
     setNotifications(data);
     setLoading(false);
   };
@@ -197,6 +199,8 @@ export function NotificationCard() {
   };
 
   const unreadCount = notifications.filter(n => !n.isRead).length;
+  const visibleNotifications = expanded ? notifications : notifications.slice(0, VISIBLE_COUNT);
+  const hasMore = notifications.length > VISIBLE_COUNT;
 
   if (loading) {
     return (
@@ -213,65 +217,74 @@ export function NotificationCard() {
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-base">
               <Bell className="h-5 w-5 text-primary" />
               Recent Activity
               {unreadCount > 0 && (
-                <Badge variant="destructive" className="ml-2">{unreadCount} new</Badge>
+                <Badge variant="destructive" className="ml-1 text-xs">{unreadCount} new</Badge>
               )}
             </CardTitle>
-            <CardDescription>Latest registrations and platform activities</CardDescription>
+            <CardDescription className="text-xs">Latest registrations and platform activities</CardDescription>
           </div>
           {unreadCount > 0 && (
-            <Button variant="outline" size="sm" onClick={handleMarkAllAsRead}>
-              <CheckCheck className="h-4 w-4 mr-1" /> Mark all read
+            <Button variant="outline" size="sm" onClick={handleMarkAllAsRead} className="text-xs h-8">
+              <CheckCheck className="h-3.5 w-3.5 mr-1" /> Mark all read
             </Button>
           )}
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pt-0">
         {notifications.length === 0 ? (
-          <p className="text-center text-muted-foreground py-4">No recent activity</p>
+          <p className="text-center text-muted-foreground py-4 text-sm">No recent activity</p>
         ) : (
-          <div className="space-y-3">
-            {notifications.map((notification) => (
+          <div className="space-y-2">
+            {visibleNotifications.map((notification) => (
               <div
                 key={notification.id}
                 className={cn(
-                  "flex items-start gap-3 p-3 rounded-lg border transition-colors",
+                  "flex items-center gap-3 px-3 py-2.5 rounded-lg border transition-colors",
                   !notification.isRead ? getNotificationColor(notification.type) : "bg-muted/30 border-border"
                 )}
               >
-                <div className={cn("p-2 rounded-full", getNotificationColor(notification.type))}>
+                <div className={cn("p-1.5 rounded-full shrink-0", getNotificationColor(notification.type))}>
                   {getNotificationIcon(notification.type)}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className={cn("text-sm", !notification.isRead && "font-medium")}>
-                    {notification.title}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {notification.message}
-                  </p>
-                  {notification.metadata?.userEmail && (
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {notification.metadata.userEmail}
+                  <div className="flex items-center gap-2">
+                    <p className={cn("text-sm truncate", !notification.isRead && "font-medium")}>
+                      {notification.title}
                     </p>
-                  )}
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
+                    <span className="text-[11px] text-muted-foreground whitespace-nowrap shrink-0">
+                      {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground truncate">
+                    {notification.message}
+                    {notification.metadata?.userEmail && ` · ${notification.metadata.userEmail}`}
                   </p>
                 </div>
                 {!notification.isRead && (
                   <Button
                     variant="ghost"
-                    size="sm"
+                    size="icon"
+                    className="h-7 w-7 shrink-0"
                     onClick={() => handleMarkAsRead(notification.id!)}
                   >
-                    <Check className="h-4 w-4" />
+                    <Check className="h-3.5 w-3.5" />
                   </Button>
                 )}
               </div>
             ))}
+            {hasMore && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full text-xs text-muted-foreground hover:text-foreground"
+                onClick={() => setExpanded(!expanded)}
+              >
+                {expanded ? "Show less" : `Show ${notifications.length - VISIBLE_COUNT} more`}
+              </Button>
+            )}
           </div>
         )}
       </CardContent>
