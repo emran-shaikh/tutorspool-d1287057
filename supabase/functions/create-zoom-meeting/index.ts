@@ -91,18 +91,15 @@ serve(async (req) => {
     }
 
     // Get access token using Server-to-Server OAuth
-    const tokenBody = new URLSearchParams({
-      grant_type: 'account_credentials',
-      account_id: ZOOM_ACCOUNT_ID,
-    });
+    const tokenUrl = new URL('https://zoom.us/oauth/token');
+    tokenUrl.searchParams.set('grant_type', 'account_credentials');
+    tokenUrl.searchParams.set('account_id', ZOOM_ACCOUNT_ID);
     
-    const tokenResponse = await fetch('https://zoom.us/oauth/token', {
+    const tokenResponse = await fetch(tokenUrl.toString(), {
       method: 'POST',
       headers: {
         'Authorization': `Basic ${btoa(`${ZOOM_CLIENT_ID}:${ZOOM_CLIENT_SECRET}`)}`,
-        'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: tokenBody.toString(),
     });
 
     if (!tokenResponse.ok) {
