@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import uzairImage from "@/assets/team-uzair.jpg";
 import bilalImage from "@/assets/team-bilal.jpg";
+import imranImage from "@/assets/team-imran.jpg";
 
 const values = [
   {
@@ -52,6 +53,12 @@ const team = [
     role: "Co-Founder",
     image: uzairImage,
     bio: "Co-Founder at TutorsPool with an MS in Computer Science. He specializes in O and A Level subjects, focusing on making complex concepts accessible and helping students achieve academic success."
+  },
+  {
+    name: "Muhammad Imran",
+    role: "Chief Technology Officer",
+    image: imranImage,
+    bio: "Tech leader with 10+ years in web development and emerging technologies. Passionate about AI, automation, and building smart, scalable systems that solve real-world problems and drive business growth."
   }
 ];
 
@@ -158,22 +165,23 @@ export default function About() {
                 Meet the passionate people behind TutorsPool
               </p>
             </div>
-            <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
               {team.map((member) => (
-                <Card key={member.name} className="overflow-hidden">
-                  <CardContent className="p-6">
-                    <div className="flex flex-col sm:flex-row gap-6 items-center sm:items-start text-center sm:text-left">
-                      <img 
-                        src={member.image} 
-                        alt={member.name}
-                        className="w-28 h-28 rounded-full object-cover border-4 border-primary/20 flex-shrink-0"
-                      />
-                      <div>
-                        <h3 className="font-display text-xl font-semibold">{member.name}</h3>
-                        <p className="text-primary font-medium mb-3">{member.role}</p>
-                        <p className="text-sm text-muted-foreground leading-relaxed">{member.bio}</p>
-                      </div>
+                <Card key={member.name} className="overflow-hidden group hover:shadow-xl transition-all duration-300 border-0 shadow-md">
+                  <div className="relative overflow-hidden">
+                    <img 
+                      src={member.image} 
+                      alt={member.name}
+                      className="w-full h-72 object-cover object-top group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                    <div className="absolute bottom-4 left-4 right-4">
+                      <h3 className="font-display text-xl font-bold text-white">{member.name}</h3>
+                      <p className="text-primary-foreground/90 font-medium text-sm bg-primary/80 inline-block px-3 py-1 rounded-full mt-1">{member.role}</p>
                     </div>
+                  </div>
+                  <CardContent className="p-5">
+                    <p className="text-sm text-muted-foreground leading-relaxed">{member.bio}</p>
                   </CardContent>
                 </Card>
               ))}
