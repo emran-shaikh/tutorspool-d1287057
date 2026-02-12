@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -77,18 +78,43 @@ export default function Contact() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!formData.name.trim() || !formData.email.trim() || !formData.subject.trim() || !formData.message.trim()) {
+      toast({ title: "Please fill in all fields", variant: "destructive" });
+      return;
+    }
+
     setSubmitting(true);
     
-    // Simulate form submission
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    toast({
-      title: "Message Sent!",
-      description: "We'll get back to you within 24 hours."
-    });
-    
-    setFormData({ name: "", email: "", subject: "", message: "" });
-    setSubmitting(false);
+    try {
+      const { data, error } = await supabase.functions.invoke("send-email", {
+        body: {
+          type: "contact_form",
+          name: formData.name.trim(),
+          email: formData.email.trim(),
+          subject: formData.subject.trim(),
+          message: formData.message.trim(),
+        },
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Message Sent!",
+        description: "We'll get back to you within 24 hours."
+      });
+      
+      setFormData({ name: "", email: "", subject: "", message: "" });
+    } catch (err) {
+      console.error("Contact form error:", err);
+      toast({
+        title: "Failed to send message",
+        description: "Please try again or email us directly at support@tutorspool.com",
+        variant: "destructive"
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
