@@ -125,7 +125,8 @@ type EmailType =
   | "welcome" | "session_booking" | "session_update" | "session_cancel"
   | "session_reminder" | "session_completed" | "review_thankyou"
   | "tutor_session_booking" | "tutor_session_cancel" | "tutor_review_received"
-  | "admin_new_student" | "admin_new_tutor" | "tutor_approved";
+  | "admin_new_student" | "admin_new_tutor" | "tutor_approved"
+  | "contact_form";
 
 interface BaseEmailRequest { type: EmailType; }
 interface WelcomeEmailRequest extends BaseEmailRequest { type: "welcome"; to: string; name: string; role?: string; }
@@ -140,12 +141,14 @@ interface TutorReviewReceivedEmailRequest extends BaseEmailRequest { type: "tuto
 interface AdminNewStudentEmailRequest extends BaseEmailRequest { type: "admin_new_student"; studentName: string; studentEmail: string; }
 interface AdminNewTutorEmailRequest extends BaseEmailRequest { type: "admin_new_tutor"; tutorName: string; tutorEmail: string; }
 interface TutorApprovedEmailRequest extends BaseEmailRequest { type: "tutor_approved"; to: string; tutorName: string; }
+interface ContactFormEmailRequest extends BaseEmailRequest { type: "contact_form"; name: string; email: string; subject: string; message: string; }
 
 type EmailRequest =
   | WelcomeEmailRequest | SessionBookingEmailRequest | SessionUpdateEmailRequest
   | SessionReminderEmailRequest | SessionCompletedEmailRequest | ReviewThankYouEmailRequest
   | TutorSessionBookingEmailRequest | TutorSessionCancelEmailRequest | TutorReviewReceivedEmailRequest
-  | AdminNewStudentEmailRequest | AdminNewTutorEmailRequest | TutorApprovedEmailRequest;
+  | AdminNewStudentEmailRequest | AdminNewTutorEmailRequest | TutorApprovedEmailRequest
+  | ContactFormEmailRequest;
 
 /* ─── Student Emails ─── */
 
@@ -376,6 +379,27 @@ async function sendAdminNewTutorEmail(payload: AdminNewTutorEmailRequest) {
   });
 }
 
+// CRITERIA: Sent to admin emails when someone submits the contact form
+async function sendContactFormEmail(payload: ContactFormEmailRequest) {
+  const body = `
+    <p>New message from the <strong>Contact Us</strong> form on TutorsPool.</p>
+    ${infoBox({ "Name": payload.name, "Email": payload.email, "Subject": payload.subject })}
+    <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:16px 20px;margin:16px 0;">
+      <p style="margin:0 0 6px;"><span style="color:#64748b;font-size:13px;">Message</span></p>
+      <p style="margin:0;color:#0f172a;font-size:14px;white-space:pre-wrap;">${payload.message}</p>
+    </div>
+    <p>Reply directly to <a href="mailto:${payload.email}" style="color:#7c3aed;text-decoration:none;">${payload.email}</a> to respond.</p>
+  `;
+
+  return resend.emails.send({
+    from: FROM_ADDRESS,
+    to: ADMIN_EMAILS,
+    replyTo: payload.email,
+    subject: `📩 Contact Form: ${payload.subject}`,
+    html: renderLayout("admin", "New Contact Form Message", body),
+  });
+}
+
 /* ─── Handler ─── */
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -408,6 +432,7 @@ serve(async (req) => {
       case "admin_new_student":  result = await sendAdminNewStudentEmail(payload); break;
       case "admin_new_tutor":    result = await sendAdminNewTutorEmail(payload); break;
       case "tutor_approved":     result = await sendTutorApprovedEmail(payload); break;
+      case "contact_form":       result = await sendContactFormEmail(payload); break;
       default:
         return new Response(JSON.stringify({ error: "Unsupported email type" }), {
           status: 400,
