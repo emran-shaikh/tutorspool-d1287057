@@ -4,6 +4,7 @@ import { HeroSection } from "@/components/home/HeroSection";
 import { FeaturesSection } from "@/components/home/FeaturesSection";
 import { FeaturedTutors } from "@/components/home/FeaturedTutors";
 import { CTASection } from "@/components/home/CTASection";
+import { ExitIntentPopup } from "@/components/ExitIntentPopup";
 import { Helmet } from "react-helmet-async";
 
 const Index = () => {
@@ -43,6 +44,7 @@ const Index = () => {
         </main>
         <Footer />
       </div>
+      <ExitIntentPopup />
     </>
   );
 };
