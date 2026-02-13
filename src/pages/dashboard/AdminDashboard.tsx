@@ -6,6 +6,7 @@ import { Users, UserCheck, Video, TrendingUp, Download, Shield, BookOpen, FileTe
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { getAllUsers, getAllTutors, getAllSessions } from "@/lib/firestore";
 import { NotificationCard } from "@/components/admin/NotificationCenter";
+import { PopupAnalytics } from "@/components/admin/PopupAnalytics";
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({
@@ -110,6 +111,11 @@ export default function AdminDashboard() {
       {/* Notification Center */}
       <div className="mb-6">
         <NotificationCard />
+      </div>
+
+      {/* Exit Popup Analytics */}
+      <div className="mb-6">
+        <PopupAnalytics />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
