@@ -499,6 +499,42 @@ export const deleteNotification = async (notificationId: string): Promise<void> 
   }
 };
 
+// Demo Request Types and Functions
+export interface DemoRequest {
+  id?: string;
+  name: string;
+  email: string;
+  phone: string;
+  status: 'pending' | 'contacted' | 'scheduled' | 'completed' | 'cancelled';
+  timestamp: any;
+  notes?: string;
+}
+
+export const getDemoRequests = async (): Promise<DemoRequest[]> => {
+  try {
+    const snapshot = await getDocs(collection(db, 'demoRequests'));
+    return snapshot.docs
+      .map(doc => ({ ...doc.data(), id: doc.id } as DemoRequest))
+      .sort((a, b) => {
+        const aTime = a.timestamp?.toDate?.() || new Date(a.timestamp);
+        const bTime = b.timestamp?.toDate?.() || new Date(b.timestamp);
+        return bTime.getTime() - aTime.getTime();
+      });
+  } catch (error) {
+    if (isDev) console.error('Error fetching demo requests:', error);
+    return [];
+  }
+};
+
+export const updateDemoRequest = async (id: string, data: Partial<DemoRequest>): Promise<void> => {
+  try {
+    await updateDoc(doc(db, 'demoRequests', id), data);
+  } catch (error) {
+    if (isDev) console.error('Error updating demo request:', error);
+    throw error;
+  }
+};
+
 // Review Types and Functions
 export interface Review {
   id?: string;

@@ -7,6 +7,7 @@ import DashboardLayout from "@/components/layout/DashboardLayout";
 import { getAllUsers, getAllTutors, getAllSessions } from "@/lib/firestore";
 import { NotificationCard } from "@/components/admin/NotificationCenter";
 import { PopupAnalytics } from "@/components/admin/PopupAnalytics";
+import { DemoRequests } from "@/components/admin/DemoRequests";
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({
@@ -111,6 +112,11 @@ export default function AdminDashboard() {
       {/* Notification Center */}
       <div className="mb-6">
         <NotificationCard />
+      </div>
+
+      {/* Demo Requests */}
+      <div className="mb-6">
+        <DemoRequests />
       </div>
 
       {/* Exit Popup Analytics */}
