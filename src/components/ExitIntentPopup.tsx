@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Gift, Sparkles, X, Send } from "lucide-react";
@@ -91,7 +92,13 @@ export function ExitIntentPopup() {
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) handleDismiss(); }}>
-      <DialogContent className="sm:max-w-md p-0 overflow-hidden border-0 rounded-2xl shadow-2xl gap-0">
+      <DialogContent className="sm:max-w-md p-0 overflow-hidden border-0 rounded-2xl shadow-2xl gap-0 [&>button.absolute]:hidden">
+        <VisuallyHidden.Root asChild>
+          <DialogTitle>Special Offer</DialogTitle>
+        </VisuallyHidden.Root>
+        <VisuallyHidden.Root asChild>
+          <DialogDescription>Book a free demo and get 50% off your first session</DialogDescription>
+        </VisuallyHidden.Root>
         <div className="relative bg-gradient-to-br from-primary via-primary/90 to-orange-600 p-8 text-center text-primary-foreground">
           <button
             onClick={handleDismiss}
