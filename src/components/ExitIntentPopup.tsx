@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Gift, Sparkles, X, Send } from "lucide-react";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export function ExitIntentPopup() {
@@ -76,6 +77,12 @@ export function ExitIntentPopup() {
       trackEvent("form_submit");
       setSubmitted(true);
       toast.success("Demo request submitted! We'll contact you soon.");
+
+      // Send admin email notification
+      supabase.functions.invoke("send-email", {
+        body: { type: "demo_request", name: name.trim(), email: email.trim(), phone: phone.trim() },
+      }).catch(err => console.error("Failed to send demo email notification", err));
+
       setTimeout(() => setOpen(false), 2000);
     } catch (err) {
       console.error("Failed to submit demo request", err);

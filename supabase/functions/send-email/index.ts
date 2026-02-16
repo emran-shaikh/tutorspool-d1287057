@@ -126,7 +126,7 @@ type EmailType =
   | "session_reminder" | "session_completed" | "review_thankyou"
   | "tutor_session_booking" | "tutor_session_cancel" | "tutor_review_received"
   | "admin_new_student" | "admin_new_tutor" | "tutor_approved"
-  | "contact_form";
+  | "contact_form" | "demo_request";
 
 interface BaseEmailRequest { type: EmailType; }
 interface WelcomeEmailRequest extends BaseEmailRequest { type: "welcome"; to: string; name: string; role?: string; }
@@ -142,13 +142,14 @@ interface AdminNewStudentEmailRequest extends BaseEmailRequest { type: "admin_ne
 interface AdminNewTutorEmailRequest extends BaseEmailRequest { type: "admin_new_tutor"; tutorName: string; tutorEmail: string; }
 interface TutorApprovedEmailRequest extends BaseEmailRequest { type: "tutor_approved"; to: string; tutorName: string; }
 interface ContactFormEmailRequest extends BaseEmailRequest { type: "contact_form"; name: string; email: string; subject: string; message: string; }
+interface DemoRequestEmailRequest extends BaseEmailRequest { type: "demo_request"; name: string; email: string; phone: string; }
 
 type EmailRequest =
   | WelcomeEmailRequest | SessionBookingEmailRequest | SessionUpdateEmailRequest
   | SessionReminderEmailRequest | SessionCompletedEmailRequest | ReviewThankYouEmailRequest
   | TutorSessionBookingEmailRequest | TutorSessionCancelEmailRequest | TutorReviewReceivedEmailRequest
   | AdminNewStudentEmailRequest | AdminNewTutorEmailRequest | TutorApprovedEmailRequest
-  | ContactFormEmailRequest;
+  | ContactFormEmailRequest | DemoRequestEmailRequest;
 
 /* ─── Student Emails ─── */
 
@@ -400,6 +401,23 @@ async function sendContactFormEmail(payload: ContactFormEmailRequest) {
   });
 }
 
+// CRITERIA: Sent to admin emails when someone submits a demo request via exit popup
+async function sendDemoRequestEmail(payload: DemoRequestEmailRequest) {
+  const body = `
+    <p>A new <strong>demo session request</strong> has been submitted via the website.</p>
+    ${infoBox({ "Name": payload.name, "Email": payload.email, "Phone": payload.phone }, "#fef3c7", "#fcd34d")}
+    <p>Please contact this lead to schedule their free demo session.</p>
+  `;
+
+  return resend.emails.send({
+    from: FROM_ADDRESS,
+    to: ADMIN_EMAILS,
+    replyTo: payload.email,
+    subject: `🎯 New Demo Request: ${payload.name}`,
+    html: renderLayout("admin", "New Demo Request", body, `${SITE}/admin/dashboard`, "View All Requests"),
+  });
+}
+
 /* ─── Handler ─── */
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -433,6 +451,7 @@ serve(async (req) => {
       case "admin_new_tutor":    result = await sendAdminNewTutorEmail(payload); break;
       case "tutor_approved":     result = await sendTutorApprovedEmail(payload); break;
       case "contact_form":       result = await sendContactFormEmail(payload); break;
+      case "demo_request":       result = await sendDemoRequestEmail(payload); break;
       default:
         return new Response(JSON.stringify({ error: "Unsupported email type" }), {
           status: 400,
