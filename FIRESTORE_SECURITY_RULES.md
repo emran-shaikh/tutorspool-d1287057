@@ -260,6 +260,21 @@ service cloud.firestore {
       // Only admins can delete student profiles
       allow delete: if isAdmin();
     }
+    
+    // Exit popup events - public tracking, admin-only reads
+    match /exitPopupEvents/{eventId} {
+      allow create: if true;
+      allow read: if isAdmin();
+      allow update, delete: if false;
+    }
+    
+    // Demo requests - public lead capture, admin-only reads
+    match /demoRequests/{requestId} {
+      allow create: if true;
+      allow read: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if false;
+    }
   }
 }
 ```
