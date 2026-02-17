@@ -34,15 +34,18 @@ import {
   FileText,
   ArrowLeft 
 } from "lucide-react";
-import { getAllBlogPosts, deleteBlogPost, updateBlogPost, BlogPost } from "@/lib/firestore";
+import { getAllBlogPosts, deleteBlogPost, updateBlogPost, seedBlogPosts, BlogPost } from "@/lib/firestore";
+import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 
 export default function ManageBlogs() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
+  const [seeding, setSeeding] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
+  const { userProfile } = useAuth();
 
   useEffect(() => {
     fetchPosts();
@@ -101,12 +104,33 @@ export default function ManageBlogs() {
             <h1 className="font-display text-3xl font-bold mb-2">Manage Blogs</h1>
             <p className="text-muted-foreground">Create, edit, and publish blog posts</p>
           </div>
-          <Link to="/admin/blogs/new">
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              New Post
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={async () => {
+                if (!userProfile) return;
+                setSeeding(true);
+                try {
+                  const count = await seedBlogPosts(userProfile.uid, userProfile.fullName, window.location.origin);
+                  toast({ title: "Success", description: `${count} blog posts created with SEO-optimized content` });
+                  fetchPosts();
+                } catch (error) {
+                  toast({ title: "Error", description: "Failed to seed blog posts", variant: "destructive" });
+                } finally {
+                  setSeeding(false);
+                }
+              }}
+              disabled={seeding}
+            >
+              {seeding ? "Seeding..." : "Seed Sample Blogs"}
             </Button>
-          </Link>
+            <Link to="/admin/blogs/new">
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                New Post
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
 
