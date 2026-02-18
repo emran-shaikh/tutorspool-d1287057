@@ -34,7 +34,7 @@ import {
   FileText,
   ArrowLeft 
 } from "lucide-react";
-import { getAllBlogPosts, deleteBlogPost, updateBlogPost, seedBlogPosts, BlogPost } from "@/lib/firestore";
+import { getAllBlogPosts, deleteBlogPost, updateBlogPost, seedBlogPosts, seedMoreBlogPosts, BlogPost } from "@/lib/firestore";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
@@ -123,6 +123,25 @@ export default function ManageBlogs() {
               disabled={seeding}
             >
               {seeding ? "Seeding..." : "Seed Sample Blogs"}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={async () => {
+                if (!userProfile) return;
+                setSeeding(true);
+                try {
+                  const count = await seedMoreBlogPosts(userProfile.uid, userProfile.fullName, window.location.origin);
+                  toast({ title: "Success", description: `${count} additional blog posts created for AdSense approval` });
+                  fetchPosts();
+                } catch (error) {
+                  toast({ title: "Error", description: "Failed to seed additional blog posts", variant: "destructive" });
+                } finally {
+                  setSeeding(false);
+                }
+              }}
+              disabled={seeding}
+            >
+              {seeding ? "Seeding..." : "Seed More Blogs (AdSense)"}
             </Button>
             <Link to="/admin/blogs/new">
               <Button>
