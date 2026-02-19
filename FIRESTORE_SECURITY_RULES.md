@@ -275,6 +275,17 @@ service cloud.firestore {
       allow update: if isAdmin();
       allow delete: if false;
     }
+    
+    // Announcements collection
+    match /announcements/{announcementId} {
+      // Anyone can read announcements (for public banner/popup display)
+      allow read: if true;
+      
+      // Only admins can create/update/delete announcements
+      allow create: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
   }
 }
 ```
