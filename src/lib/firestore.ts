@@ -1798,3 +1798,73 @@ export const getStudentProfile = async (uid: string): Promise<StudentProfile | n
     return null;
   }
 };
+
+// Announcement Types and Functions
+export interface Announcement {
+  id?: string;
+  title: string;
+  content: string;
+  isActive: boolean;
+  displayType: 'banner' | 'popup';
+  createdAt: string;
+  updatedAt: string;
+  createdBy: string;
+}
+
+export const createAnnouncement = async (announcement: Omit<Announcement, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> => {
+  try {
+    const now = new Date().toISOString();
+    const docRef = await addDoc(collection(db, 'announcements'), {
+      ...announcement,
+      createdAt: now,
+      updatedAt: now
+    });
+    return docRef.id;
+  } catch (error) {
+    if (isDev) console.error('Error creating announcement:', error);
+    throw error;
+  }
+};
+
+export const getAnnouncements = async (): Promise<Announcement[]> => {
+  try {
+    const snapshot = await getDocs(collection(db, 'announcements'));
+    return snapshot.docs
+      .map(doc => ({ ...doc.data(), id: doc.id } as Announcement))
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  } catch (error) {
+    if (isDev) console.error('Error fetching announcements:', error);
+    return [];
+  }
+};
+
+export const getActiveAnnouncements = async (): Promise<Announcement[]> => {
+  try {
+    const snapshot = await getDocs(collection(db, 'announcements'));
+    return snapshot.docs
+      .map(doc => ({ ...doc.data(), id: doc.id } as Announcement))
+      .filter(a => a.isActive)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  } catch (error) {
+    if (isDev) console.error('Error fetching active announcements:', error);
+    return [];
+  }
+};
+
+export const updateAnnouncement = async (id: string, data: Partial<Announcement>): Promise<void> => {
+  try {
+    await updateDoc(doc(db, 'announcements', id), { ...data, updatedAt: new Date().toISOString() });
+  } catch (error) {
+    if (isDev) console.error('Error updating announcement:', error);
+    throw error;
+  }
+};
+
+export const deleteAnnouncement = async (id: string): Promise<void> => {
+  try {
+    await deleteDoc(doc(db, 'announcements', id));
+  } catch (error) {
+    if (isDev) console.error('Error deleting announcement:', error);
+    throw error;
+  }
+};

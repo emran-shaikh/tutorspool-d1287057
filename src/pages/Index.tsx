@@ -5,6 +5,7 @@ import { FeaturesSection } from "@/components/home/FeaturesSection";
 import { FeaturedTutors } from "@/components/home/FeaturedTutors";
 import { CTASection } from "@/components/home/CTASection";
 import { ExitIntentPopup } from "@/components/ExitIntentPopup";
+import { AnnouncementBanner } from "@/components/AnnouncementBanner";
 import { Helmet } from "react-helmet-async";
 
 const Index = () => {
@@ -35,6 +36,7 @@ const Index = () => {
       </Helmet>
 
       <div className="min-h-screen flex flex-col">
+        <AnnouncementBanner />
         <Navbar />
         <main className="flex-1">
           <HeroSection />
