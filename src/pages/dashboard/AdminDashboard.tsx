@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, UserCheck, Video, TrendingUp, Download, Shield, BookOpen, FileText, Plus } from "lucide-react";
+import { Users, UserCheck, Video, TrendingUp, Download, Shield, BookOpen, FileText, Plus, Megaphone } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { getAllUsers, getAllTutors, getAllSessions } from "@/lib/firestore";
 import { NotificationCard } from "@/components/admin/NotificationCenter";
@@ -211,6 +211,21 @@ export default function AdminDashboard() {
             </Button>
             <Button variant="default" className="w-full justify-start" asChild>
               <Link to="/admin/blogs/new"><Plus className="h-4 w-4 mr-2" /> Create New Post</Link>
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Megaphone className="h-5 w-5 text-primary" />
+              Announcements
+            </CardTitle>
+            <CardDescription>Create banners and popups for visitors</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Button variant="outline" className="w-full justify-start" asChild>
+              <Link to="/admin/announcements"><Megaphone className="h-4 w-4 mr-2" /> Manage Announcements</Link>
             </Button>
           </CardContent>
         </Card>

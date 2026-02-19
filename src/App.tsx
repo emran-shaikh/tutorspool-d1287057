@@ -37,6 +37,7 @@ import SessionMonitoring from "./pages/admin/SessionMonitoring";
 import Reports from "./pages/admin/Reports";
 import ManageBlogs from "./pages/admin/ManageBlogs";
 import BlogEditor from "./pages/admin/BlogEditor";
+import ManageAnnouncements from "./pages/admin/ManageAnnouncements";
 import HelpCenter from "./pages/HelpCenter";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
@@ -144,6 +145,7 @@ const App = () => (
               <Route path="/admin/blogs" element={<ProtectedRoute allowedRoles={['admin']}><ManageBlogs /></ProtectedRoute>} />
               <Route path="/admin/blogs/new" element={<ProtectedRoute allowedRoles={['admin']}><BlogEditor /></ProtectedRoute>} />
               <Route path="/admin/blogs/edit/:id" element={<ProtectedRoute allowedRoles={['admin']}><BlogEditor /></ProtectedRoute>} />
+              <Route path="/admin/announcements" element={<ProtectedRoute allowedRoles={['admin']}><ManageAnnouncements /></ProtectedRoute>} />
               
               <Route path="*" element={<NotFound />} />
             </Routes>
