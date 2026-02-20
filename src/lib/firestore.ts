@@ -1840,13 +1840,16 @@ export const getAnnouncements = async (): Promise<Announcement[]> => {
 
 export const getActiveAnnouncements = async (): Promise<Announcement[]> => {
   try {
-    const snapshot = await getDocs(collection(db, 'announcements'));
+    const q = query(
+      collection(db, 'announcements'),
+      where('isActive', '==', true)
+    );
+    const snapshot = await getDocs(q);
     return snapshot.docs
       .map(doc => ({ ...doc.data(), id: doc.id } as Announcement))
-      .filter(a => a.isActive)
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   } catch (error) {
-    if (isDev) console.error('Error fetching active announcements:', error);
+    console.error('Error fetching active announcements:', error);
     return [];
   }
 };
