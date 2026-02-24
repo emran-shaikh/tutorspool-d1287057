@@ -11,6 +11,8 @@ import DashboardLayout from "@/components/layout/DashboardLayout";
 import { getStudentGoals, createLearningGoal, updateLearningGoal, deleteLearningGoal, LearningGoal } from "@/lib/firestore";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { awardXP } from "@/lib/gamification";
+import { showXPNotification, showBadgeNotification } from "@/components/gamification/XPNotification";
 
 export default function LearningGoals() {
   const { userProfile } = useAuth();
@@ -91,9 +93,19 @@ export default function LearningGoals() {
   };
 
   const handleProgressUpdate = async (goal: LearningGoal, newProgress: number) => {
-    if (!goal.id) return;
+    if (!goal.id || !userProfile?.uid) return;
     try {
       await updateLearningGoal(goal.id, { progress: newProgress });
+      // Award XP when goal reaches 100%
+      if (newProgress === 100 && goal.progress < 100) {
+        try {
+          const result = await awardXP(userProfile.uid, 'goal_achieved', 100, `Goal achieved: ${goal.title}`, { goalsCompleted: 1 });
+          showXPNotification(100, `Goal achieved: ${goal.title}`);
+          result.badgesEarned.forEach(b => showBadgeNotification(b));
+        } catch (e) {
+          console.error('Gamification error:', e);
+        }
+      }
       fetchGoals();
     } catch (error) {
       console.error('Failed to update progress');

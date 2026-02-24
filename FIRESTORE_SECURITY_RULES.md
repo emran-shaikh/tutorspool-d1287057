@@ -304,6 +304,24 @@ service cloud.firestore {
 
 6. **Admin Notifications**: Only admins can read/update/delete notifications, but authenticated users can create them to support registration events.
 
+7. **Gamification**: Student gamification profiles are publicly readable (for leaderboard), but only the owning student can create/update their own record. XP transactions are readable only by the owning student and creatable by any authenticated user.
+
+### Gamification Rules (add inside `match /databases/{database}/documents`)
+
+```javascript
+    // Student Gamification profiles (public read for leaderboard)
+    match /studentGamification/{studentId} {
+      allow read: if true;
+      allow create, update: if isAuthenticated() && request.auth.uid == studentId;
+    }
+
+    // XP Transactions
+    match /xpTransactions/{transactionId} {
+      allow read: if isAuthenticated() && request.auth.uid == resource.data.studentId;
+      allow create: if isAuthenticated();
+    }
+```
+
 ## How to Apply These Rules
 
 1. Go to [Firebase Console](https://console.firebase.google.com/)

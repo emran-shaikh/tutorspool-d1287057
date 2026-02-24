@@ -1,9 +1,14 @@
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { GraduationCap, LogOut, User } from "lucide-react";
+import { GraduationCap, LogOut, User, Award } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { NotificationBell } from "@/components/admin/NotificationCenter";
+import LevelBadge from "@/components/gamification/LevelBadge";
+import StreakCounter from "@/components/gamification/StreakCounter";
+import { getStudentGamification, updateStreak, type StudentGamification } from "@/lib/gamification";
+import { showXPNotification } from "@/components/gamification/XPNotification";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -13,6 +18,23 @@ interface DashboardLayoutProps {
 export default function DashboardLayout({ children, role }: DashboardLayoutProps) {
   const { userProfile, logout } = useAuth();
   const navigate = useNavigate();
+  const [gamification, setGamification] = useState<StudentGamification | null>(null);
+
+  useEffect(() => {
+    if (role === 'student' && userProfile?.uid) {
+      getStudentGamification(userProfile.uid).then(data => {
+        setGamification(data);
+      });
+      // Update streak on dashboard load
+      updateStreak(userProfile.uid).then(({ xpAwarded }) => {
+        if (xpAwarded > 0) {
+          showXPNotification(xpAwarded, 'Daily login bonus');
+          // Refresh gamification data
+          getStudentGamification(userProfile.uid).then(setGamification);
+        }
+      }).catch(console.error);
+    }
+  }, [role, userProfile?.uid]);
 
   const handleLogout = async () => {
     try {
@@ -54,6 +76,17 @@ export default function DashboardLayout({ children, role }: DashboardLayoutProps
             </span>
             {role === 'admin' && (
               <NotificationBell />
+            )}
+            {role === 'student' && gamification && (
+              <div className="flex items-center gap-1.5">
+                <LevelBadge xp={gamification.xp} />
+                <StreakCounter streak={gamification.streak} />
+                <Button variant="ghost" size="sm" asChild>
+                  <Link to="/student/achievements">
+                    <Award className="h-4 w-4" />
+                  </Link>
+                </Button>
+              </div>
             )}
             {(role === 'student' || role === 'tutor') && (
               <Button variant="ghost" size="sm" asChild>
