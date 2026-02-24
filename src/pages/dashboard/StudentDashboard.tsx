@@ -2,10 +2,13 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Target, Calendar, TrendingUp, Clock, ArrowRight, Brain, Video, Users, Sparkles, Loader2, BookOpen, GraduationCap } from "lucide-react";
+import { Target, Calendar, TrendingUp, Clock, ArrowRight, Brain, Video, Users, Sparkles, Loader2, BookOpen, GraduationCap, Award, Zap } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { getStudentSessions, getStudentGoals, Session, LearningGoal } from "@/lib/firestore";
+import { Progress } from "@/components/ui/progress";
+import Leaderboard from "@/components/gamification/Leaderboard";
+import { getStudentGamification, calculateLevel, type StudentGamification as GamificationData } from "@/lib/gamification";
 
 interface CareerSuggestion {
   career: string;
@@ -21,6 +24,7 @@ export default function StudentDashboard() {
   const [error, setError] = useState<string | null>(null);
   const [aiSuggestions, setAiSuggestions] = useState<CareerSuggestion[]>([]);
   const [aiLoading, setAiLoading] = useState(false);
+  const [gamification, setGamification] = useState<GamificationData | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -31,12 +35,14 @@ export default function StudentDashboard() {
     setLoading(true);
     setError(null);
     try {
-      const [sessionsData, goalsData] = await Promise.all([
+      const [sessionsData, goalsData, gamData] = await Promise.all([
         getStudentSessions(userProfile.uid),
-        getStudentGoals(userProfile.uid)
+        getStudentGoals(userProfile.uid),
+        getStudentGamification(userProfile.uid),
       ]);
       setSessions(sessionsData);
       setGoals(goalsData);
+      setGamification(gamData);
       if (goalsData.length > 0) {
         generateAISuggestions(goalsData);
       }
@@ -168,6 +174,39 @@ export default function StudentDashboard() {
         </div>
         <p className="text-muted-foreground ml-14">Track your progress and continue your learning journey.</p>
       </div>
+
+      {/* Gamification Summary */}
+      {gamification && (() => {
+        const lvl = calculateLevel(gamification.xp);
+        return (
+          <Card className="mb-6 border-amber-100 dark:border-amber-900 bg-gradient-to-br from-amber-50/50 to-orange-50/50 dark:from-amber-950/30 dark:to-orange-950/30">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2">
+                <div className="p-1.5 rounded-md bg-gradient-to-br from-amber-400 to-orange-500">
+                  <Zap className="h-4 w-4 text-white" />
+                </div>
+                Level {lvl.level} — {lvl.title}
+              </CardTitle>
+              <CardDescription>{gamification.xp} / {lvl.nextLevelXp} XP to next level</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Progress value={lvl.progress} className="h-2 mb-3" />
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4 text-sm">
+                  <span>🔥 {gamification.streak}d streak</span>
+                  <span>🧠 {gamification.quizzesCompleted} quizzes</span>
+                  <span>🎓 {gamification.sessionsCompleted} sessions</span>
+                </div>
+                <Button variant="outline" size="sm" asChild>
+                  <Link to="/student/achievements">
+                    <Award className="h-4 w-4 mr-1" /> Achievements
+                  </Link>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        );
+      })()}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 mb-6 sm:mb-8">
         {[
@@ -341,6 +380,9 @@ export default function StudentDashboard() {
             </Button>
           </CardContent>
         </Card>
+
+        {/* Leaderboard */}
+        <Leaderboard />
       </div>
     </DashboardLayout>
   );

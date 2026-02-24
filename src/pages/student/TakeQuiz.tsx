@@ -31,6 +31,8 @@ import {
   Flashcard,
   QuizQuestion
 } from "@/lib/firestore";
+import { awardXP } from "@/lib/gamification";
+import { showXPNotification, showBadgeNotification } from "@/components/gamification/XPNotification";
 
 type Phase = "flashcards" | "quiz" | "results";
 
@@ -143,6 +145,34 @@ export default function TakeQuiz() {
           status: "completed",
           completedAt: endTime.toISOString()
         });
+      }
+
+      // Award XP for quiz completion
+      try {
+        const result = await awardXP(userProfile.uid, 'quiz_completed', 30, `Completed quiz: ${quiz.topic}`, { quizzesCompleted: 1 });
+        showXPNotification(30, `Completed quiz: ${quiz.topic}`);
+        result.badgesEarned.forEach(b => showBadgeNotification(b));
+
+        // Bonus for perfect score
+        if (accuracy === 100) {
+          const bonusResult = await awardXP(userProfile.uid, 'perfect_quiz', 50, 'Perfect quiz score!');
+          showXPNotification(50, 'Perfect score bonus! 💯');
+          // Also award perfect_score badge directly
+          const { doc: firestoreDoc, getDoc: firestoreGetDoc, updateDoc: firestoreUpdateDoc } = await import('firebase/firestore');
+          const { db: firestoreDb } = await import('@/lib/firebase');
+          const ref = firestoreDoc(firestoreDb, 'studentGamification', userProfile.uid);
+          const snap = await firestoreGetDoc(ref);
+          if (snap.exists()) {
+            const d = snap.data();
+            if (!d.badges?.includes('perfect_score')) {
+              await firestoreUpdateDoc(ref, { badges: [...(d.badges || []), 'perfect_score'] });
+              showBadgeNotification('perfect_score');
+            }
+          }
+          bonusResult.badgesEarned.forEach(b => showBadgeNotification(b));
+        }
+      } catch (e) {
+        console.error('Gamification error:', e);
       }
 
       navigate(`/student/quiz/${quizId}/results?result=${resultId}`);
