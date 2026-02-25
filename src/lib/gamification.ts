@@ -106,9 +106,10 @@ export async function awardXP(
   xpAmount: number,
   description: string,
   statIncrement?: Partial<Pick<StudentGamification, 'sessionsCompleted' | 'quizzesCompleted' | 'goalsCompleted' | 'totalStudyHours'>>
-): Promise<{ newXP: number; newLevel: number; badgesEarned: string[] }> {
+): Promise<{ newXP: number; newLevel: number; previousLevel: number; levelTitle: string; badgesEarned: string[] }> {
   // Ensure gamification record exists
-  await initializeGamification(studentId);
+  const prev = await initializeGamification(studentId);
+  const previousLevel = prev.level;
 
   const ref = doc(db, 'studentGamification', studentId);
 
@@ -141,7 +142,7 @@ export async function awardXP(
   // Check badges
   const badgesEarned = await checkAndAwardBadges(studentId, { ...updated, level: levelInfo.level });
 
-  return { newXP: updated.xp, newLevel: levelInfo.level, badgesEarned };
+  return { newXP: updated.xp, newLevel: levelInfo.level, previousLevel, levelTitle: levelInfo.title, badgesEarned };
 }
 
 export async function checkAndAwardBadges(studentId: string, stats: StudentGamification): Promise<string[]> {
