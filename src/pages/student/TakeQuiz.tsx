@@ -32,7 +32,7 @@ import {
   QuizQuestion
 } from "@/lib/firestore";
 import { awardXP } from "@/lib/gamification";
-import { showXPNotification, showBadgeNotification } from "@/components/gamification/XPNotification";
+import { showXPNotification, showBadgeNotification, showLevelUpNotification } from "@/components/gamification/XPNotification";
 
 type Phase = "flashcards" | "quiz" | "results";
 
@@ -151,12 +151,14 @@ export default function TakeQuiz() {
       try {
         const result = await awardXP(userProfile.uid, 'quiz_completed', 30, `Completed quiz: ${quiz.topic}`, { quizzesCompleted: 1 });
         showXPNotification(30, `Completed quiz: ${quiz.topic}`);
+        if (result.newLevel > result.previousLevel) showLevelUpNotification(result.newLevel, result.levelTitle);
         result.badgesEarned.forEach(b => showBadgeNotification(b));
 
         // Bonus for perfect score
         if (accuracy === 100) {
           const bonusResult = await awardXP(userProfile.uid, 'perfect_quiz', 50, 'Perfect quiz score!');
           showXPNotification(50, 'Perfect score bonus! 💯');
+          if (bonusResult.newLevel > bonusResult.previousLevel) showLevelUpNotification(bonusResult.newLevel, bonusResult.levelTitle);
           // Also award perfect_score badge directly
           const { doc: firestoreDoc, getDoc: firestoreGetDoc, updateDoc: firestoreUpdateDoc } = await import('firebase/firestore');
           const { db: firestoreDb } = await import('@/lib/firebase');

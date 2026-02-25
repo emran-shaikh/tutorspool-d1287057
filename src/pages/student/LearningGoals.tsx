@@ -12,7 +12,7 @@ import { getStudentGoals, createLearningGoal, updateLearningGoal, deleteLearning
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { awardXP } from "@/lib/gamification";
-import { showXPNotification, showBadgeNotification } from "@/components/gamification/XPNotification";
+import { showXPNotification, showBadgeNotification, showLevelUpNotification } from "@/components/gamification/XPNotification";
 
 export default function LearningGoals() {
   const { userProfile } = useAuth();
@@ -101,6 +101,7 @@ export default function LearningGoals() {
         try {
           const result = await awardXP(userProfile.uid, 'goal_achieved', 100, `Goal achieved: ${goal.title}`, { goalsCompleted: 1 });
           showXPNotification(100, `Goal achieved: ${goal.title}`);
+          if (result.newLevel > result.previousLevel) showLevelUpNotification(result.newLevel, result.levelTitle);
           result.badgesEarned.forEach(b => showBadgeNotification(b));
         } catch (e) {
           console.error('Gamification error:', e);
