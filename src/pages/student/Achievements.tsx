@@ -16,6 +16,7 @@ import {
   LEVELS,
   type StudentGamification as GamificationData,
   type XPTransaction,
+  GAMIFICATION_UPDATED_EVENT,
 } from '@/lib/gamification';
 
 const tierColors: Record<string, string> = {
@@ -53,14 +54,22 @@ export default function Achievements() {
   // Refetch when page regains focus (e.g. after completing a quiz)
   useEffect(() => {
     const handleFocus = () => fetchData();
-    window.addEventListener('focus', handleFocus);
     const handleVisibility = () => {
       if (document.visibilityState === 'visible') fetchData();
     };
+    const handleGamificationUpdated = (event: Event) => {
+      const { detail } = event as CustomEvent<{ studentId?: string }>;
+      if (!detail?.studentId || detail.studentId === userProfile?.uid) fetchData();
+    };
+
+    window.addEventListener('focus', handleFocus);
     document.addEventListener('visibilitychange', handleVisibility);
+    window.addEventListener(GAMIFICATION_UPDATED_EVENT, handleGamificationUpdated as EventListener);
+
     return () => {
       window.removeEventListener('focus', handleFocus);
       document.removeEventListener('visibilitychange', handleVisibility);
+      window.removeEventListener(GAMIFICATION_UPDATED_EVENT, handleGamificationUpdated as EventListener);
     };
   }, [userProfile?.uid]);
 

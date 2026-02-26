@@ -7,7 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { NotificationBell } from "@/components/admin/NotificationCenter";
 import LevelBadge from "@/components/gamification/LevelBadge";
 import StreakCounter from "@/components/gamification/StreakCounter";
-import { getStudentGamification, updateStreak, type StudentGamification } from "@/lib/gamification";
+import { getStudentGamification, updateStreak, GAMIFICATION_UPDATED_EVENT, type StudentGamification } from "@/lib/gamification";
 import { showXPNotification } from "@/components/gamification/XPNotification";
 
 interface DashboardLayoutProps {
@@ -39,11 +39,26 @@ export default function DashboardLayout({ children, role }: DashboardLayoutProps
     }
   }, [role, userProfile?.uid]);
 
-  // Refresh gamification on focus/visibility change
+  // Refresh gamification on focus/visibility change and in-app XP events
   useEffect(() => {
     const handleFocus = () => fetchGamification();
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') fetchGamification();
+    };
+    const handleGamificationUpdated = (event: Event) => {
+      const { detail } = event as CustomEvent<{ studentId?: string }>;
+      if (!detail?.studentId || detail.studentId === userProfile?.uid) fetchGamification();
+    };
+
     window.addEventListener('focus', handleFocus);
-    return () => window.removeEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleVisibility);
+    window.addEventListener(GAMIFICATION_UPDATED_EVENT, handleGamificationUpdated as EventListener);
+
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibility);
+      window.removeEventListener(GAMIFICATION_UPDATED_EVENT, handleGamificationUpdated as EventListener);
+    };
   }, [role, userProfile?.uid]);
 
   const handleLogout = async () => {
