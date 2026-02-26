@@ -1,4 +1,4 @@
-import { doc, getDoc, setDoc, updateDoc, addDoc, collection, query, where, orderBy, limit as firestoreLimit, getDocs, increment } from 'firebase/firestore';
+import { doc, getDoc, getDocFromServer, setDoc, updateDoc, addDoc, collection, query, where, orderBy, limit as firestoreLimit, getDocs, getDocsFromServer, increment } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -42,6 +42,15 @@ export const LEVELS = [
   { level: 10, title: 'Grandmaster', xpRequired: 10000 },
 ];
 
+export const GAMIFICATION_UPDATED_EVENT = 'gamification:updated';
+
+function notifyGamificationUpdated(studentId: string) {
+  if (typeof window === 'undefined') return;
+  window.dispatchEvent(new CustomEvent(GAMIFICATION_UPDATED_EVENT, {
+    detail: { studentId, at: Date.now() },
+  }));
+}
+
 export function calculateLevel(xp: number): { level: number; title: string; xpRequired: number; nextLevelXp: number; progress: number } {
   let current = LEVELS[0];
   for (const l of LEVELS) {
@@ -83,7 +92,13 @@ export const BADGES: BadgeDefinition[] = [
 // ── Firestore CRUD ─────────────────────────────────────────────────────────
 
 export async function getStudentGamification(studentId: string): Promise<StudentGamification | null> {
-  const snap = await getDoc(doc(db, 'studentGamification', studentId));
+  const ref = doc(db, 'studentGamification', studentId);
+  let snap;
+  try {
+    snap = await getDocFromServer(ref);
+  } catch {
+    snap = await getDoc(ref);
+  }
   return snap.exists() ? (snap.data() as StudentGamification) : null;
 }
 
@@ -131,7 +146,13 @@ export async function awardXP(
   });
 
   // Re-read to get new totals
-  const updated = (await getDoc(ref)).data() as StudentGamification;
+  let updatedSnap;
+  try {
+    updatedSnap = await getDocFromServer(ref);
+  } catch {
+    updatedSnap = await getDoc(ref);
+  }
+  const updated = updatedSnap.data() as StudentGamification;
   const levelInfo = calculateLevel(updated.xp);
 
   // Update level if changed
@@ -141,6 +162,8 @@ export async function awardXP(
 
   // Check badges
   const badgesEarned = await checkAndAwardBadges(studentId, { ...updated, level: levelInfo.level });
+
+  notifyGamificationUpdated(studentId);
 
   return { newXP: updated.xp, newLevel: levelInfo.level, previousLevel, levelTitle: levelInfo.title, badgesEarned };
 }
@@ -181,7 +204,13 @@ export async function checkAndAwardBadges(studentId: string, stats: StudentGamif
 export async function updateStreak(studentId: string): Promise<{ streak: number; xpAwarded: number }> {
   await initializeGamification(studentId);
   const ref = doc(db, 'studentGamification', studentId);
-  const data = (await getDoc(ref)).data() as StudentGamification;
+  let currentSnap;
+  try {
+    currentSnap = await getDocFromServer(ref);
+  } catch {
+    currentSnap = await getDoc(ref);
+  }
+  const data = currentSnap.data() as StudentGamification;
 
   const today = new Date().toISOString().split('T')[0];
   if (data.lastActiveDate === today) return { streak: data.streak, xpAwarded: 0 };
@@ -210,12 +239,19 @@ export async function updateStreak(studentId: string): Promise<{ streak: number;
   await updateDoc(ref, { xp: increment(xpAwarded) });
 
   // Re-check level
-  const fresh = (await getDoc(ref)).data() as StudentGamification;
+  let freshSnap;
+  try {
+    freshSnap = await getDocFromServer(ref);
+  } catch {
+    freshSnap = await getDoc(ref);
+  }
+  const fresh = freshSnap.data() as StudentGamification;
   const lvl = calculateLevel(fresh.xp);
   if (lvl.level !== fresh.level) await updateDoc(ref, { level: lvl.level });
 
   // Check badges for streak
   await checkAndAwardBadges(studentId, { ...fresh, longestStreak, streak: newStreak, level: lvl.level });
+  notifyGamificationUpdated(studentId);
 
   return { streak: newStreak, xpAwarded };
 }
@@ -227,7 +263,12 @@ export async function getXPHistory(studentId: string, count = 20): Promise<XPTra
     orderBy('createdAt', 'desc'),
     firestoreLimit(count)
   );
-  const snap = await getDocs(q);
+  let snap;
+  try {
+    snap = await getDocsFromServer(q);
+  } catch {
+    snap = await getDocs(q);
+  }
   return snap.docs.map(d => ({ id: d.id, ...d.data() } as XPTransaction));
 }
 
@@ -237,7 +278,12 @@ export async function getLeaderboard(count = 10): Promise<(StudentGamification &
     orderBy('xp', 'desc'),
     firestoreLimit(count)
   );
-  const snap = await getDocs(q);
+  let snap;
+  try {
+    snap = await getDocsFromServer(q);
+  } catch {
+    snap = await getDocs(q);
+  }
   const entries = snap.docs.map(d => ({ id: d.id, ...d.data() } as StudentGamification & { id: string; fullName?: string }));
 
   // Fetch names
