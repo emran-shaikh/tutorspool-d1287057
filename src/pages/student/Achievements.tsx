@@ -30,16 +30,39 @@ export default function Achievements() {
   const [history, setHistory] = useState<XPTransaction[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const fetchData = async () => {
     if (!userProfile?.uid) return;
-    Promise.all([
-      getStudentGamification(userProfile.uid),
-      getXPHistory(userProfile.uid, 20),
-    ])
-      .then(([g, h]) => { setData(g); setHistory(h); })
-      .catch(console.error)
-      .finally(() => setLoading(false));
+    try {
+      const [g, h] = await Promise.all([
+        getStudentGamification(userProfile.uid),
+        getXPHistory(userProfile.uid, 20),
+      ]);
+      setData(g);
+      setHistory(h);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
   }, [userProfile]);
+
+  // Refetch when page regains focus (e.g. after completing a quiz)
+  useEffect(() => {
+    const handleFocus = () => fetchData();
+    window.addEventListener('focus', handleFocus);
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') fetchData();
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
+  }, [userProfile?.uid]);
 
   if (loading) {
     return (

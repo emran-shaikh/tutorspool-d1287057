@@ -20,20 +20,30 @@ export default function DashboardLayout({ children, role }: DashboardLayoutProps
   const navigate = useNavigate();
   const [gamification, setGamification] = useState<StudentGamification | null>(null);
 
+  const fetchGamification = async () => {
+    if (role !== 'student' || !userProfile?.uid) return;
+    const data = await getStudentGamification(userProfile.uid);
+    setGamification(data);
+  };
+
   useEffect(() => {
     if (role === 'student' && userProfile?.uid) {
-      getStudentGamification(userProfile.uid).then(data => {
-        setGamification(data);
-      });
+      fetchGamification();
       // Update streak on dashboard load
       updateStreak(userProfile.uid).then(({ xpAwarded }) => {
         if (xpAwarded > 0) {
           showXPNotification(xpAwarded, 'Daily login bonus');
-          // Refresh gamification data
-          getStudentGamification(userProfile.uid).then(setGamification);
+          fetchGamification();
         }
       }).catch(console.error);
     }
+  }, [role, userProfile?.uid]);
+
+  // Refresh gamification on focus/visibility change
+  useEffect(() => {
+    const handleFocus = () => fetchGamification();
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
   }, [role, userProfile?.uid]);
 
   const handleLogout = async () => {
