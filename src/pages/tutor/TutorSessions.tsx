@@ -14,6 +14,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { auth } from "@/lib/firebase";
 import { supabase } from "@/integrations/supabase/client";
+import { awardXP } from "@/lib/gamification";
+import { showXPNotification, showLevelUpNotification, showBadgeNotification } from "@/components/gamification/XPNotification";
 
 const statusColors: Record<Session['status'], string> = {
   pending: "bg-warning/10 text-warning border-warning/20",
@@ -171,6 +173,22 @@ export default function TutorSessions() {
       await updateSessionStatus(sessionId, 'completed');
       if (session) {
         await sendSessionStatusEmail(session, 'session_update', 'completed');
+        // Award +50 XP to the student for completing a session
+        try {
+          const result = await awardXP(
+            session.studentId,
+            'session_completed',
+            50,
+            `Completed tutoring session: ${session.subject}`,
+            { sessionsCompleted: 1 }
+          );
+          if (result.newLevel > result.previousLevel) {
+            showLevelUpNotification(result.newLevel, result.levelTitle);
+          }
+          result.badgesEarned.forEach(b => showBadgeNotification(b));
+        } catch (xpError) {
+          console.error('Failed to award session XP:', xpError);
+        }
       }
       toast({ title: "Session marked as completed" });
       fetchSessions();
