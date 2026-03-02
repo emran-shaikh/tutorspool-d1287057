@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { 
   Calculator, 
   FlaskConical, 
@@ -79,8 +80,13 @@ const subjects = [
 
 export default function Subjects() {
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
+    <>
+      <Helmet>
+        <title>Subjects - TutorsPool | 50+ Subjects Available</title>
+        <meta name="description" content="Browse 50+ subjects on TutorsPool — math, science, languages, programming, music, arts, test prep, and more. Find expert tutors in any subject." />
+        <link rel="canonical" href={`${window.location.origin}/subjects`} />
+      </Helmet>
+      <div className="min-h-screen flex flex-col">
       <main className="flex-1">
         {/* Hero Section */}
         <section className="py-16 bg-gradient-to-b from-primary/5 to-background">
@@ -161,5 +167,6 @@ export default function Subjects() {
       </main>
       <Footer />
     </div>
+    </>
   );
 }

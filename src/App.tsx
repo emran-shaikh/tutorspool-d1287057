@@ -42,6 +42,7 @@ import HelpCenter from "./pages/HelpCenter";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import FAQ from "./pages/FAQ";
+import Disclaimer from "./pages/Disclaimer";
 import Careers from "./pages/Careers";
 import NotFound from "./pages/NotFound";
 import ForgotPassword from "./pages/ForgotPassword";
@@ -113,6 +114,7 @@ const App = () => (
               <Route path="/terms" element={<Terms />} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/faq" element={<FAQ />} />
+              <Route path="/disclaimer" element={<Disclaimer />} />
               <Route path="/careers" element={<Careers />} />
               <Route path="/results/:resultId" element={<SharedQuizResults />} />
               <Route path="/login" element={<AuthRoute><Login /></AuthRoute>} />

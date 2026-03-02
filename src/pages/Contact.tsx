@@ -2,6 +2,7 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
+import { Helmet } from "react-helmet-async";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -118,8 +119,13 @@ export default function Contact() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
+    <>
+      <Helmet>
+        <title>Contact Us - TutorsPool | Get In Touch</title>
+        <meta name="description" content="Contact TutorsPool for questions about tutoring, sessions, or partnerships. Reach our support team via email, phone, or our contact form." />
+        <link rel="canonical" href={`${window.location.origin}/contact`} />
+      </Helmet>
+      <div className="min-h-screen flex flex-col">
       <main className="flex-1">
         {/* Hero Section */}
         <section className="py-16 bg-gradient-to-b from-primary/5 to-background">
@@ -273,5 +279,6 @@ export default function Contact() {
       </main>
       <Footer />
     </div>
+    </>
   );
 }
