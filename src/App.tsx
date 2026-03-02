@@ -48,6 +48,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import SharedQuizResults from "./pages/SharedQuizResults";
 import Achievements from "./pages/student/Achievements";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { CookieConsent } from "@/components/CookieConsent";
 
 const queryClient = new QueryClient();
 
@@ -152,6 +153,7 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
             </Routes>
             <ChatBot />
+            <CookieConsent />
           </ErrorBoundary>
         </AuthProvider>
       </BrowserRouter>
