@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
+import { Helmet } from "react-helmet-async";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -69,8 +70,13 @@ export default function Reviews() {
     : "0.0";
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
+    <>
+      <Helmet>
+        <title>Student Reviews - TutorsPool | Real Testimonials</title>
+        <meta name="description" content="Read real reviews from students who improved their grades with TutorsPool. See ratings, testimonials, and success stories from our tutoring community." />
+        <link rel="canonical" href={`${window.location.origin}/reviews`} />
+      </Helmet>
+      <div className="min-h-screen flex flex-col">
       <main className="flex-1">
         {/* Hero Section */}
         <section className="py-16 bg-gradient-to-b from-primary/5 to-background">
@@ -205,5 +211,6 @@ export default function Reviews() {
       </main>
       <Footer />
     </div>
+    </>
   );
 }

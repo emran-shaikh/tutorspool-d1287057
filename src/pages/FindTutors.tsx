@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -96,8 +97,13 @@ export default function FindTutors() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
+    <>
+      <Helmet>
+        <title>Find Tutors - TutorsPool | Browse Expert Tutors</title>
+        <meta name="description" content="Browse verified expert tutors on TutorsPool. Filter by subject, read reviews, compare rates, and book personalized 1-on-1 sessions." />
+        <link rel="canonical" href={`${window.location.origin}/tutors`} />
+      </Helmet>
+      <div className="min-h-screen flex flex-col">
       <main className="flex-1">
         {/* Hero Section */}
         <section className="py-16 bg-gradient-to-b from-primary/5 to-background">
@@ -321,5 +327,6 @@ export default function FindTutors() {
       </main>
       <Footer />
     </div>
+    </>
   );
 }

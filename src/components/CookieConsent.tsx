@@ -13,16 +13,27 @@ export function CookieConsent() {
     }
   }, []);
 
+  const loadAdSense = () => {
+    if (document.querySelector('script[src*="adsbygoogle"]')) return;
+    const s = document.createElement("script");
+    s.async = true;
+    s.src =
+      "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8398028846106746";
+    s.crossOrigin = "anonymous";
+    document.head.appendChild(s);
+  };
+
   const accept = () => {
     localStorage.setItem("cookie_consent", "accepted");
     setVisible(false);
+    loadAdSense();
   };
 
   const decline = () => {
     localStorage.setItem("cookie_consent", "declined");
     setVisible(false);
     // Disable Google Analytics & AdSense tracking
-    window['ga-disable-G-EMJX84775R'] = true;
+    (window as any)["ga-disable-G-EMJX84775R"] = true;
   };
 
   if (!visible) return null;
@@ -34,9 +45,13 @@ export function CookieConsent() {
           <Cookie className="h-6 w-6 text-primary shrink-0 mt-0.5 sm:mt-0" />
           <div className="flex-1 text-sm text-muted-foreground">
             <p>
-              We use cookies and similar technologies to improve your experience, serve personalized ads via Google AdSense, and analyze traffic.
-              By clicking "Accept", you consent to our use of cookies.{" "}
-              <a href="/privacy" className="underline text-primary hover:text-primary/80">
+              We use cookies and similar technologies to improve your experience,
+              serve personalized ads via Google AdSense, and analyze traffic. By
+              clicking "Accept", you consent to our use of cookies.{" "}
+              <a
+                href="/privacy"
+                className="underline text-primary hover:text-primary/80"
+              >
                 Privacy Policy
               </a>
             </p>

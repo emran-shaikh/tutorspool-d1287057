@@ -1,6 +1,7 @@
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Card, CardContent } from "@/components/ui/card";
+import { Helmet } from "react-helmet-async";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -73,8 +74,13 @@ const achievements = [
 
 export default function About() {
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
+    <>
+      <Helmet>
+        <title>About Us - TutorsPool | Our Mission & Team</title>
+        <meta name="description" content="Learn about TutorsPool's mission to make quality education accessible. Meet our leadership team and discover our values." />
+        <link rel="canonical" href={`${window.location.origin}/about`} />
+      </Helmet>
+      <div className="min-h-screen flex flex-col">
       <main className="flex-1">
         {/* Hero Section */}
         <section className="py-16 bg-gradient-to-b from-primary/5 to-background">
@@ -212,5 +218,6 @@ export default function About() {
       </main>
       <Footer />
     </div>
+    </>
   );
 }

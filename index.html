@@ -7,10 +7,23 @@
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-
       gtag('config', 'G-EMJX84775R');
     </script>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8398028846106746" crossorigin="anonymous"></script>
+    <!-- Google AdSense - only loads if cookie consent accepted -->
+    <script>
+      (function() {
+        try {
+          var consent = localStorage.getItem('cookie_consent');
+          if (consent === 'accepted') {
+            var s = document.createElement('script');
+            s.async = true;
+            s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8398028846106746';
+            s.crossOrigin = 'anonymous';
+            document.head.appendChild(s);
+          }
+        } catch(e) {}
+      })();
+    </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>TutorsPool - Transform Your Learning Journey</title>
@@ -31,6 +44,13 @@
   </head>
 
   <body>
+    <noscript>
+      <div style="padding:2rem;text-align:center;font-family:sans-serif;">
+        <h1>TutorsPool - Personalized Online Tutoring</h1>
+        <p>Connect with expert tutors for 1-on-1 online sessions in math, science, languages, test prep, and more. Join thousands of students improving their grades with TutorsPool.</p>
+        <p><a href="https://www.tutorspool.com">Visit TutorsPool</a></p>
+      </div>
+    </noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
