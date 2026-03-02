@@ -94,7 +94,44 @@ export default function Privacy() {
 
               <Card>
                 <CardHeader>
-                  <CardTitle>5. Contact Us</CardTitle>
+                  <CardTitle>5. Cookies & Advertising</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3 text-sm text-muted-foreground">
+                  <p>
+                    We use cookies and similar tracking technologies to enhance your
+                    browsing experience, remember your preferences, and analyze site
+                    traffic.
+                  </p>
+                  <p>
+                    We use Google AdSense to display advertisements. Google and its
+                    partners may use cookies to serve ads based on your prior visits to
+                    this or other websites. You can opt out of personalized advertising
+                    by visiting{" "}
+                    <a
+                      href="https://www.google.com/settings/ads"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline font-medium"
+                    >
+                      Google Ads Settings
+                    </a>.
+                  </p>
+                  <p>
+                    We also use Google Analytics to understand how visitors interact
+                    with our site. This data is anonymized and used solely to improve
+                    the platform experience.
+                  </p>
+                  <p>
+                    You can manage your cookie preferences at any time. Declining
+                    cookies will disable personalized advertising and analytics
+                    tracking.
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>6. Contact Us</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3 text-sm text-muted-foreground">
                   <p>
