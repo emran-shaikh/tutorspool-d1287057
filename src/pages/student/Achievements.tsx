@@ -10,6 +10,7 @@ import Leaderboard from '@/components/gamification/Leaderboard';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   getStudentGamification,
+  initializeGamification,
   getXPHistory,
   calculateLevel,
   BADGES,
@@ -35,7 +36,7 @@ export default function Achievements() {
     if (!userProfile?.uid) return;
     try {
       const [g, h] = await Promise.all([
-        getStudentGamification(userProfile.uid),
+        initializeGamification(userProfile.uid).then(() => getStudentGamification(userProfile.uid)),
         getXPHistory(userProfile.uid, 20),
       ]);
       setData(g);
