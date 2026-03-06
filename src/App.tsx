@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ChatBot } from "@/components/ChatBot";
+import { VoiceAgent } from "@/components/VoiceAgent";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -155,6 +156,7 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
             </Routes>
             <ChatBot />
+            <VoiceAgent />
             <CookieConsent />
           </ErrorBoundary>
         </AuthProvider>
