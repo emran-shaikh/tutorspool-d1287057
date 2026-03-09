@@ -24,6 +24,20 @@ export function VoiceAgent() {
         description: "Connection failed. Please try again.",
       });
     },
+    clientTools: {
+      navigateTo: (params: { page: string }) => {
+        window.location.href = params.page;
+        return `Navigated to ${params.page}`;
+      },
+      openWhatsApp: () => {
+        window.open("https://wa.me/923453284284", "_blank");
+        return "Opened WhatsApp support chat";
+      },
+      showNotification: (params: { title: string; message: string }) => {
+        toast({ title: params.title, description: params.message });
+        return "Notification displayed";
+      },
+    },
   });
 
   const startConversation = useCallback(async () => {
