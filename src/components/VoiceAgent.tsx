@@ -138,50 +138,68 @@ RULES:
   const isConnected = conversation.status === "connected";
 
   return (
-    <div className="fixed bottom-6 left-6 z-50 flex flex-col items-center gap-2">
+    <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-3">
       {/* Status indicator */}
       {isConnected && (
-        <div className="bg-background/95 backdrop-blur-sm border rounded-xl px-3 py-2 shadow-lg text-xs text-center animate-in fade-in slide-in-from-bottom-2">
-          <div className="flex items-center gap-1.5">
+        <div className="bg-background/90 backdrop-blur-md border border-border/50 rounded-full px-4 py-2 shadow-elevated text-xs text-center animate-fade-in">
+          <div className="flex items-center gap-2">
             <span
               className={`inline-block w-2 h-2 rounded-full ${
                 conversation.isSpeaking
-                  ? "bg-green-500 animate-pulse"
-                  : "bg-amber-500"
+                  ? "bg-success animate-pulse"
+                  : "bg-warning"
               }`}
             />
-            <span className="text-muted-foreground">
+            <span className="text-muted-foreground font-medium">
               {conversation.isSpeaking ? "Agent speaking…" : "Listening…"}
             </span>
           </div>
         </div>
       )}
 
-      {/* Main button */}
-      {isConnected ? (
-        <Button
-          onClick={stopConversation}
-          size="icon"
-          className="h-14 w-14 rounded-full shadow-lg bg-destructive hover:bg-destructive/90 text-destructive-foreground"
-          aria-label="End voice conversation"
-        >
-          <PhoneOff className="h-6 w-6" />
-        </Button>
-      ) : (
-        <Button
-          onClick={startConversation}
-          disabled={isConnecting}
-          size="icon"
-          className="h-14 w-14 rounded-full shadow-lg gradient-primary text-primary-foreground hover:shadow-xl hover:scale-105 transition-all"
-          aria-label="Start voice conversation"
-        >
-          {isConnecting ? (
-            <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
-          ) : (
-            <Mic className="h-6 w-6" />
-          )}
-        </Button>
-      )}
+      {/* Animated border pill button */}
+      <div className="relative group">
+        {/* Animated gradient border */}
+        <div className="absolute -inset-[2px] rounded-full bg-[length:300%_300%] animate-[gradient-spin_3s_linear_infinite] opacity-80 group-hover:opacity-100 transition-opacity"
+          style={{
+            background: "linear-gradient(90deg, hsl(var(--primary)), hsl(280, 70%, 55%), hsl(var(--primary)), hsl(200, 80%, 55%), hsl(var(--primary)))",
+            backgroundSize: "300% 100%",
+          }}
+        />
+        
+        {/* Inner content */}
+        {isConnected ? (
+          <button
+            onClick={stopConversation}
+            className="relative flex items-center gap-2.5 px-7 py-3.5 rounded-full bg-secondary text-secondary-foreground font-display font-medium text-sm tracking-wide hover:bg-secondary/90 transition-colors"
+            aria-label="End voice conversation"
+          >
+            <PhoneOff className="h-4 w-4" />
+            <span>End Call</span>
+            <span className="inline-block w-1.5 h-1.5 rounded-full bg-destructive animate-pulse" />
+          </button>
+        ) : (
+          <button
+            onClick={startConversation}
+            disabled={isConnecting}
+            className="relative flex items-center gap-2.5 px-7 py-3.5 rounded-full bg-secondary text-secondary-foreground font-display font-medium text-sm tracking-wide hover:bg-secondary/90 transition-colors disabled:opacity-60"
+            aria-label="Start voice conversation"
+          >
+            {isConnecting ? (
+              <>
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-secondary-foreground border-t-transparent" />
+                <span>Connecting…</span>
+              </>
+            ) : (
+              <>
+                <Mic className="h-4 w-4" />
+                <span>Talk to Agent</span>
+                <span className="text-xs opacity-60">✦</span>
+              </>
+            )}
+          </button>
+        )}
+      </div>
     </div>
   );
 }
