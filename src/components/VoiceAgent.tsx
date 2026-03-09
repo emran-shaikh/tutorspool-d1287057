@@ -24,9 +24,10 @@ export function VoiceAgent() {
       });
     },
     clientTools: {
-      navigateTo: (params: { page: string }) => {
-        window.location.href = params.page;
-        return `Navigated to ${params.page}`;
+      navigateTo: async (params: { page: string }) => {
+        const page = params.page.startsWith('/') ? params.page : `/${params.page}`;
+        window.location.assign(window.location.origin + page);
+        return `Navigating user to ${page}`;
       },
       openWhatsApp: () => {
         window.open("https://wa.me/923453284284", "_blank");
@@ -137,7 +138,7 @@ RULES:
   const isConnected = conversation.status === "connected";
 
   return (
-    <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-3">
+    <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-3 drop-shadow-[0_0_25px_hsl(var(--primary)/0.4)]">
       {/* Status indicator */}
       {isConnected && (
         <div className="bg-background/90 backdrop-blur-md border border-border/50 rounded-full px-4 py-2 shadow-elevated text-xs text-center animate-fade-in">
