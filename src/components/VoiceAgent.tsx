@@ -24,9 +24,10 @@ export function VoiceAgent() {
       });
     },
     clientTools: {
-      navigateTo: (params: { page: string }) => {
-        window.location.href = params.page;
-        return `Navigated to ${params.page}`;
+      navigateTo: async (params: { page: string }) => {
+        const page = params.page.startsWith('/') ? params.page : `/${params.page}`;
+        window.location.assign(window.location.origin + page);
+        return `Navigating user to ${page}`;
       },
       openWhatsApp: () => {
         window.open("https://wa.me/923453284284", "_blank");
