@@ -24,6 +24,20 @@ export function VoiceAgent() {
         description: "Connection failed. Please try again.",
       });
     },
+    clientTools: {
+      navigateTo: (params: { page: string }) => {
+        window.location.href = params.page;
+        return `Navigated to ${params.page}`;
+      },
+      openWhatsApp: () => {
+        window.open("https://wa.me/923453284284", "_blank");
+        return "Opened WhatsApp support chat";
+      },
+      showNotification: (params: { title: string; message: string }) => {
+        toast({ title: params.title, description: params.message });
+        return "Notification displayed";
+      },
+    },
   });
 
   const startConversation = useCallback(async () => {
@@ -79,12 +93,26 @@ SUPPORT:
 - For help, contact via WhatsApp: +92 345 3284 284
 - Visit the Help Center or FAQ page on the website
 
+AVAILABLE TOOLS (use these to take actions for the user):
+1. navigateTo({ page: string }) — Navigate the user to a page. Available pages:
+   - /tutors (Find Tutors), /subjects (Browse Subjects), /reviews (Reviews)
+   - /register (Sign Up), /login (Sign In), /forgot-password (Reset Password)
+   - /about (About Us), /contact (Contact), /blog (Blog)
+   - /help (Help Center), /faq (FAQ), /careers (Careers)
+   - /student/dashboard, /student/tutors, /student/sessions, /student/goals, /student/quizzes, /student/achievements, /student/profile
+   - /tutor/dashboard, /tutor/sessions, /tutor/availability, /tutor/profile, /tutor/quizzes, /tutor/quizzes/create
+   Use this when a user says things like "take me to...", "show me...", "I want to find tutors", "I want to sign up", etc.
+
+2. openWhatsApp() — Open WhatsApp support chat with TutorsPool team. Use when user asks for direct support or wants to chat with a human.
+
+3. showNotification({ title: string, message: string }) — Show a toast notification on screen. Use to confirm actions or provide quick tips.
+
 RULES:
 - Only discuss TutorsPool platform topics
 - Be concise, warm, and helpful
 - If asked about unrelated topics, politely redirect to TutorsPool
 - Guide users step-by-step when they need help with platform features
-- Suggest relevant pages or actions the user can take`,
+- ALWAYS use the appropriate tool when the user wants to navigate or needs support — don't just describe what to do, actually do it for them`,
             },
             firstMessage: "Hi there! I'm your TutorsPool assistant. I can help you find tutors, book sessions, understand our features, or answer any questions about the platform. What would you like to know?",
             language: "en",
