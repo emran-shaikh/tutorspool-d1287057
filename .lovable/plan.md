@@ -1,46 +1,32 @@
 
 
-# Plan: Add ElevenLabs Conversational AI Voice Agent
+## Plan: Add Client Tools to Voice Agent for Actionable Decisions
 
-## Overview
+The voice agent currently only answers questions. This plan adds **client tools** so the agent can take actions on behalf of the user — like navigating to pages, opening WhatsApp support, and showing toast notifications.
 
-Add a voice agent button to the site that lets users have a real-time voice conversation with an AI tutor assistant, powered by ElevenLabs Conversational AI.
+**Important prerequisite:** Each client tool listed below must also be registered in the ElevenLabs dashboard for the agent. Without that, the agent won't call them.
 
-## Prerequisites
+### Changes
 
-1. **ElevenLabs Connection** — Connect your ElevenLabs account via the connector so the API key is available as a secret.
-2. **ElevenLabs Agent** — You need to create a Conversational AI Agent in the [ElevenLabs dashboard](https://elevenlabs.io/app/conversational-ai). This gives you an Agent ID that we configure server-side.
+**1. Update `src/components/VoiceAgent.tsx`**
 
-## Implementation Steps
+- Wrap the component to use `react-router-dom`'s `useNavigate` hook
+- Add `clientTools` to the `useConversation` hook with the following tools:
 
-### 1. Connect ElevenLabs
-Use the ElevenLabs connector to link your API key to this project.
+| Tool Name | What It Does | Parameters |
+|-----------|-------------|------------|
+| `navigateTo` | Navigates user to any platform page | `{ page: string }` (e.g. `/find-tutors`, `/register`, `/login`, `/subjects`, `/contact`, `/help-center`, `/faq`, `/about`, `/reviews`) |
+| `openWhatsApp` | Opens WhatsApp support chat | none |
+| `showNotification` | Shows a toast message to the user | `{ title: string, message: string }` |
 
-### 2. Create Edge Function: `elevenlabs-conversation-token`
-A backend function that generates a single-use WebRTC conversation token. It takes the Agent ID (stored as a secret) and calls the ElevenLabs token endpoint. This keeps the API key secure server-side.
+- Update the system prompt to inform the agent about these tools and when to use them (e.g. "If the user wants to find tutors, use the navigateTo tool with page '/find-tutors'")
+- Add route mapping instructions in the prompt so the agent knows which pages exist
 
-### 3. Install `@elevenlabs/react` SDK
-Provides the `useConversation` hook for managing WebSocket/WebRTC connections and audio.
+**2. Register Client Tools in ElevenLabs Dashboard (manual step)**
 
-### 4. Create `VoiceAgent` Component
-A floating voice agent button (similar to the existing chatbot button placement but on the opposite side). When clicked:
-- Requests microphone permission
-- Fetches a conversation token from the edge function
-- Starts a WebRTC voice session with the ElevenLabs agent
-- Shows connection status, speaking/listening state, and a stop button
-- Animated visual indicator when the agent is speaking
+You will need to add these three tools in your ElevenLabs agent settings with matching names and parameter schemas.
 
-### 5. Integrate into App
-Add the `VoiceAgent` component alongside the existing `ChatBot` in the app layout.
+### Technical Details
 
-### 6. Update `supabase/config.toml`
-Register the new edge function with `verify_jwt = false`.
-
-## Technical Details
-
-- **Transport**: WebRTC (recommended for lowest latency)
-- **Component location**: `src/components/VoiceAgent.tsx`
-- **Edge function**: `supabase/functions/elevenlabs-conversation-token/index.ts`
-- **Agent ID**: Stored as a secret (`ELEVENLABS_AGENT_ID`) to keep it configurable
-- **Positioning**: Floating button on the bottom-left to avoid conflicting with the chatbot on the bottom-right
+The `clientTools` object is passed to `useConversation`. Each function receives parameters from the agent and returns a string confirmation. The `navigateTo` tool uses `window.location.href` for navigation (simpler than requiring the component to be inside Router context, since it's rendered at app root level).
 
