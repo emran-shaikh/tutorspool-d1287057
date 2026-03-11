@@ -16,7 +16,13 @@ export function VoiceAgent() {
       console.log("Voice agent disconnected");
     },
     onError: (error) => {
-      console.error("Voice agent error:", error);
+      // Guard against SDK bug where error can be undefined
+      if (error) {
+        console.error("Voice agent error:", error);
+      } else {
+        console.warn("Voice agent: received undefined error event (SDK bug), ignoring");
+        return;
+      }
       toast({
         variant: "destructive",
         title: "Voice Agent Error",
