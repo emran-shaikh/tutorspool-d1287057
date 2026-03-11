@@ -16,7 +16,13 @@ export function VoiceAgent() {
       console.log("Voice agent disconnected");
     },
     onError: (error) => {
-      console.error("Voice agent error:", error);
+      // Guard against SDK bug where error can be undefined
+      if (error) {
+        console.error("Voice agent error:", error);
+      } else {
+        console.warn("Voice agent: received undefined error event (SDK bug), ignoring");
+        return;
+      }
       toast({
         variant: "destructive",
         title: "Voice Agent Error",
@@ -49,13 +55,12 @@ export function VoiceAgent() {
         "elevenlabs-conversation-token"
       );
 
-      if (error || !data?.token) {
-        throw new Error(error?.message || "No token received");
+      if (error || !data?.signed_url) {
+        throw new Error(error?.message || "No signed URL received");
       }
 
       await conversation.startSession({
-        conversationToken: data.token,
-        connectionType: "webrtc",
+        signedUrl: data.signed_url,
         overrides: {
           agent: {
             prompt: {

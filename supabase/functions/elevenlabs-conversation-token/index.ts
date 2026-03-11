@@ -21,8 +21,9 @@ serve(async (req) => {
       throw new Error("ELEVENLABS_AGENT_ID is not configured");
     }
 
+    // Use signed URL endpoint for WebSocket connection (more stable than WebRTC token)
     const response = await fetch(
-      `https://api.elevenlabs.io/v1/convai/conversation/token?agent_id=${ELEVENLABS_AGENT_ID}`,
+      `https://api.elevenlabs.io/v1/convai/conversation/get-signed-url?agent_id=${ELEVENLABS_AGENT_ID}`,
       {
         headers: {
           "xi-api-key": ELEVENLABS_API_KEY,
@@ -37,11 +38,11 @@ serve(async (req) => {
 
     const data = await response.json();
 
-    return new Response(JSON.stringify({ token: data.token }), {
+    return new Response(JSON.stringify({ signed_url: data.signed_url }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error("Error generating conversation token:", error);
+    console.error("Error generating signed URL:", error);
     const message = error instanceof Error ? error.message : "Unknown error";
     return new Response(JSON.stringify({ error: message }), {
       status: 500,
