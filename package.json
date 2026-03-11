@@ -11,7 +11,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@elevenlabs/react": "^0.14.1",
+    "@elevenlabs/react": "^0.14.2",
     "@fontsource/inter": "^5.2.8",
     "@fontsource/outfit": "^5.2.8",
     "@hookform/resolvers": "^3.10.0",
