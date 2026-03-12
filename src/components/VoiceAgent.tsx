@@ -55,9 +55,33 @@ export function VoiceAgent() {
         "elevenlabs-conversation-token"
       );
 
-      if (error || !data?.signed_url) {
-        throw new Error(error?.message || "No signed URL received");
+      if (error) {
+        throw new Error(error?.message || "Edge function invocation failed");
       }
+
+      // Check for quota/credit errors from ElevenLabs
+      if (data?.is_quota_error) {
+        console.error("🚫 ELEVENLABS CREDIT/QUOTA ERROR:", data.error);
+        console.error("🚫 Status code from ElevenLabs:", data.status_code);
+        console.error("🚫 You are likely out of credits on the ElevenLabs free plan. Please check your ElevenLabs dashboard: https://elevenlabs.io/subscription");
+        toast({
+          variant: "destructive",
+          title: "Voice Agent Unavailable",
+          description: "ElevenLabs credits may be exhausted. Check your plan.",
+        });
+        return;
+      }
+
+      if (data?.error) {
+        console.error("❌ ElevenLabs API error (non-quota):", data.error);
+        throw new Error(data.error);
+      }
+
+      if (!data?.signed_url) {
+        throw new Error("No signed URL received");
+      }
+
+      console.log("✅ Signed URL obtained, starting session...");
 
       // Defensive reset: avoid SDK socket state issues when reconnecting quickly
       if (conversation.status !== "disconnected") {
