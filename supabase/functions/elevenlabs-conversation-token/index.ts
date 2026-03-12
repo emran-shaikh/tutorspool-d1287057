@@ -33,10 +33,27 @@ serve(async (req) => {
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`ElevenLabs API error [${response.status}]: ${errorText}`);
+      console.error(`ElevenLabs API error [${response.status}]: ${errorText}`);
+
+      // Detect quota/credit issues
+      const isQuota = response.status === 401 || response.status === 403 || response.status === 429
+        || errorText.toLowerCase().includes("quota")
+        || errorText.toLowerCase().includes("credit")
+        || errorText.toLowerCase().includes("limit")
+        || errorText.toLowerCase().includes("subscription");
+
+      return new Response(JSON.stringify({
+        error: `ElevenLabs API error [${response.status}]: ${errorText}`,
+        is_quota_error: isQuota,
+        status_code: response.status,
+      }), {
+        status: 200, // Return 200 so client can read the body
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const data = await response.json();
+    console.log("Signed URL obtained successfully");
 
     return new Response(JSON.stringify({ signed_url: data.signed_url }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
