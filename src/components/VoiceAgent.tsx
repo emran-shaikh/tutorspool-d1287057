@@ -14,6 +14,11 @@ export function VoiceAgent() {
     },
     onDisconnect: () => {
       console.log("Voice agent disconnected");
+      console.warn(
+        "⚠️ If the session disconnected immediately after connecting, this is most likely because your ElevenLabs FREE PLAN CREDITS ARE EXHAUSTED.\n" +
+        "👉 Check your usage at: https://elevenlabs.io/subscription\n" +
+        "The signed URL was generated successfully (authentication passed), but the conversation server closed the WebSocket because there are no remaining credits to run the session."
+      );
     },
     onError: (error) => {
       // Guard against SDK bug where error can be undefined
