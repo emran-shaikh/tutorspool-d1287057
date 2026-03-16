@@ -37,8 +37,8 @@ const contactInfo = [
   {
     icon: MapPin,
     title: "Visit Us",
-    value: "TutorPool.com",
-    description: "Global Platform"
+    value: "TutorsPool.com",
+    description: "Global Online Platform"
   },
   {
     icon: Clock,

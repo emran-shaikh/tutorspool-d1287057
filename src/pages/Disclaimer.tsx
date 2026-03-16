@@ -28,6 +28,9 @@ export default function Disclaimer() {
               <p className="text-lg text-muted-foreground">
                 Please read this disclaimer carefully before using TutorsPool.
               </p>
+              <p className="text-sm text-muted-foreground mt-2">
+                <strong>Last Updated:</strong> March 16, 2026
+              </p>
             </div>
           </section>
 
