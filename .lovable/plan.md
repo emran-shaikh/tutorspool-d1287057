@@ -1,44 +1,46 @@
 
 
-## Plan: Auto-Hide Voice Agent When ElevenLabs Credits Are Exhausted
+# Plan: Add ElevenLabs Conversational AI Voice Agent
 
-### Approach
+## Overview
 
-Create a new edge function `elevenlabs-check-credits` that pings the ElevenLabs API to verify credit availability. The `VoiceAgent` component will call this on mount (and periodically) to determine visibility. When credits are exhausted, the component hides itself entirely. When credits reset, it reappears automatically.
+Add a voice agent button to the site that lets users have a real-time voice conversation with an AI tutor assistant, powered by ElevenLabs Conversational AI.
 
-### Detection Strategy
+## Prerequisites
 
-The ElevenLabs free plan doesn't expose a direct "credits remaining" API. Instead, we'll use the existing signed URL endpoint as a health check — if it returns a quota error, credits are exhausted. If it succeeds, credits are available. This avoids needing any new API.
+1. **ElevenLabs Connection** — Connect your ElevenLabs account via the connector so the API key is available as a secret.
+2. **ElevenLabs Agent** — You need to create a Conversational AI Agent in the [ElevenLabs dashboard](https://elevenlabs.io/app/conversational-ai). This gives you an Agent ID that we configure server-side.
 
-### Changes
+## Implementation Steps
 
-**1. New edge function: `supabase/functions/elevenlabs-check-credits/index.ts`**
-- Lightweight function that hits the ElevenLabs signed URL endpoint
-- Returns `{ has_credits: true/false }`
-- Reuses the same quota detection logic from the token function
-- No signed URL is wasted — we just check if the API responds successfully
+### 1. Connect ElevenLabs
+Use the ElevenLabs connector to link your API key to this project.
 
-**2. Update `src/components/VoiceAgent.tsx`**
-- Add `hasCredits` state (default `true` to avoid flash-hiding on load)
-- On mount, call `elevenlabs-check-credits` to check availability
-- Re-check every 5 minutes via `setInterval` so when credits reset, button reappears
-- Also set `hasCredits = false` when a quota error is detected during `startConversation` (existing logic) or when session disconnects within 3 seconds (immediate disconnect = no credits)
-- If `hasCredits` is `false`, return `null` — component is fully hidden
-- Console messages: log when hiding (`🚫 Voice agent hidden: credits exhausted`) and when restoring (`✅ Voice agent restored: credits available`)
+### 2. Create Edge Function: `elevenlabs-conversation-token`
+A backend function that generates a single-use WebRTC conversation token. It takes the Agent ID (stored as a secret) and calls the ElevenLabs token endpoint. This keeps the API key secure server-side.
 
-**3. Update `supabase/config.toml`** — not needed, config is auto-managed.
+### 3. Install `@elevenlabs/react` SDK
+Provides the `useConversation` hook for managing WebSocket/WebRTC connections and audio.
 
-### Flow
+### 4. Create `VoiceAgent` Component
+A floating voice agent button (similar to the existing chatbot button placement but on the opposite side). When clicked:
+- Requests microphone permission
+- Fetches a conversation token from the edge function
+- Starts a WebRTC voice session with the ElevenLabs agent
+- Shows connection status, speaking/listening state, and a stop button
+- Animated visual indicator when the agent is speaking
 
-```text
-Mount → check-credits → has_credits?
-  ├─ true  → show button, re-check in 5 min
-  └─ false → hide button, log to console, re-check in 5 min
-                                ↓
-                        credits reset → next check returns true → show button again
-```
+### 5. Integrate into App
+Add the `VoiceAgent` component alongside the existing `ChatBot` in the app layout.
 
-### Immediate Disconnect Detection
+### 6. Update `supabase/config.toml`
+Register the new edge function with `verify_jwt = false`.
 
-When the session connects but disconnects within 3 seconds (the pattern you're seeing), we'll also mark `hasCredits = false` and hide the button — since this is the telltale sign of exhausted free plan credits even when the signed URL succeeded.
+## Technical Details
+
+- **Transport**: WebRTC (recommended for lowest latency)
+- **Component location**: `src/components/VoiceAgent.tsx`
+- **Edge function**: `supabase/functions/elevenlabs-conversation-token/index.ts`
+- **Agent ID**: Stored as a secret (`ELEVENLABS_AGENT_ID`) to keep it configurable
+- **Positioning**: Floating button on the bottom-left to avoid conflicting with the chatbot on the bottom-right
 

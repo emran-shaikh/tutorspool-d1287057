@@ -1,27 +1,57 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useConversation } from "@elevenlabs/react";
 import { Mic, PhoneOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
+const CREDIT_CHECK_INTERVAL = 5 * 60 * 1000; // 5 minutes
+const FAST_DISCONNECT_THRESHOLD = 3000; // 3 seconds
+
 export function VoiceAgent() {
   const [isConnecting, setIsConnecting] = useState(false);
+  const [hasCredits, setHasCredits] = useState(true);
+  const connectTimeRef = useRef<number | null>(null);
   const { toast } = useToast();
+
+  const checkCredits = useCallback(async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke("elevenlabs-check-credits");
+      if (error || !data?.has_credits) {
+        if (hasCredits) console.log("🚫 Voice agent hidden: credits exhausted");
+        setHasCredits(false);
+        return false;
+      }
+      if (!hasCredits) console.log("✅ Voice agent restored: credits available");
+      setHasCredits(true);
+      return true;
+    } catch {
+      setHasCredits(false);
+      return false;
+    }
+  }, [hasCredits]);
+
+  // Check credits on mount and every 5 minutes
+  useEffect(() => {
+    checkCredits();
+    const interval = setInterval(checkCredits, CREDIT_CHECK_INTERVAL);
+    return () => clearInterval(interval);
+  }, [checkCredits]);
 
   const conversation = useConversation({
     onConnect: () => {
       console.log("Voice agent connected");
+      connectTimeRef.current = Date.now();
     },
     onDisconnect: () => {
       console.log("Voice agent disconnected");
-      console.warn(
-        "⚠️ If the session disconnected immediately after connecting, this is most likely because your ElevenLabs FREE PLAN CREDITS ARE EXHAUSTED.\n" +
-        "👉 Check your usage at: https://elevenlabs.io/subscription\n" +
-        "The signed URL was generated successfully (authentication passed), but the conversation server closed the WebSocket because there are no remaining credits to run the session."
-      );
+      // Fast disconnect detection: if disconnected within 3s, likely no credits
+      if (connectTimeRef.current && Date.now() - connectTimeRef.current < FAST_DISCONNECT_THRESHOLD) {
+        console.log("🚫 Voice agent hidden: fast disconnect detected (likely no credits)");
+        setHasCredits(false);
+      }
+      connectTimeRef.current = null;
     },
     onError: (error) => {
-      // Guard against SDK bug where error can be undefined
       if (error) {
         console.error("Voice agent error:", error);
       } else {
@@ -64,21 +94,18 @@ export function VoiceAgent() {
         throw new Error(error?.message || "Edge function invocation failed");
       }
 
-      // Check for quota/credit errors from ElevenLabs
       if (data?.is_quota_error) {
-        console.error("🚫 ELEVENLABS CREDIT/QUOTA ERROR:", data.error);
-        console.error("🚫 Status code from ElevenLabs:", data.status_code);
-        console.error("🚫 You are likely out of credits on the ElevenLabs free plan. Please check your ElevenLabs dashboard: https://elevenlabs.io/subscription");
+        console.log("🚫 Voice agent hidden: credits exhausted (quota error from token request)");
+        setHasCredits(false);
         toast({
           variant: "destructive",
           title: "Voice Agent Unavailable",
-          description: "ElevenLabs credits may be exhausted. Check your plan.",
+          description: "ElevenLabs credits may be exhausted. The agent will return when credits reset.",
         });
         return;
       }
 
       if (data?.error) {
-        console.error("❌ ElevenLabs API error (non-quota):", data.error);
         throw new Error(data.error);
       }
 
@@ -88,13 +115,10 @@ export function VoiceAgent() {
 
       console.log("✅ Signed URL obtained, starting session...");
 
-      // Defensive reset: avoid SDK socket state issues when reconnecting quickly
       if (conversation.status !== "disconnected") {
         await conversation.endSession();
       }
 
-      // NOTE: Passing overrides with WebSocket signedUrl can trigger SDK disconnect bugs.
-      // Keep agent prompt/tools configured in ElevenLabs dashboard for stability.
       await conversation.startSession({
         signedUrl: data.signed_url,
       });
@@ -113,6 +137,9 @@ export function VoiceAgent() {
   const stopConversation = useCallback(async () => {
     await conversation.endSession();
   }, [conversation]);
+
+  // Hide completely when no credits
+  if (!hasCredits) return null;
 
   const isConnected = conversation.status === "connected";
 
@@ -138,7 +165,6 @@ export function VoiceAgent() {
 
       {/* Animated border pill button */}
       <div className="relative group">
-        {/* Animated gradient border */}
         <div className="absolute -inset-[2px] rounded-full bg-[length:300%_300%] animate-[gradient-spin_3s_linear_infinite] opacity-80 group-hover:opacity-100 transition-opacity"
           style={{
             background: "linear-gradient(90deg, hsl(var(--primary)), hsl(280, 70%, 55%), hsl(var(--primary)), hsl(200, 80%, 55%), hsl(var(--primary)))",
@@ -146,7 +172,6 @@ export function VoiceAgent() {
           }}
         />
         
-        {/* Inner content */}
         {isConnected ? (
           <button
             onClick={stopConversation}
