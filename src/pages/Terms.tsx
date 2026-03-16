@@ -27,6 +27,9 @@ export default function Terms() {
                 Please review these terms carefully before using TutorsPool. By creating an
                 account or booking a session, you agree to these terms.
               </p>
+              <p className="text-sm text-muted-foreground mt-2">
+                <strong>Last Updated:</strong> March 16, 2026
+              </p>
             </div>
           </section>
 
