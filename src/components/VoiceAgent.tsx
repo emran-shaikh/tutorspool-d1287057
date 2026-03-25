@@ -144,7 +144,7 @@ export function VoiceAgent() {
   const isConnected = conversation.status === "connected";
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end gap-2 drop-shadow-[0_0_25px_hsl(var(--primary)/0.4)] sm:bottom-8 sm:right-8">
+    <div className="fixed bottom-4 left-4 z-50 flex flex-col items-start gap-2 drop-shadow-[0_0_25px_hsl(var(--primary)/0.4)] sm:bottom-8 sm:left-8">
       {/* Status indicator */}
       {isConnected && (
         <div className="bg-background/90 backdrop-blur-md border border-border/50 rounded-full px-3 py-1.5 shadow-elevated text-xs animate-fade-in">
