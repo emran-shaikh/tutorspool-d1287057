@@ -257,19 +257,46 @@ export async function updateStreak(studentId: string): Promise<{ streak: number;
 }
 
 export async function getXPHistory(studentId: string, count = 20): Promise<XPTransaction[]> {
-  const q = query(
-    collection(db, 'xpTransactions'),
-    where('studentId', '==', studentId),
-    orderBy('createdAt', 'desc'),
-    firestoreLimit(count)
-  );
-  let snap;
+  // Try ordered query first (requires composite index on studentId + createdAt)
   try {
-    snap = await getDocsFromServer(q);
-  } catch {
-    snap = await getDocs(q);
+    const q = query(
+      collection(db, 'xpTransactions'),
+      where('studentId', '==', studentId),
+      orderBy('createdAt', 'desc'),
+      firestoreLimit(count)
+    );
+    let snap;
+    try {
+      snap = await getDocsFromServer(q);
+    } catch {
+      snap = await getDocs(q);
+    }
+    return snap.docs.map(d => ({ id: d.id, ...d.data() } as XPTransaction));
+  } catch (err: any) {
+    // If composite index is missing, fall back to unordered query + client-side sort
+    console.warn('XP History ordered query failed (likely missing Firestore index). Falling back to client-side sort.', err?.message);
+    if (err?.message?.includes('https://')) {
+      console.info('Create the required index here:', err.message.match(/(https:\/\/[^\s]+)/)?.[1]);
+    }
+    try {
+      const fallbackQ = query(
+        collection(db, 'xpTransactions'),
+        where('studentId', '==', studentId)
+      );
+      let snap;
+      try {
+        snap = await getDocsFromServer(fallbackQ);
+      } catch {
+        snap = await getDocs(fallbackQ);
+      }
+      const results = snap.docs.map(d => ({ id: d.id, ...d.data() } as XPTransaction));
+      results.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      return results.slice(0, count);
+    } catch (fallbackErr) {
+      console.error('XP History fallback query also failed:', fallbackErr);
+      return [];
+    }
   }
-  return snap.docs.map(d => ({ id: d.id, ...d.data() } as XPTransaction));
 }
 
 export async function getLeaderboard(count = 10): Promise<(StudentGamification & { id: string; fullName?: string })[]> {
