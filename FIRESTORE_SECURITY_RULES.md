@@ -286,6 +286,20 @@ service cloud.firestore {
       allow update: if isAdmin();
       allow delete: if isAdmin();
     }
+    
+    // Student Gamification profiles (public read for leaderboard)
+    match /studentGamification/{studentId} {
+      allow read: if true;
+      // Allow any authenticated user to create/update (tutors award XP to students on session completion)
+      allow create, update: if isAuthenticated();
+    }
+
+    // XP Transactions
+    match /xpTransactions/{transactionId} {
+      // Allow students to read their own transactions, and tutors/admins to read any
+      allow read: if isAuthenticated() && (request.auth.uid == resource.data.studentId || isTutor() || isAdmin());
+      allow create: if isAuthenticated();
+    }
   }
 }
 ```
@@ -312,12 +326,14 @@ service cloud.firestore {
     // Student Gamification profiles (public read for leaderboard)
     match /studentGamification/{studentId} {
       allow read: if true;
-      allow create, update: if isAuthenticated() && request.auth.uid == studentId;
+      // Allow any authenticated user to create/update (tutors award XP to students on session completion)
+      allow create, update: if isAuthenticated();
     }
 
     // XP Transactions
     match /xpTransactions/{transactionId} {
-      allow read: if isAuthenticated() && request.auth.uid == resource.data.studentId;
+      // Allow students to read their own transactions, and tutors/admins to read any
+      allow read: if isAuthenticated() && (request.auth.uid == resource.data.studentId || isTutor() || isAdmin());
       allow create: if isAuthenticated();
     }
 ```

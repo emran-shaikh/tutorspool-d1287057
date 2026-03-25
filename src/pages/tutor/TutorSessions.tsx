@@ -175,6 +175,7 @@ export default function TutorSessions() {
         await sendSessionStatusEmail(session, 'session_update', 'completed');
         // Award +50 XP to the student for completing a session
         try {
+          console.log('Awarding XP to student:', session.studentId, 'for session:', session.subject);
           const result = await awardXP(
             session.studentId,
             'session_completed',
