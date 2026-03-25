@@ -144,10 +144,10 @@ export function VoiceAgent() {
   const isConnected = conversation.status === "connected";
 
   return (
-    <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-3 drop-shadow-[0_0_25px_hsl(var(--primary)/0.4)]">
+    <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end gap-2 drop-shadow-[0_0_25px_hsl(var(--primary)/0.4)] sm:bottom-8 sm:right-8">
       {/* Status indicator */}
       {isConnected && (
-        <div className="bg-background/90 backdrop-blur-md border border-border/50 rounded-full px-4 py-2 shadow-elevated text-xs text-center animate-fade-in">
+        <div className="bg-background/90 backdrop-blur-md border border-border/50 rounded-full px-3 py-1.5 shadow-elevated text-xs animate-fade-in">
           <div className="flex items-center gap-2">
             <span
               className={`inline-block w-2 h-2 rounded-full ${
@@ -163,7 +163,7 @@ export function VoiceAgent() {
         </div>
       )}
 
-      {/* Animated border pill button */}
+      {/* Button */}
       <div className="relative group">
         <div className="absolute -inset-[2px] rounded-full bg-[length:300%_300%] animate-[gradient-spin_3s_linear_infinite] opacity-80 group-hover:opacity-100 transition-opacity"
           style={{
@@ -175,30 +175,30 @@ export function VoiceAgent() {
         {isConnected ? (
           <button
             onClick={stopConversation}
-            className="relative flex items-center gap-2.5 px-7 py-3.5 rounded-full bg-secondary text-secondary-foreground font-display font-medium text-sm tracking-wide hover:bg-secondary/90 transition-colors"
+            className="relative flex items-center gap-2 px-5 py-3 rounded-full bg-secondary text-secondary-foreground font-display font-medium text-sm tracking-wide hover:bg-secondary/90 transition-colors sm:px-7 sm:py-3.5"
             aria-label="End voice conversation"
           >
             <PhoneOff className="h-4 w-4" />
-            <span>End Call</span>
+            <span className="hidden sm:inline">End Call</span>
             <span className="inline-block w-1.5 h-1.5 rounded-full bg-destructive animate-pulse" />
           </button>
         ) : (
           <button
             onClick={startConversation}
             disabled={isConnecting}
-            className="relative flex items-center gap-2.5 px-7 py-3.5 rounded-full bg-secondary text-secondary-foreground font-display font-medium text-sm tracking-wide hover:bg-secondary/90 transition-colors disabled:opacity-60"
+            className="relative flex items-center gap-2 px-5 py-3 rounded-full bg-secondary text-secondary-foreground font-display font-medium text-sm tracking-wide hover:bg-secondary/90 transition-colors disabled:opacity-60 sm:px-7 sm:py-3.5"
             aria-label="Start voice conversation"
           >
             {isConnecting ? (
               <>
                 <div className="h-4 w-4 animate-spin rounded-full border-2 border-secondary-foreground border-t-transparent" />
-                <span>Connecting…</span>
+                <span className="hidden sm:inline">Connecting…</span>
               </>
             ) : (
               <>
                 <Mic className="h-4 w-4" />
-                <span>Talk to Agent</span>
-                <span className="text-xs opacity-60">✦</span>
+                <span className="hidden sm:inline">Talk to Agent</span>
+                <span className="text-xs opacity-60 hidden sm:inline">✦</span>
               </>
             )}
           </button>
