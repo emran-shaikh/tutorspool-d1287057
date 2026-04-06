@@ -35,12 +35,25 @@ type EditableField = 'bio' | 'experience' | 'hourlyRate' | 'subjects' | 'photo' 
 export default function EditTutorProfile() {
   const { userProfile } = useAuth();
   const { toast } = useToast();
+  const location = useLocation();
+  const isIncompleteRedirect = location.state?.incomplete === true;
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [profile, setProfile] = useState<TutorProfile | null>(null);
   const [editingField, setEditingField] = useState<EditableField>(null);
   const [isNewProfile, setIsNewProfile] = useState(false);
+
+  // Show toast if redirected due to incomplete profile
+  useEffect(() => {
+    if (isIncompleteRedirect) {
+      toast({
+        title: "Complete Your Profile",
+        description: "Your account has been approved! Please fill in your profile details to start accepting students.",
+        duration: 8000,
+      });
+    }
+  }, [isIncompleteRedirect]);
 
   // Edit state
   const [bio, setBio] = useState("");
