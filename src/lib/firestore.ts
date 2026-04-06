@@ -185,8 +185,30 @@ export const getTutors = async (): Promise<TutorProfile[]> => {
 
 export const getAllTutors = async (): Promise<TutorProfile[]> => {
   try {
+    // Get all tutor profiles
     const snapshot = await getDocs(collection(db, 'tutorProfiles'));
-    return snapshot.docs.map(doc => ({ ...doc.data(), uid: doc.id } as TutorProfile));
+    const tutorProfiles = snapshot.docs.map(doc => ({ ...doc.data(), uid: doc.id } as TutorProfile));
+    const profileUids = new Set(tutorProfiles.map(t => t.uid));
+
+    // Also get users with role "tutor" who don't have a tutorProfiles doc yet
+    // These are newly registered tutors who haven't filled their profile
+    const usersSnapshot = await getDocs(collection(db, 'users'));
+    const missingTutors = usersSnapshot.docs
+      .map(doc => ({ ...doc.data(), uid: doc.id } as any))
+      .filter(u => u.role === 'tutor' && !profileUids.has(u.uid))
+      .map(u => ({
+        uid: u.uid,
+        fullName: u.fullName || 'Unknown',
+        email: u.email || '',
+        subjects: [],
+        bio: '',
+        hourlyRate: 0,
+        experience: 'Not specified',
+        isApproved: false,
+        createdAt: u.createdAt || new Date().toISOString(),
+      } as TutorProfile));
+
+    return [...tutorProfiles, ...missingTutors];
   } catch (error) {
     if (isDev) console.error('Error fetching all tutors:', error);
     return [];
