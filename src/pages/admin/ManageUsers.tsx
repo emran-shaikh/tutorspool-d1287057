@@ -103,15 +103,22 @@ export default function ManageUsers() {
   const handleDeleteUser = async () => {
     if (!userToDelete) return;
     
+    const deletedUid = userToDelete.uid;
+    const deletedName = userToDelete.name;
+    
     setIsDeleting(true);
     try {
       await deleteUser(userToDelete.uid, userToDelete.role);
+      
+      // Optimistically remove from local state immediately
+      setUsers(prev => prev.filter(u => u.uid !== deletedUid));
+      setTutors(prev => prev.filter(t => t.uid !== deletedUid));
+      
       toast({ 
         title: "User deleted", 
-        description: `${userToDelete.name} has been permanently removed from the platform.` 
+        description: `${deletedName} has been permanently removed from the platform.` 
       });
       setUserToDelete(null);
-      fetchData();
     } catch (error) {
       toast({ 
         title: "Error", 
