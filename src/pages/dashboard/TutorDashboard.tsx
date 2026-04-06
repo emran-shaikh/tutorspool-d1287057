@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, Users, Clock, DollarSign, Video, GraduationCap, TrendingUp, Star } from "lucide-react";
@@ -9,6 +9,7 @@ import { getTutorSessions, getTutorProfile, Session, TutorProfile } from "@/lib/
 
 export default function TutorDashboard() {
   const { userProfile } = useAuth();
+  const navigate = useNavigate();
   const [sessions, setSessions] = useState<Session[]>([]);
   const [tutorProfile, setTutorProfile] = useState<TutorProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -17,6 +18,13 @@ export default function TutorDashboard() {
   useEffect(() => {
     fetchData();
   }, [userProfile]);
+
+  // Auto-redirect to profile edit if profile is incomplete (auto-created during approval)
+  useEffect(() => {
+    if (!loading && tutorProfile && !tutorProfile.bio && (!tutorProfile.subjects || tutorProfile.subjects.length === 0)) {
+      navigate('/tutor/edit-profile', { replace: true, state: { incomplete: true } });
+    }
+  }, [loading, tutorProfile, navigate]);
 
   const fetchData = async () => {
     if (!userProfile?.uid) return;
