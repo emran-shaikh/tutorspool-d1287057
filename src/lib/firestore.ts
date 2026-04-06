@@ -250,7 +250,27 @@ export const updateTutorProfile = async (uid: string, data: Partial<TutorProfile
 
 export const approveTutor = async (uid: string): Promise<void> => {
   try {
-    await updateDoc(doc(db, 'tutorProfiles', uid), { isApproved: true });
+    // Use setDoc with merge to handle tutors who registered but haven't created a profile doc yet
+    const profileRef = doc(db, 'tutorProfiles', uid);
+    const profileSnap = await getDoc(profileRef);
+    if (profileSnap.exists()) {
+      await updateDoc(profileRef, { isApproved: true });
+    } else {
+      // Create a minimal profile doc so approval persists
+      const userDoc = await getDoc(doc(db, 'users', uid));
+      const userData = userDoc.data() || {};
+      await setDoc(profileRef, {
+        uid,
+        fullName: userData.fullName || '',
+        email: userData.email || '',
+        subjects: [],
+        bio: '',
+        hourlyRate: 0,
+        experience: '',
+        isApproved: true,
+        createdAt: new Date().toISOString()
+      });
+    }
   } catch (error) {
     if (isDev) console.error('Error approving tutor:', error);
     throw error;
@@ -423,17 +443,17 @@ export const updateUserStatus = async (uid: string, isActive: boolean): Promise<
 // Delete user and all related data (Admin only)
 export const deleteUser = async (uid: string, role: string): Promise<void> => {
   try {
-    // Delete from users collection
-    await deleteDoc(doc(db, 'users', uid));
+    // Delete from users collection (may not exist, so catch individually)
+    try { await deleteDoc(doc(db, 'users', uid)); } catch (e) { if (isDev) console.warn('users doc missing:', e); }
     
     // Delete role-specific profile
     if (role === 'tutor') {
-      await deleteDoc(doc(db, 'tutorProfiles', uid));
+      try { await deleteDoc(doc(db, 'tutorProfiles', uid)); } catch (e) { if (isDev) console.warn('tutorProfiles doc missing:', e); }
       // Delete tutor's availability slots
       const availabilitySnapshot = await getDocs(query(collection(db, 'availability'), where('tutorId', '==', uid)));
       await Promise.all(availabilitySnapshot.docs.map(d => deleteDoc(doc(db, 'availability', d.id))));
     } else if (role === 'student') {
-      await deleteDoc(doc(db, 'studentProfiles', uid));
+      try { await deleteDoc(doc(db, 'studentProfiles', uid)); } catch (e) { if (isDev) console.warn('studentProfiles doc missing:', e); }
       // Delete student's learning goals
       const goalsSnapshot = await getDocs(query(collection(db, 'learningGoals'), where('studentId', '==', uid)));
       await Promise.all(goalsSnapshot.docs.map(d => deleteDoc(doc(db, 'learningGoals', d.id))));
