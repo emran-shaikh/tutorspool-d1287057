@@ -22,7 +22,7 @@ export default function TutorDashboard() {
   // Auto-redirect to profile edit if profile is incomplete (auto-created during approval)
   useEffect(() => {
     if (!loading && tutorProfile && !tutorProfile.bio && (!tutorProfile.subjects || tutorProfile.subjects.length === 0)) {
-      navigate('/tutor/edit-profile', { replace: true, state: { incomplete: true } });
+      navigate('/tutor/profile', { replace: true, state: { incomplete: true } });
     }
   }, [loading, tutorProfile, navigate]);
 
