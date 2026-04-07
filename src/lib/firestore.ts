@@ -272,7 +272,7 @@ export const approveTutor = async (uid: string): Promise<void> => {
       });
     }
   } catch (error) {
-    if (isDev) console.error('Error approving tutor:', error);
+    console.error('Error approving tutor:', error);
     throw error;
   }
 };
