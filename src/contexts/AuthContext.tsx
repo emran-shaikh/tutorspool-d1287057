@@ -113,6 +113,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             type: 'welcome',
             to: email,
             name: fullName,
+            role: role,
           },
         });
       } catch (err) {
