@@ -59,8 +59,8 @@ service cloud.firestore {
       // Public read for approved tutors (for browsing)
       allow read: if true;
       
-      // Only the tutor themselves can create/update their profile
-      allow create: if isOwner(tutorId) && isTutor();
+      // Only the tutor themselves or admins can create/update their profile
+      allow create: if (isOwner(tutorId) && isTutor()) || isAdmin();
       allow update: if (isOwner(tutorId) && isTutor() 
         && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['isApproved']))
         || isAdmin();
