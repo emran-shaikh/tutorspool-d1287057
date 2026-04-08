@@ -55,7 +55,7 @@ export default function Login() {
       } else if (error.message === 'email-not-verified') {
         errorMessage = "Please verify your email before signing in. Check your inbox for the verification link.";
       } else if (error.code === 'auth/profile-missing') {
-        errorMessage = "Your account was removed. Please register again with a new account or contact support.";
+        errorMessage = "Your account data was removed. Your account has been cleaned up — please register again with the same email.";
       }
       
       toast({

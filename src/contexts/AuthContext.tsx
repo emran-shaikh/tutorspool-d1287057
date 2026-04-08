@@ -138,8 +138,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Check if Firestore profile exists; if not, it's an orphaned account
       const userDoc = await getDoc(doc(db, 'users', result.user.uid));
       if (!userDoc.exists()) {
-        // Sign out — profile was deleted, account is orphaned
-        await signOut(auth);
+        // Delete the orphaned Firebase Auth account so user can re-register
+        try {
+          await result.user.delete();
+        } catch (deleteErr) {
+          if (isDev) console.error("Could not delete orphaned auth account:", deleteErr);
+          await signOut(auth);
+        }
         throw { code: 'auth/profile-missing', message: 'profile-missing' };
       }
     } catch (error) {
