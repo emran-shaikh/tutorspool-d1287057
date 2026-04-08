@@ -91,7 +91,7 @@ export default function FindTutors() {
     ));
   };
 
-  const BookButton = ({ tutorId, size = "default" as const, className = "" }) => {
+  const BookButton = ({ tutorId, size = "default", className = "" }: { tutorId: string; size?: "default" | "sm" | "lg" | "icon"; className?: string }) => {
     if (user && userProfile?.role === 'student') {
       return (
         <Link to={`/student/book/${tutorId}`} className={className}>
