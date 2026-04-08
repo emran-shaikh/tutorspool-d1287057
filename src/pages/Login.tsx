@@ -54,6 +54,8 @@ export default function Login() {
         errorMessage = "This account has been disabled. Please contact support.";
       } else if (error.message === 'email-not-verified') {
         errorMessage = "Please verify your email before signing in. Check your inbox for the verification link.";
+      } else if (error.code === 'auth/profile-missing') {
+        errorMessage = "Your account data was removed. Your account has been cleaned up — please register again with the same email.";
       }
       
       toast({

@@ -132,7 +132,7 @@ export default function Register() {
       let errorMessage = "Failed to create account. Please try again.";
       
       if (error.code === 'auth/email-already-in-use') {
-        errorMessage = "This email is already registered. Please sign in instead.";
+        errorMessage = "This email is already registered. Try signing in, or use 'Forgot password?' on the login page to recover your account.";
       } else if (error.code === 'auth/weak-password') {
         errorMessage = "Password is too weak. Please use a stronger password.";
       } else if (error.code === 'auth/invalid-email') {
