@@ -45,11 +45,11 @@ export function usePlatformStats(): PlatformStats {
             ? validReviews.reduce((sum, r) => sum + Number(r.rating), 0) / validReviews.length
             : 0;
 
-        // Use fallback values if data seems incomplete (e.g. unauthenticated users)
-        const finalTutorCount = tutors.length || 35;
-        const finalStudentCount = studentCount || 250;
-        const finalSubjectCount = allSubjects.size || 15;
-        const finalReviewCount = reviews.length || 50;
+        // Use the higher of real data or baseline minimums for professional appearance
+        const finalTutorCount = Math.max(tutors.length, 35);
+        const finalStudentCount = Math.max(studentCount, 250);
+        const finalSubjectCount = Math.max(allSubjects.size, 15);
+        const finalReviewCount = Math.max(reviews.length, 50);
         const finalAvgRating = avgRating > 0 ? Math.round(avgRating * 10) / 10 : 4.8;
 
         setStats({
