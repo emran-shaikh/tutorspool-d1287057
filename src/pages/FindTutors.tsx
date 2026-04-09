@@ -13,18 +13,7 @@ import { Search, Star, Clock, DollarSign, GraduationCap, Users, Filter, ChevronR
 import { getTutors, TutorProfile, getAllReviews, Review } from "@/lib/firestore";
 import { useAuth } from "@/contexts/AuthContext";
 
-const subjectFilters = [
-  "All Subjects",
-  "Mathematics",
-  "Physics",
-  "Chemistry",
-  "Biology",
-  "English",
-  "Programming",
-  "Languages",
-  "Music",
-  "Arts"
-];
+// Subject filters are now derived dynamically from tutor data
 
 interface TutorWithRating extends TutorProfile {
   avgRating: number;
@@ -153,7 +142,7 @@ export default function FindTutors() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {subjectFilters.map((subject) => (
+                  {["All Subjects", ...Array.from(new Set(tutors.flatMap(t => t.subjects))).sort()].map((subject) => (
                     <SelectItem key={subject} value={subject}>
                       {subject}
                     </SelectItem>
