@@ -81,6 +81,7 @@ export default function About() {
         <link rel="canonical" href={`${window.location.origin}/about`} />
       </Helmet>
       <div className="min-h-screen flex flex-col">
+      <Navbar />
       <main className="flex-1">
         {/* Hero Section */}
         <section className="py-16 bg-gradient-to-b from-primary/5 to-background">

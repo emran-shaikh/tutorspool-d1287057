@@ -118,6 +118,7 @@ export default function FindTutors() {
         <link rel="canonical" href={`${window.location.origin}/tutors`} />
       </Helmet>
       <div className="min-h-screen flex flex-col">
+      <Navbar />
       <main className="flex-1">
         {/* Hero Section */}
         <section className="py-16 md:py-20 bg-gradient-to-b from-primary/5 via-primary/[0.02] to-background">
