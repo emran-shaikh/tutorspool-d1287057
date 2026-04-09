@@ -142,7 +142,7 @@ export default function FindTutors() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {subjectFilters.map((subject) => (
+                  {["All Subjects", ...Array.from(new Set(tutors.flatMap(t => t.subjects))).sort()].map((subject) => (
                     <SelectItem key={subject} value={subject}>
                       {subject}
                     </SelectItem>
