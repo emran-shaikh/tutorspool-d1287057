@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Users, UserCheck, Ban, CheckCircle, Eye, X, Trash2, ShieldAlert } from "lucide-react";
+import { ArrowLeft, Users, UserCheck, Ban, CheckCircle, Eye, X, Trash2, ShieldAlert, Pencil } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { getAllUsers, getAllTutors, approveTutor, updateUserStatus, deleteUser, TutorProfile, createAdminNotification } from "@/lib/firestore";
 import { useToast } from "@/hooks/use-toast";
@@ -212,6 +212,11 @@ export default function ManageUsers() {
                           <Button size="sm" variant="outline" onClick={() => setSelectedTutor(tutor)}>
                             <Eye className="h-4 w-4 mr-1" /> Review
                           </Button>
+                          <Button size="sm" variant="outline" asChild>
+                            <Link to={`/admin/users/tutor/${tutor.uid}`}>
+                              <Pencil className="h-4 w-4 mr-1" /> Edit
+                            </Link>
+                          </Button>
                           <Button 
                             size="sm" 
                             variant="destructive"
@@ -255,6 +260,11 @@ export default function ManageUsers() {
                         </div>
                         <div className="flex items-center gap-2">
                           <Badge variant="default" className="bg-success">Active</Badge>
+                          <Button size="sm" variant="ghost" asChild>
+                            <Link to={`/admin/users/tutor/${tutor.uid}`}>
+                              <Pencil className="h-4 w-4" />
+                            </Link>
+                          </Button>
                           <Button 
                             size="sm" 
                             variant="ghost"
@@ -296,6 +306,11 @@ export default function ManageUsers() {
                           <Badge variant={student.isActive !== false ? "default" : "secondary"}>
                             {student.isActive !== false ? "Active" : "Suspended"}
                           </Badge>
+                          <Button size="sm" variant="ghost" asChild>
+                            <Link to={`/admin/users/student/${student.uid}`}>
+                              <Pencil className="h-4 w-4" />
+                            </Link>
+                          </Button>
                           <Button
                             size="sm"
                             variant="ghost"
