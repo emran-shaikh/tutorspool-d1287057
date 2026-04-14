@@ -457,6 +457,10 @@ export const deleteUser = async (uid: string, role: string): Promise<void> => {
       // Delete student's learning goals
       const goalsSnapshot = await getDocs(query(collection(db, 'learningGoals'), where('studentId', '==', uid)));
       await Promise.all(goalsSnapshot.docs.map(d => deleteDoc(doc(db, 'learningGoals', d.id))));
+    } else if (role === 'parent') {
+      // Delete parent's links
+      const linksSnapshot = await getDocs(query(collection(db, 'parentLinks'), where('parentId', '==', uid)));
+      await Promise.all(linksSnapshot.docs.map(d => deleteDoc(doc(db, 'parentLinks', d.id))));
     }
   } catch (error) {
     if (isDev) console.error('Error deleting user:', error);
