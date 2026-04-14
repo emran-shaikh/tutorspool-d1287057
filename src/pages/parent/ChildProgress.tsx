@@ -117,7 +117,7 @@ export default function ChildProgress() {
           </Card>
           <Card>
             <CardContent className="pt-6 text-center">
-              <CheckCircle className="h-6 w-6 mx-auto mb-2 text-green-500" />
+              <CheckCircle className="h-6 w-6 mx-auto mb-2 text-primary" />
               <p className="text-2xl font-bold">{completedSessions}</p>
               <p className="text-sm text-muted-foreground">Completed</p>
             </CardContent>
@@ -131,7 +131,7 @@ export default function ChildProgress() {
           </Card>
           <Card>
             <CardContent className="pt-6 text-center">
-              <Clock className="h-6 w-6 mx-auto mb-2 text-amber-500" />
+              <Clock className="h-6 w-6 mx-auto mb-2 text-muted-foreground" />
               <p className="text-2xl font-bold">{pendingSessions}</p>
               <p className="text-sm text-muted-foreground">Pending</p>
             </CardContent>
