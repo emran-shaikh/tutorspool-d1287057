@@ -3,7 +3,7 @@ import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Mail, Lock, User, Eye, EyeOff, Users, BookOpen, Shield, Key } from "lucide-react";
+import { Mail, Lock, User, Eye, EyeOff, Users, BookOpen, Shield, Key, Heart } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { useAuth, UserRole } from "@/contexts/AuthContext";
@@ -38,6 +38,12 @@ const roles: { value: UserRole; label: string; icon: typeof User; description: s
     label: "Tutor",
     icon: Users,
     description: "Share your expertise",
+  },
+  {
+    value: "parent",
+    label: "Parent",
+    icon: Heart,
+    description: "Monitor your child's progress",
   },
   {
     value: "admin",
@@ -192,7 +198,7 @@ export default function Register() {
           </div>
 
           {/* Role Selection */}
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {roles.map((r) => (
               <button
                 key={r.value}

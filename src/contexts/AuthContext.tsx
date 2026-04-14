@@ -14,7 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 // Environment check for conditional logging
 const isDev = import.meta.env.DEV;
 
-export type UserRole = 'student' | 'tutor' | 'admin';
+export type UserRole = 'student' | 'tutor' | 'admin' | 'parent';
 
 interface UserProfile {
   uid: string;
