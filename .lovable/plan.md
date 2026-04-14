@@ -1,46 +1,76 @@
 
 
-# Plan: Add ElevenLabs Conversational AI Voice Agent
+## Plan: Add Parent Role with Silent Child Monitoring
 
-## Overview
+This feature adds a new "Parent" role that can monitor their child's academic progress, sessions, quiz results, and learning goals — without the child being notified or aware of the oversight.
 
-Add a voice agent button to the site that lets users have a real-time voice conversation with an AI tutor assistant, powered by ElevenLabs Conversational AI.
+### How It Works
 
-## Prerequisites
+1. **Parent registers** with the "parent" role and links to their child by entering the child's email during registration or from their dashboard
+2. **Linking mechanism**: Parent enters child's email → system looks up the student account → creates a `parentLinks` record in Firestore mapping parent UID to student UID
+3. **Parent dashboard** shows a read-only view of the child's data: sessions, quiz results, learning goals, achievements, and gamification stats
+4. **No notifications to child**: The child's UI has zero awareness of the parent link — no alerts, no indicators, no changes to their experience
+5. **Email notifications to parent**: When the child completes a quiz, books/completes a session, or hits a milestone, the parent receives an email notification silently
 
-1. **ElevenLabs Connection** — Connect your ElevenLabs account via the connector so the API key is available as a secret.
-2. **ElevenLabs Agent** — You need to create a Conversational AI Agent in the [ElevenLabs dashboard](https://elevenlabs.io/app/conversational-ai). This gives you an Agent ID that we configure server-side.
+### Files to Create
 
-## Implementation Steps
+| File | Purpose |
+|------|---------|
+| `src/pages/dashboard/ParentDashboard.tsx` | Main parent dashboard with child overview |
+| `src/pages/parent/LinkChild.tsx` | Page to link/manage child accounts |
+| `src/pages/parent/ChildProgress.tsx` | Detailed view of child's sessions, goals, quiz results |
+| `src/pages/parent/EditParentProfile.tsx` | Parent profile editing |
 
-### 1. Connect ElevenLabs
-Use the ElevenLabs connector to link your API key to this project.
+### Files to Modify
 
-### 2. Create Edge Function: `elevenlabs-conversation-token`
-A backend function that generates a single-use WebRTC conversation token. It takes the Agent ID (stored as a secret) and calls the ElevenLabs token endpoint. This keeps the API key secure server-side.
+| File | Change |
+|------|--------|
+| `src/contexts/AuthContext.tsx` | Add `'parent'` to `UserRole` type |
+| `src/pages/Register.tsx` | Add parent role option with "Heart" icon, remove admin from default role selector grid |
+| `src/App.tsx` | Add parent routes and dashboard redirect |
+| `src/components/layout/DashboardLayout.tsx` | Support `'parent'` role in layout |
+| `src/lib/firestore.ts` | Add `parentLinks` collection CRUD functions, add functions to fetch child data by parent UID |
+| `FIRESTORE_SECURITY_RULES.md` | Add rules for `parentLinks` collection |
+| `supabase/functions/send-email/index.ts` | Add parent notification email templates |
 
-### 3. Install `@elevenlabs/react` SDK
-Provides the `useConversation` hook for managing WebSocket/WebRTC connections and audio.
+### Firestore Collections
 
-### 4. Create `VoiceAgent` Component
-A floating voice agent button (similar to the existing chatbot button placement but on the opposite side). When clicked:
-- Requests microphone permission
-- Fetches a conversation token from the edge function
-- Starts a WebRTC voice session with the ElevenLabs agent
-- Shows connection status, speaking/listening state, and a stop button
-- Animated visual indicator when the agent is speaking
+**`parentLinks`** — maps parent to child:
+```
+{
+  parentId: string,      // parent's UID
+  childId: string,       // student's UID
+  childEmail: string,    // for display
+  childName: string,     // cached name
+  linkedAt: string,      // ISO timestamp
+  status: 'active' | 'pending'
+}
+```
 
-### 5. Integrate into App
-Add the `VoiceAgent` component alongside the existing `ChatBot` in the app layout.
+### Security Rules for `parentLinks`
+- Parents can read/create/delete their own links (where `parentId == uid`)
+- Students cannot see `parentLinks` at all (no read access for students)
+- Admins have full access
 
-### 6. Update `supabase/config.toml`
-Register the new edge function with `verify_jwt = false`.
+### Parent Dashboard Features
+- **Child Overview Card**: Name, grade, active goals count, sessions count
+- **Recent Sessions**: Last 5 sessions with status
+- **Quiz Results**: Scores, completion dates, subjects
+- **Learning Goals**: Progress bars for each goal
+- **Achievements**: XP, level, streak data
+- All data is fetched using existing firestore functions (`getStudentSessions`, `getStudentGoals`, `getStudentResults`, `getStudentGamification`) but called with the child's UID
 
-## Technical Details
+### Email Notifications (Silent)
+Parent receives emails when child:
+- Completes a quiz (with score summary)
+- Books or completes a session
+- Achieves a new level or milestone
 
-- **Transport**: WebRTC (recommended for lowest latency)
-- **Component location**: `src/components/VoiceAgent.tsx`
-- **Edge function**: `supabase/functions/elevenlabs-conversation-token/index.ts`
-- **Agent ID**: Stored as a secret (`ELEVENLABS_AGENT_ID`) to keep it configurable
-- **Positioning**: Floating button on the bottom-left to avoid conflicting with the chatbot on the bottom-right
+These are triggered from existing flows (quiz completion, session updates) by checking if the student has a linked parent and sending the notification only to the parent.
+
+### Technical Details
+- The linking flow validates that the entered email belongs to an existing student account
+- A parent can link multiple children
+- The child's dashboard, notifications, and UI remain completely unchanged
+- Parent data access reuses existing Firestore query functions, just called with the child's UID from the parent's context
 
