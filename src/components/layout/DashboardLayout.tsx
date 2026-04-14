@@ -12,7 +12,7 @@ import { showXPNotification } from "@/components/gamification/XPNotification";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
-  role: 'student' | 'tutor' | 'admin';
+  role: 'student' | 'tutor' | 'admin' | 'parent';
 }
 
 export default function DashboardLayout({ children, role }: DashboardLayoutProps) {
@@ -74,6 +74,7 @@ export default function DashboardLayout({ children, role }: DashboardLayoutProps
     switch (role) {
       case 'admin': return 'Admin';
       case 'tutor': return 'Tutor';
+      case 'parent': return 'Parent';
       default: return 'Student';
     }
   };
@@ -113,7 +114,7 @@ export default function DashboardLayout({ children, role }: DashboardLayoutProps
                 </Button>
               </div>
             )}
-            {(role === 'student' || role === 'tutor') && (
+            {(role === 'student' || role === 'tutor' || role === 'parent') && (
               <Button variant="ghost" size="sm" asChild>
                 <Link to={`/${role}/profile`}>
                   <User className="mr-2 h-4 w-4" />
