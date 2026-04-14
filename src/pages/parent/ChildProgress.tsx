@@ -9,10 +9,12 @@ import { useAuth } from "@/contexts/AuthContext";
 import {
   getStudentSessions,
   getStudentGoals,
+  getStudentResults,
   type Session,
   type LearningGoal,
+  type QuizResult,
 } from "@/lib/firestore";
-import { getStudentGamification, getStudentQuizResults, type StudentGamification } from "@/lib/gamification";
+import { getStudentGamification, type StudentGamification } from "@/lib/gamification";
 import { ArrowLeft, BookOpen, Target, Trophy, Clock, CheckCircle, XCircle, Calendar } from "lucide-react";
 import LevelBadge from "@/components/gamification/LevelBadge";
 import StreakCounter from "@/components/gamification/StreakCounter";
@@ -23,7 +25,7 @@ export default function ChildProgress() {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [goals, setGoals] = useState<LearningGoal[]>([]);
   const [gamification, setGamification] = useState<StudentGamification | null>(null);
-  const [quizResults, setQuizResults] = useState<any[]>([]);
+  const [quizResults, setQuizResults] = useState<QuizResult[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -38,7 +40,7 @@ export default function ChildProgress() {
         getStudentSessions(childId),
         getStudentGoals(childId),
         getStudentGamification(childId),
-        getStudentQuizResults(childId),
+        getStudentResults(childId),
       ]);
       setSessions(sess);
       setGoals(gls);

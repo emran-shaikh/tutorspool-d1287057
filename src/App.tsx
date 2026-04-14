@@ -51,6 +51,10 @@ import NotFound from "./pages/NotFound";
 import ForgotPassword from "./pages/ForgotPassword";
 import SharedQuizResults from "./pages/SharedQuizResults";
 import Achievements from "./pages/student/Achievements";
+import ParentDashboard from "./pages/dashboard/ParentDashboard";
+import LinkChild from "./pages/parent/LinkChild";
+import ChildProgress from "./pages/parent/ChildProgress";
+import EditParentProfile from "./pages/parent/EditParentProfile";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { CookieConsent } from "@/components/CookieConsent";
 
@@ -156,6 +160,12 @@ const App = () => (
               <Route path="/admin/announcements" element={<ProtectedRoute allowedRoles={['admin']}><ManageAnnouncements /></ProtectedRoute>} />
               <Route path="/admin/users/tutor/:uid" element={<ProtectedRoute allowedRoles={['admin']}><AdminEditTutor /></ProtectedRoute>} />
               <Route path="/admin/users/student/:uid" element={<ProtectedRoute allowedRoles={['admin']}><AdminEditStudent /></ProtectedRoute>} />
+              
+              {/* Parent Routes */}
+              <Route path="/parent/dashboard" element={<ProtectedRoute allowedRoles={['parent']}><ParentDashboard /></ProtectedRoute>} />
+              <Route path="/parent/link-child" element={<ProtectedRoute allowedRoles={['parent']}><LinkChild /></ProtectedRoute>} />
+              <Route path="/parent/progress/:childId" element={<ProtectedRoute allowedRoles={['parent']}><ChildProgress /></ProtectedRoute>} />
+              <Route path="/parent/profile" element={<ProtectedRoute allowedRoles={['parent']}><EditParentProfile /></ProtectedRoute>} />
               
               <Route path="*" element={<NotFound />} />
             </Routes>
