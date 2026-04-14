@@ -36,6 +36,11 @@ service cloud.firestore {
     function isStudent() {
       return isAuthenticated() && getUserRole() == 'student';
     }
+    
+    // Helper function to check if user is parent
+    function isParent() {
+      return isAuthenticated() && getUserRole() == 'parent';
+    }
 
     // Users collection - CRITICAL: Protect role field
     match /users/{userId} {
@@ -299,6 +304,27 @@ service cloud.firestore {
       // Allow students to read their own transactions, and tutors/admins to read any
       allow read: if isAuthenticated() && (request.auth.uid == resource.data.studentId || isTutor() || isAdmin());
       allow create: if isAuthenticated();
+    }
+
+    // Parent Links collection - silent child monitoring
+    match /parentLinks/{linkId} {
+      // Parents can read their own links, admins can read all
+      allow read: if isAuthenticated() && (
+        resource.data.parentId == request.auth.uid ||
+        isAdmin()
+      );
+      
+      // Parents can create links
+      allow create: if isAuthenticated() && 
+        request.resource.data.parentId == request.auth.uid &&
+        getUserRole() == 'parent';
+      
+      // Parents can delete their own links
+      allow delete: if isAuthenticated() && 
+        resource.data.parentId == request.auth.uid;
+      
+      // No updates needed
+      allow update: if isAdmin();
     }
   }
 }

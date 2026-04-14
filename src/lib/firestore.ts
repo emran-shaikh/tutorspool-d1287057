@@ -457,6 +457,10 @@ export const deleteUser = async (uid: string, role: string): Promise<void> => {
       // Delete student's learning goals
       const goalsSnapshot = await getDocs(query(collection(db, 'learningGoals'), where('studentId', '==', uid)));
       await Promise.all(goalsSnapshot.docs.map(d => deleteDoc(doc(db, 'learningGoals', d.id))));
+    } else if (role === 'parent') {
+      // Delete parent's links
+      const linksSnapshot = await getDocs(query(collection(db, 'parentLinks'), where('parentId', '==', uid)));
+      await Promise.all(linksSnapshot.docs.map(d => deleteDoc(doc(db, 'parentLinks', d.id))));
     }
   } catch (error) {
     if (isDev) console.error('Error deleting user:', error);
@@ -1911,5 +1915,82 @@ export const deleteAnnouncement = async (id: string): Promise<void> => {
   } catch (error) {
     if (isDev) console.error('Error deleting announcement:', error);
     throw error;
+  }
+};
+
+// Parent Link Types and Functions
+export interface ParentLink {
+  id?: string;
+  parentId: string;
+  childId: string;
+  childEmail: string;
+  childName: string;
+  linkedAt: string;
+  status: 'active' | 'pending';
+}
+
+export const getParentLinks = async (parentId: string): Promise<ParentLink[]> => {
+  try {
+    const q = query(collection(db, 'parentLinks'), where('parentId', '==', parentId));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(d => ({ ...d.data(), id: d.id } as ParentLink));
+  } catch (error) {
+    if (isDev) console.error('Error fetching parent links:', error);
+    return [];
+  }
+};
+
+export const createParentLink = async (parentId: string, childEmail: string): Promise<string> => {
+  // Find the student by email
+  const usersSnapshot = await getDocs(collection(db, 'users'));
+  const studentDoc = usersSnapshot.docs.find(d => {
+    const data = d.data();
+    return data.email === childEmail && data.role === 'student';
+  });
+
+  if (!studentDoc) {
+    throw new Error('No student account found with this email address.');
+  }
+
+  const studentData = studentDoc.data();
+
+  // Check for duplicate
+  const existing = await getDocs(
+    query(collection(db, 'parentLinks'), where('parentId', '==', parentId), where('childId', '==', studentDoc.id))
+  );
+  if (!existing.empty) {
+    throw new Error('This child is already linked to your account.');
+  }
+
+  const link: Omit<ParentLink, 'id'> = {
+    parentId,
+    childId: studentDoc.id,
+    childEmail,
+    childName: studentData.fullName || 'Unknown',
+    linkedAt: new Date().toISOString(),
+    status: 'active',
+  };
+
+  const docRef = await addDoc(collection(db, 'parentLinks'), link);
+  return docRef.id;
+};
+
+export const deleteParentLink = async (linkId: string): Promise<void> => {
+  try {
+    await deleteDoc(doc(db, 'parentLinks', linkId));
+  } catch (error) {
+    if (isDev) console.error('Error deleting parent link:', error);
+    throw error;
+  }
+};
+
+export const getParentLinksForStudent = async (childId: string): Promise<ParentLink[]> => {
+  try {
+    const q = query(collection(db, 'parentLinks'), where('childId', '==', childId));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(d => ({ ...d.data(), id: d.id } as ParentLink));
+  } catch (error) {
+    if (isDev) console.error('Error fetching parent links for student:', error);
+    return [];
   }
 };
