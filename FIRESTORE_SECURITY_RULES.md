@@ -36,6 +36,11 @@ service cloud.firestore {
     function isStudent() {
       return isAuthenticated() && getUserRole() == 'student';
     }
+    
+    // Helper function to check if user is parent
+    function isParent() {
+      return isAuthenticated() && getUserRole() == 'parent';
+    }
 
     // Users collection - CRITICAL: Protect role field
     match /users/{userId} {
