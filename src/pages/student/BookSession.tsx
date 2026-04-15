@@ -12,6 +12,7 @@ import { getTutorProfile, getTutorAvailability, createSession, TutorProfile, Ava
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { notifyParentsOfSessionBooked } from "@/lib/parentNotifications";
 
 const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 

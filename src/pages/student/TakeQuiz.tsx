@@ -33,6 +33,7 @@ import {
 } from "@/lib/firestore";
 import { awardXP } from "@/lib/gamification";
 import { showXPNotification, showBadgeNotification, showLevelUpNotification } from "@/components/gamification/XPNotification";
+import { notifyParentsOfQuizCompletion, notifyParentsOfMilestone } from "@/lib/parentNotifications";
 
 type Phase = "flashcards" | "quiz" | "results";
 
