@@ -41,6 +41,11 @@ service cloud.firestore {
     function isParent() {
       return isAuthenticated() && getUserRole() == 'parent';
     }
+    
+    // Helper: check if authenticated parent is linked to the given student
+    function isLinkedParent(studentId) {
+      return isParent() && exists(/databases/$(database)/documents/parentLinks/$(request.auth.uid + '_' + studentId));
+    }
 
     // Users collection - CRITICAL: Protect role field
     match /users/{userId} {
