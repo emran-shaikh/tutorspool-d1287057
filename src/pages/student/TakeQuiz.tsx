@@ -156,6 +156,7 @@ export default function TakeQuiz() {
           showLevelUpNotification(result.newLevel, result.levelTitle);
           notifyParentsOfMilestone(userProfile.uid, userProfile.fullName, `Level ${result.newLevel}: ${result.levelTitle}`, `Reached level ${result.newLevel} through consistent learning!`);
         }
+        result.badgesEarned.forEach(b => showBadgeNotification(b));
 
         // Bonus for perfect score
         if (accuracy === 100) {
