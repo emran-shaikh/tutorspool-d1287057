@@ -152,8 +152,10 @@ export default function TakeQuiz() {
       try {
         const result = await awardXP(userProfile.uid, 'quiz_completed', 30, `Completed quiz: ${quiz.topic}`, { quizzesCompleted: 1 });
         showXPNotification(30, `Completed quiz: ${quiz.topic}`);
-        if (result.newLevel > result.previousLevel) showLevelUpNotification(result.newLevel, result.levelTitle);
-        result.badgesEarned.forEach(b => showBadgeNotification(b));
+        if (result.newLevel > result.previousLevel) {
+          showLevelUpNotification(result.newLevel, result.levelTitle);
+          notifyParentsOfMilestone(userProfile.uid, userProfile.fullName, `Level ${result.newLevel}: ${result.levelTitle}`, `Reached level ${result.newLevel} through consistent learning!`);
+        }
 
         // Bonus for perfect score
         if (accuracy === 100) {
