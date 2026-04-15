@@ -178,6 +178,15 @@ export default function TakeQuiz() {
         console.error('Gamification error:', e);
       }
 
+      // Silent parent notification (fire-and-forget)
+      notifyParentsOfQuizCompletion(
+        userProfile.uid, userProfile.fullName, quiz.topic, quiz.subject,
+        accuracy, correctAnswers, quiz.questions.length
+      );
+      if (accuracy === 100) {
+        notifyParentsOfMilestone(userProfile.uid, userProfile.fullName, 'Perfect Quiz Score!', `Scored 100% on ${quiz.topic}`);
+      }
+
       navigate(`/student/quiz/${quizId}/results?result=${resultId}`);
     } catch (error) {
       console.error("Error submitting quiz:", error);

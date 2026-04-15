@@ -122,6 +122,12 @@ export default function BookSession() {
       } catch (err) {
         console.error('Failed to trigger session emails:', err);
       }
+
+      // Silent parent notification (fire-and-forget)
+      notifyParentsOfSessionBooked(
+        userProfile.uid, userProfile.fullName, tutor.fullName,
+        selectedSubject, selectedDate, selectedTime
+      );
       
       toast({ title: "Success", description: "Session request sent to tutor!" });
       navigate('/student/sessions');
