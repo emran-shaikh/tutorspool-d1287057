@@ -1,5 +1,21 @@
 import { getParentLinksForStudent } from './firestore';
 import { supabase } from '@/integrations/supabase/client';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from './firebase';
+
+/**
+ * Fetch parent email & name from users collection
+ */
+async function getParentInfo(parentId: string): Promise<{ email: string; name: string } | null> {
+  try {
+    const snap = await getDoc(doc(db, 'users', parentId));
+    if (!snap.exists()) return null;
+    const data = snap.data();
+    return { email: data.email, name: data.fullName || 'Parent' };
+  } catch {
+    return null;
+  }
+}
 
 /**
  * Silently notify all linked parents about a child's activity.
@@ -19,12 +35,14 @@ export async function notifyParentsOfQuizCompletion(
     if (!links.length) return;
 
     await Promise.allSettled(
-      links.map(link =>
-        supabase.functions.invoke('send-email', {
+      links.map(async (link) => {
+        const parent = await getParentInfo(link.parentId);
+        if (!parent?.email) return;
+        return supabase.functions.invoke('send-email', {
           body: {
             type: 'parent_quiz_completed',
-            to: link.parentEmail,
-            parentName: link.parentName || 'Parent',
+            to: parent.email,
+            parentName: parent.name,
             childName: studentName,
             quizTopic,
             subject,
@@ -32,8 +50,8 @@ export async function notifyParentsOfQuizCompletion(
             correctAnswers,
             totalQuestions,
           },
-        })
-      )
+        });
+      })
     );
   } catch (e) {
     console.error('Silent parent notification (quiz) failed:', e);
@@ -53,20 +71,22 @@ export async function notifyParentsOfSessionBooked(
     if (!links.length) return;
 
     await Promise.allSettled(
-      links.map(link =>
-        supabase.functions.invoke('send-email', {
+      links.map(async (link) => {
+        const parent = await getParentInfo(link.parentId);
+        if (!parent?.email) return;
+        return supabase.functions.invoke('send-email', {
           body: {
             type: 'parent_session_booked',
-            to: link.parentEmail,
-            parentName: link.parentName || 'Parent',
+            to: parent.email,
+            parentName: parent.name,
             childName: studentName,
             tutorName,
             subject,
             date,
             time,
           },
-        })
-      )
+        });
+      })
     );
   } catch (e) {
     console.error('Silent parent notification (session) failed:', e);
@@ -84,18 +104,20 @@ export async function notifyParentsOfMilestone(
     if (!links.length) return;
 
     await Promise.allSettled(
-      links.map(link =>
-        supabase.functions.invoke('send-email', {
+      links.map(async (link) => {
+        const parent = await getParentInfo(link.parentId);
+        if (!parent?.email) return;
+        return supabase.functions.invoke('send-email', {
           body: {
             type: 'parent_milestone',
-            to: link.parentEmail,
-            parentName: link.parentName || 'Parent',
+            to: parent.email,
+            parentName: parent.name,
             childName: studentName,
             milestoneTitle,
             milestoneDescription,
           },
-        })
-      )
+        });
+      })
     );
   } catch (e) {
     console.error('Silent parent notification (milestone) failed:', e);
