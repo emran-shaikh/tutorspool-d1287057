@@ -14,7 +14,7 @@ const ADMIN_EMAILS = ["info@tutorspool.com", "itsartificialimran@gmail.com"];
 const SITE = "https://tutorspool.com";
 
 /* ─── Role Themes ─── */
-type Role = "student" | "tutor" | "admin";
+type Role = "student" | "tutor" | "admin" | "parent";
 
 const THEMES: Record<Role, { gradient: string; accent: string; accentFg: string; badge: string; icon: string }> = {
   student: {
@@ -37,6 +37,13 @@ const THEMES: Record<Role, { gradient: string; accent: string; accentFg: string;
     accentFg: "#ffffff",
     badge: "#ede9fe",
     icon: "🛡️",
+  },
+  parent: {
+    gradient: "linear-gradient(135deg, #e11d48, #f43f5e)",
+    accent: "#e11d48",
+    accentFg: "#ffffff",
+    badge: "#ffe4e6",
+    icon: "👨‍👩‍👧",
   },
 };
 
@@ -126,7 +133,8 @@ type EmailType =
   | "session_reminder" | "session_completed" | "review_thankyou"
   | "tutor_session_booking" | "tutor_session_cancel" | "tutor_review_received"
   | "admin_new_student" | "admin_new_tutor" | "tutor_approved"
-  | "contact_form" | "demo_request";
+  | "contact_form" | "demo_request"
+  | "parent_quiz_completed" | "parent_session_booked" | "parent_milestone";
 
 interface BaseEmailRequest { type: EmailType; }
 interface WelcomeEmailRequest extends BaseEmailRequest { type: "welcome"; to: string; name: string; role?: string; }
@@ -143,27 +151,32 @@ interface AdminNewTutorEmailRequest extends BaseEmailRequest { type: "admin_new_
 interface TutorApprovedEmailRequest extends BaseEmailRequest { type: "tutor_approved"; to: string; tutorName: string; }
 interface ContactFormEmailRequest extends BaseEmailRequest { type: "contact_form"; name: string; email: string; subject: string; message: string; }
 interface DemoRequestEmailRequest extends BaseEmailRequest { type: "demo_request"; name: string; email: string; phone: string; }
+interface ParentQuizCompletedEmailRequest extends BaseEmailRequest { type: "parent_quiz_completed"; to: string; parentName: string; childName: string; quizTopic: string; subject: string; accuracy: number; correctAnswers: number; totalQuestions: number; }
+interface ParentSessionBookedEmailRequest extends BaseEmailRequest { type: "parent_session_booked"; to: string; parentName: string; childName: string; tutorName: string; subject: string; date: string; time: string; }
+interface ParentMilestoneEmailRequest extends BaseEmailRequest { type: "parent_milestone"; to: string; parentName: string; childName: string; milestoneTitle: string; milestoneDescription: string; }
 
 type EmailRequest =
   | WelcomeEmailRequest | SessionBookingEmailRequest | SessionUpdateEmailRequest
   | SessionReminderEmailRequest | SessionCompletedEmailRequest | ReviewThankYouEmailRequest
   | TutorSessionBookingEmailRequest | TutorSessionCancelEmailRequest | TutorReviewReceivedEmailRequest
   | AdminNewStudentEmailRequest | AdminNewTutorEmailRequest | TutorApprovedEmailRequest
-  | ContactFormEmailRequest | DemoRequestEmailRequest;
+  | ContactFormEmailRequest | DemoRequestEmailRequest
+  | ParentQuizCompletedEmailRequest | ParentSessionBookedEmailRequest | ParentMilestoneEmailRequest;
 
 /* ─── Student Emails ─── */
 
-// CRITERIA: Sent when a student registers on the platform
 async function sendWelcomeEmail(payload: WelcomeEmailRequest) {
-  const role: Role = (payload.role === "tutor") ? "tutor" : "student";
-  const dashboardPath = role === "tutor" ? "/tutor/dashboard" : "/student/dashboard";
+  const role: Role = (payload.role === "tutor") ? "tutor" : (payload.role === "parent") ? "parent" : "student";
+  const dashboardPath = role === "tutor" ? "/tutor/dashboard" : role === "parent" ? "/parent/dashboard" : "/student/dashboard";
 
   const body = `
     <p>Hi <strong>${payload.name}</strong>,</p>
     <p>Welcome aboard! Your ${role} account is ready. ${
       role === "student"
         ? "Start exploring top tutors, book sessions, and track your learning journey."
-        : "Complete your profile, set your availability, and start receiving session requests."
+        : role === "tutor"
+        ? "Complete your profile, set your availability, and start receiving session requests."
+        : "Link your child's account to start monitoring their academic progress."
     }</p>
     <p style="margin-top:4px;font-size:13px;color:#64748b;">Need help? Reply to this email anytime.</p>
   `;
@@ -176,7 +189,6 @@ async function sendWelcomeEmail(payload: WelcomeEmailRequest) {
   });
 }
 
-// CRITERIA: Sent to student when they request a session booking
 async function sendBookingEmail(payload: SessionBookingEmailRequest) {
   const body = `
     <p>Hi <strong>${payload.studentName}</strong>,</p>
@@ -193,7 +205,6 @@ async function sendBookingEmail(payload: SessionBookingEmailRequest) {
   });
 }
 
-// CRITERIA: Sent to student when session status changes (accepted/declined) or cancelled
 async function sendUpdateEmail(payload: SessionUpdateEmailRequest) {
   const pretty = payload.status.charAt(0).toUpperCase() + payload.status.slice(1);
   const isCancelled = payload.type === "session_cancel";
@@ -213,7 +224,6 @@ async function sendUpdateEmail(payload: SessionUpdateEmailRequest) {
   });
 }
 
-// CRITERIA: Scheduled 24h and 1h before session start time
 async function scheduleReminderEmails(payload: SessionReminderEmailRequest) {
   const sessionStart = new Date(payload.sessionStartIso);
   if (isNaN(sessionStart.getTime())) throw new Error("Invalid sessionStartIso date");
@@ -249,7 +259,6 @@ async function scheduleReminderEmails(payload: SessionReminderEmailRequest) {
   return { reminder24h, reminder1h };
 }
 
-// CRITERIA: Sent to student after a session is marked completed
 async function sendSessionCompletedEmail(payload: SessionCompletedEmailRequest) {
   const body = `
     <p>Hi <strong>${payload.studentName}</strong>,</p>
@@ -265,7 +274,6 @@ async function sendSessionCompletedEmail(payload: SessionCompletedEmailRequest) 
   });
 }
 
-// CRITERIA: Sent to student after they submit a review for a tutor
 async function sendReviewThankYouEmail(payload: ReviewThankYouEmailRequest) {
   const body = `
     <p>Hi <strong>${payload.studentName}</strong>,</p>
@@ -281,7 +289,6 @@ async function sendReviewThankYouEmail(payload: ReviewThankYouEmailRequest) {
 
 /* ─── Tutor Emails ─── */
 
-// CRITERIA: Sent to tutor when a student books a session with them
 async function sendTutorSessionBookingEmail(payload: TutorSessionBookingEmailRequest) {
   const body = `
     <p>Hi <strong>${payload.tutorName}</strong>,</p>
@@ -297,7 +304,6 @@ async function sendTutorSessionBookingEmail(payload: TutorSessionBookingEmailReq
   });
 }
 
-// CRITERIA: Sent to tutor when a session is cancelled (by student or tutor)
 async function sendTutorSessionCancelEmail(payload: TutorSessionCancelEmailRequest) {
   const by = payload.cancelledBy === "student" ? "the student" : "you";
   const body = `
@@ -313,7 +319,6 @@ async function sendTutorSessionCancelEmail(payload: TutorSessionCancelEmailReque
   });
 }
 
-// CRITERIA: Sent to tutor when a student leaves a review for them
 async function sendTutorReviewReceivedEmail(payload: TutorReviewReceivedEmailRequest) {
   const body = `
     <p>Hi <strong>${payload.tutorName}</strong>,</p>
@@ -327,7 +332,6 @@ async function sendTutorReviewReceivedEmail(payload: TutorReviewReceivedEmailReq
   });
 }
 
-// CRITERIA: Sent to tutor when admin approves their application
 async function sendTutorApprovedEmail(payload: TutorApprovedEmailRequest) {
   const body = `
     <p>Hi <strong>${payload.tutorName}</strong>,</p>
@@ -350,7 +354,6 @@ async function sendTutorApprovedEmail(payload: TutorApprovedEmailRequest) {
 
 /* ─── Admin Emails ─── */
 
-// CRITERIA: Sent to admin emails when a new student registers
 async function sendAdminNewStudentEmail(payload: AdminNewStudentEmailRequest) {
   const body = `
     <p>A new <strong>student</strong> has registered on TutorsPool.</p>
@@ -365,7 +368,6 @@ async function sendAdminNewStudentEmail(payload: AdminNewStudentEmailRequest) {
   });
 }
 
-// CRITERIA: Sent to admin emails when a new tutor registers (needs approval)
 async function sendAdminNewTutorEmail(payload: AdminNewTutorEmailRequest) {
   const body = `
     <p>A new <strong>tutor</strong> has registered and is <strong>awaiting approval</strong>.</p>
@@ -380,7 +382,6 @@ async function sendAdminNewTutorEmail(payload: AdminNewTutorEmailRequest) {
   });
 }
 
-// CRITERIA: Sent to admin emails when someone submits the contact form
 async function sendContactFormEmail(payload: ContactFormEmailRequest) {
   const body = `
     <p>New message from the <strong>Contact Us</strong> form on TutorsPool.</p>
@@ -393,15 +394,13 @@ async function sendContactFormEmail(payload: ContactFormEmailRequest) {
   `;
 
   return resend.emails.send({
-    from: FROM_ADDRESS,
-    to: ADMIN_EMAILS,
+    from: FROM_ADDRESS, to: ADMIN_EMAILS,
     replyTo: payload.email,
     subject: `📩 Contact Form: ${payload.subject}`,
     html: renderLayout("admin", "New Contact Form Message", body),
   });
 }
 
-// CRITERIA: Sent to admin emails when someone submits a demo request via exit popup
 async function sendDemoRequestEmail(payload: DemoRequestEmailRequest) {
   const body = `
     <p>A new <strong>demo session request</strong> has been submitted via the website.</p>
@@ -410,11 +409,69 @@ async function sendDemoRequestEmail(payload: DemoRequestEmailRequest) {
   `;
 
   return resend.emails.send({
-    from: FROM_ADDRESS,
-    to: ADMIN_EMAILS,
+    from: FROM_ADDRESS, to: ADMIN_EMAILS,
     replyTo: payload.email,
     subject: `🎯 New Demo Request: ${payload.name}`,
     html: renderLayout("admin", "New Demo Request", body, `${SITE}/admin/dashboard`, "View All Requests"),
+  });
+}
+
+/* ─── Parent Emails (Silent Notifications) ─── */
+
+async function sendParentQuizCompletedEmail(payload: ParentQuizCompletedEmailRequest) {
+  const scoreColor = payload.accuracy >= 80 ? "#059669" : payload.accuracy >= 50 ? "#d97706" : "#dc2626";
+  const body = `
+    <p>Hi <strong>${payload.parentName}</strong>,</p>
+    <p>Your child <strong>${payload.childName}</strong> just completed a quiz!</p>
+    ${infoBox({ "Quiz Topic": payload.quizTopic, "Subject": payload.subject })}
+    <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:16px 20px;margin:16px 0;text-align:center;">
+      <p style="margin:0 0 8px;color:#64748b;font-size:13px;">Score</p>
+      <p style="margin:0;font-size:32px;font-weight:800;color:${scoreColor};">${payload.accuracy}%</p>
+      <p style="margin:8px 0 0;color:#334155;font-size:14px;">${payload.correctAnswers} out of ${payload.totalQuestions} correct</p>
+    </div>
+    <p>You can view the full details from your parent dashboard.</p>
+  `;
+
+  return resend.emails.send({
+    from: FROM_ADDRESS,
+    to: [payload.to],
+    subject: `📊 ${payload.childName} completed a quiz — ${payload.accuracy}% score`,
+    html: renderLayout("parent", "Quiz Completed", body, `${SITE}/parent/dashboard`, "View Dashboard"),
+  });
+}
+
+async function sendParentSessionBookedEmail(payload: ParentSessionBookedEmailRequest) {
+  const body = `
+    <p>Hi <strong>${payload.parentName}</strong>,</p>
+    <p>Your child <strong>${payload.childName}</strong> has booked a new tutoring session.</p>
+    ${infoBox({ "Tutor": payload.tutorName, "Subject": payload.subject, "Date": payload.date, "Time": payload.time }, "#ffe4e6", "#fda4af")}
+    <p>The session is pending tutor confirmation. You'll be updated once it's confirmed.</p>
+  `;
+
+  return resend.emails.send({
+    from: FROM_ADDRESS,
+    to: [payload.to],
+    subject: `📅 ${payload.childName} booked a session with ${payload.tutorName}`,
+    html: renderLayout("parent", "New Session Booked", body, `${SITE}/parent/dashboard`, "View Dashboard"),
+  });
+}
+
+async function sendParentMilestoneEmail(payload: ParentMilestoneEmailRequest) {
+  const body = `
+    <p>Hi <strong>${payload.parentName}</strong>,</p>
+    <p>Great news! Your child <strong>${payload.childName}</strong> just reached a new milestone! 🎉</p>
+    <div style="background:#ffe4e6;border:1px solid #fda4af;border-radius:10px;padding:20px;margin:16px 0;text-align:center;">
+      <p style="margin:0;font-size:20px;font-weight:700;color:#e11d48;">🏆 ${payload.milestoneTitle}</p>
+      <p style="margin:8px 0 0;color:#334155;font-size:14px;">${payload.milestoneDescription}</p>
+    </div>
+    <p>Keep encouraging them — every achievement matters!</p>
+  `;
+
+  return resend.emails.send({
+    from: FROM_ADDRESS,
+    to: [payload.to],
+    subject: `🏆 ${payload.childName} achieved: ${payload.milestoneTitle}`,
+    html: renderLayout("parent", "New Milestone Achieved!", body, `${SITE}/parent/dashboard`, "View Dashboard"),
   });
 }
 
@@ -452,6 +509,9 @@ serve(async (req) => {
       case "tutor_approved":     result = await sendTutorApprovedEmail(payload); break;
       case "contact_form":       result = await sendContactFormEmail(payload); break;
       case "demo_request":       result = await sendDemoRequestEmail(payload); break;
+      case "parent_quiz_completed": result = await sendParentQuizCompletedEmail(payload); break;
+      case "parent_session_booked": result = await sendParentSessionBookedEmail(payload); break;
+      case "parent_milestone":      result = await sendParentMilestoneEmail(payload); break;
       default:
         return new Response(JSON.stringify({ error: "Unsupported email type" }), {
           status: 400,

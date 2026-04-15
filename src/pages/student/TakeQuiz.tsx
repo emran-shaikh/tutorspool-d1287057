@@ -33,6 +33,7 @@ import {
 } from "@/lib/firestore";
 import { awardXP } from "@/lib/gamification";
 import { showXPNotification, showBadgeNotification, showLevelUpNotification } from "@/components/gamification/XPNotification";
+import { notifyParentsOfQuizCompletion, notifyParentsOfMilestone } from "@/lib/parentNotifications";
 
 type Phase = "flashcards" | "quiz" | "results";
 
@@ -151,7 +152,10 @@ export default function TakeQuiz() {
       try {
         const result = await awardXP(userProfile.uid, 'quiz_completed', 30, `Completed quiz: ${quiz.topic}`, { quizzesCompleted: 1 });
         showXPNotification(30, `Completed quiz: ${quiz.topic}`);
-        if (result.newLevel > result.previousLevel) showLevelUpNotification(result.newLevel, result.levelTitle);
+        if (result.newLevel > result.previousLevel) {
+          showLevelUpNotification(result.newLevel, result.levelTitle);
+          notifyParentsOfMilestone(userProfile.uid, userProfile.fullName, `Level ${result.newLevel}: ${result.levelTitle}`, `Reached level ${result.newLevel} through consistent learning!`);
+        }
         result.badgesEarned.forEach(b => showBadgeNotification(b));
 
         // Bonus for perfect score
@@ -175,6 +179,15 @@ export default function TakeQuiz() {
         }
       } catch (e) {
         console.error('Gamification error:', e);
+      }
+
+      // Silent parent notification (fire-and-forget)
+      notifyParentsOfQuizCompletion(
+        userProfile.uid, userProfile.fullName, quiz.topic, quiz.subject,
+        accuracy, correctAnswers, quiz.questions.length
+      );
+      if (accuracy === 100) {
+        notifyParentsOfMilestone(userProfile.uid, userProfile.fullName, 'Perfect Quiz Score!', `Scored 100% on ${quiz.topic}`);
       }
 
       navigate(`/student/quiz/${quizId}/results?result=${resultId}`);

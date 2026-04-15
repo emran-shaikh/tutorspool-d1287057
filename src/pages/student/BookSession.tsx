@@ -12,6 +12,7 @@ import { getTutorProfile, getTutorAvailability, createSession, TutorProfile, Ava
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { notifyParentsOfSessionBooked } from "@/lib/parentNotifications";
 
 const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -121,6 +122,12 @@ export default function BookSession() {
       } catch (err) {
         console.error('Failed to trigger session emails:', err);
       }
+
+      // Silent parent notification (fire-and-forget)
+      notifyParentsOfSessionBooked(
+        userProfile.uid, userProfile.fullName, tutor.fullName,
+        selectedSubject, selectedDate, selectedTime
+      );
       
       toast({ title: "Success", description: "Session request sent to tutor!" });
       navigate('/student/sessions');
