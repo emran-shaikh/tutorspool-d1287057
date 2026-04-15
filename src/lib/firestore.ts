@@ -1954,11 +1954,12 @@ export const createParentLink = async (parentId: string, childEmail: string): Pr
 
   const studentData = studentDoc.data();
 
+  // Use deterministic ID for Firestore rules exists() checks
+  const linkDocId = `${parentId}_${studentDoc.id}`;
+
   // Check for duplicate
-  const existing = await getDocs(
-    query(collection(db, 'parentLinks'), where('parentId', '==', parentId), where('childId', '==', studentDoc.id))
-  );
-  if (!existing.empty) {
+  const existingDoc = await getDoc(doc(db, 'parentLinks', linkDocId));
+  if (existingDoc.exists()) {
     throw new Error('This child is already linked to your account.');
   }
 
@@ -1971,8 +1972,8 @@ export const createParentLink = async (parentId: string, childEmail: string): Pr
     status: 'active',
   };
 
-  const docRef = await addDoc(collection(db, 'parentLinks'), link);
-  return docRef.id;
+  await setDoc(doc(db, 'parentLinks', linkDocId), link);
+  return linkDocId;
 };
 
 export const deleteParentLink = async (linkId: string): Promise<void> => {

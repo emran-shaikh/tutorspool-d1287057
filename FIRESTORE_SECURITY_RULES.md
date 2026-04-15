@@ -41,6 +41,11 @@ service cloud.firestore {
     function isParent() {
       return isAuthenticated() && getUserRole() == 'parent';
     }
+    
+    // Helper: check if authenticated parent is linked to the given student
+    function isLinkedParent(studentId) {
+      return isParent() && exists(/databases/$(database)/documents/parentLinks/$(request.auth.uid + '_' + studentId));
+    }
 
     // Users collection - CRITICAL: Protect role field
     match /users/{userId} {
@@ -80,7 +85,8 @@ service cloud.firestore {
       allow read: if isAuthenticated() && (
         resource.data.studentId == request.auth.uid ||
         resource.data.tutorId == request.auth.uid ||
-        isAdmin()
+        isAdmin() ||
+        isLinkedParent(resource.data.studentId)
       );
       
       // Students can create sessions
@@ -117,7 +123,8 @@ service cloud.firestore {
       // Students can read their own goals, admins can read all
       allow read: if isAuthenticated() && (
         resource.data.studentId == request.auth.uid ||
-        isAdmin()
+        isAdmin() ||
+        isLinkedParent(resource.data.studentId)
       );
       
       // Students can manage their own goals
@@ -234,7 +241,8 @@ service cloud.firestore {
       allow read: if isAuthenticated() && (
         resource.data.studentId == request.auth.uid ||
         resource.data.tutorId == request.auth.uid ||
-        isAdmin()
+        isAdmin() ||
+        isLinkedParent(resource.data.studentId)
       );
       
       // Students can create results when completing a quiz
@@ -255,7 +263,8 @@ service cloud.firestore {
       allow read: if isAuthenticated() && (
         isOwner(studentId) ||
         isTutor() ||
-        isAdmin()
+        isAdmin() ||
+        isLinkedParent(studentId)
       );
       
       // Only the student themselves can create/update their profile
