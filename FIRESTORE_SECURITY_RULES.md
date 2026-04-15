@@ -85,7 +85,8 @@ service cloud.firestore {
       allow read: if isAuthenticated() && (
         resource.data.studentId == request.auth.uid ||
         resource.data.tutorId == request.auth.uid ||
-        isAdmin()
+        isAdmin() ||
+        isLinkedParent(resource.data.studentId)
       );
       
       // Students can create sessions
@@ -122,7 +123,8 @@ service cloud.firestore {
       // Students can read their own goals, admins can read all
       allow read: if isAuthenticated() && (
         resource.data.studentId == request.auth.uid ||
-        isAdmin()
+        isAdmin() ||
+        isLinkedParent(resource.data.studentId)
       );
       
       // Students can manage their own goals
@@ -239,7 +241,8 @@ service cloud.firestore {
       allow read: if isAuthenticated() && (
         resource.data.studentId == request.auth.uid ||
         resource.data.tutorId == request.auth.uid ||
-        isAdmin()
+        isAdmin() ||
+        isLinkedParent(resource.data.studentId)
       );
       
       // Students can create results when completing a quiz
