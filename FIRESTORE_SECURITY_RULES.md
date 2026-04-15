@@ -263,7 +263,8 @@ service cloud.firestore {
       allow read: if isAuthenticated() && (
         isOwner(studentId) ||
         isTutor() ||
-        isAdmin()
+        isAdmin() ||
+        isLinkedParent(studentId)
       );
       
       // Only the student themselves can create/update their profile
