@@ -1959,12 +1959,6 @@ export const createParentLink = async (parentId: string, childEmail: string): Pr
   // Use deterministic ID for Firestore rules exists() checks
   const linkDocId = `${parentId}_${studentDoc.id}`;
 
-  // Check for duplicate
-  const existingDoc = await getDoc(doc(db, 'parentLinks', linkDocId));
-  if (existingDoc.exists()) {
-    throw new Error('This child is already linked to your account.');
-  }
-
   const link: Omit<ParentLink, 'id'> = {
     parentId,
     childId: studentDoc.id,

@@ -37,9 +37,23 @@ export default function LinkChild() {
     e.preventDefault();
     if (!userProfile?.uid || !childEmail.trim()) return;
 
+    const trimmedChildEmail = childEmail.trim();
+    const alreadyLinked = links.some(
+      (link) => link.childEmail.trim().toLowerCase() === trimmedChildEmail.toLowerCase()
+    );
+
+    if (alreadyLinked) {
+      toast({
+        title: "Child already linked",
+        description: "This child is already linked to your account.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
     try {
-      await createParentLink(userProfile.uid, childEmail.trim());
+      await createParentLink(userProfile.uid, trimmedChildEmail);
       toast({ title: "Child linked successfully!", description: "You can now monitor their progress." });
       setChildEmail("");
       await loadLinks();
