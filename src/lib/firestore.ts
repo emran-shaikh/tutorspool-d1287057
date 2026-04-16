@@ -1941,12 +1941,14 @@ export const getParentLinks = async (parentId: string): Promise<ParentLink[]> =>
 };
 
 export const createParentLink = async (parentId: string, childEmail: string): Promise<string> => {
-  // Find the student by email
-  const usersSnapshot = await getDocs(collection(db, 'users'));
-  const studentDoc = usersSnapshot.docs.find(d => {
-    const data = d.data();
-    return data.email === childEmail && data.role === 'student';
-  });
+  // Find the student by email using a targeted query
+  const q = query(
+    collection(db, 'users'),
+    where('email', '==', childEmail),
+    where('role', '==', 'student')
+  );
+  const usersSnapshot = await getDocs(q);
+  const studentDoc = usersSnapshot.docs[0];
 
   if (!studentDoc) {
     throw new Error('No student account found with this email address.');
