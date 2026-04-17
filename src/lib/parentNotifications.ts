@@ -2,6 +2,7 @@ import { getParentLinksForStudent } from './firestore';
 import { supabase } from '@/integrations/supabase/client';
 import { doc, getDoc, addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { db } from './firebase';
+import { DEFAULT_PREFS, type ParentNotificationPreferences } from '@/pages/parent/NotificationPreferences';
 
 export type ParentNotificationType =
   | 'quiz_completed'
@@ -21,6 +22,21 @@ async function getParentInfo(parentId: string): Promise<{ email: string; name: s
   } catch {
     return null;
   }
+}
+
+/**
+ * Fetch a parent's notification preferences (defaults to all enabled).
+ */
+async function getParentPrefs(parentId: string): Promise<ParentNotificationPreferences> {
+  try {
+    const snap = await getDoc(doc(db, 'parentNotificationPrefs', parentId));
+    if (snap.exists()) {
+      return { ...DEFAULT_PREFS, ...(snap.data() as ParentNotificationPreferences) };
+    }
+  } catch (e) {
+    console.error('Failed to load parent prefs:', e);
+  }
+  return DEFAULT_PREFS;
 }
 
 /**
