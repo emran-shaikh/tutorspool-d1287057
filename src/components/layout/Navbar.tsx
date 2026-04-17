@@ -1,7 +1,8 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Users, BookOpen, Star, Mail, Info, GraduationCap, Globe, Menu, X, FileText } from "lucide-react";
+import { Users, BookOpen, Star, Mail, Info, GraduationCap, Globe, Menu, X, FileText, User, LogOut, LayoutDashboard } from "lucide-react";
 import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const navLinks = [
   { label: "Subjects", href: "/subjects", icon: BookOpen },
@@ -15,6 +16,21 @@ const navLinks = [
 
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user, userProfile, logout } = useAuth();
+  const navigate = useNavigate();
+  const isLoggedIn = !!user && !!userProfile;
+  const dashboardHref = userProfile ? `/${userProfile.role}/dashboard` : '/';
+  const firstName = userProfile?.fullName?.split(' ')[0] || 'Account';
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      setMobileMenuOpen(false);
+      navigate('/');
+    } catch (e) {
+      console.error('Logout error:', e);
+    }
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
