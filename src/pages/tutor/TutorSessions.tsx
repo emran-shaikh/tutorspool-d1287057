@@ -16,6 +16,7 @@ import { auth } from "@/lib/firebase";
 import { supabase } from "@/integrations/supabase/client";
 import { awardXP } from "@/lib/gamification";
 import { showXPNotification, showLevelUpNotification, showBadgeNotification } from "@/components/gamification/XPNotification";
+import { notifyParentsOfSessionStatus } from "@/lib/parentNotifications";
 
 const statusColors: Record<Session['status'], string> = {
   pending: "bg-warning/10 text-warning border-warning/20",
@@ -132,6 +133,10 @@ export default function TutorSessions() {
       const meetingLink = zoomLink || `https://zoom.us/j/${Date.now()}`;
       await updateSessionStatus(selectedSession.id, 'accepted', meetingLink);
       await sendSessionStatusEmail({ ...selectedSession, zoomLink: meetingLink }, 'session_update', 'accepted');
+      notifyParentsOfSessionStatus(
+        selectedSession.studentId, selectedSession.studentName, selectedSession.tutorName,
+        selectedSession.subject, selectedSession.date, selectedSession.time, 'accepted'
+      );
       toast({ title: "Session accepted!", description: "Student has been notified" });
       setZoomDialogOpen(false);
       fetchSessions();
@@ -146,6 +151,10 @@ export default function TutorSessions() {
       await updateSessionStatus(sessionId, 'declined');
       if (session) {
         await sendSessionStatusEmail(session, 'session_cancel', 'declined');
+        notifyParentsOfSessionStatus(
+          session.studentId, session.studentName, session.tutorName,
+          session.subject, session.date, session.time, 'declined'
+        );
         if (session.tutorEmail) {
           await supabase.functions.invoke('send-email', {
             body: {
@@ -173,6 +182,10 @@ export default function TutorSessions() {
       await updateSessionStatus(sessionId, 'completed');
       if (session) {
         await sendSessionStatusEmail(session, 'session_update', 'completed');
+        notifyParentsOfSessionStatus(
+          session.studentId, session.studentName, session.tutorName,
+          session.subject, session.date, session.time, 'completed'
+        );
         // Award +50 XP to the student for completing a session
         try {
           console.log('Awarding XP to student:', session.studentId, 'for session:', session.subject);
@@ -204,6 +217,10 @@ export default function TutorSessions() {
       await updateSessionStatus(sessionId, 'cancelled');
       if (session) {
         await sendSessionStatusEmail(session, 'session_cancel', 'cancelled');
+        notifyParentsOfSessionStatus(
+          session.studentId, session.studentName, session.tutorName,
+          session.subject, session.date, session.time, 'cancelled'
+        );
         if (session.tutorEmail) {
           await supabase.functions.invoke('send-email', {
             body: {

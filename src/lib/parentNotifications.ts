@@ -1,7 +1,13 @@
 import { getParentLinksForStudent } from './firestore';
 import { supabase } from '@/integrations/supabase/client';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { db } from './firebase';
+
+export type ParentNotificationType =
+  | 'quiz_completed'
+  | 'session_booked'
+  | 'session_status'
+  | 'milestone';
 
 /**
  * Fetch parent email & name from users collection
@@ -18,9 +24,36 @@ async function getParentInfo(parentId: string): Promise<{ email: string; name: s
 }
 
 /**
- * Silently notify all linked parents about a child's activity.
- * Fire-and-forget — never throws, never shows UI to the student.
+ * Persist a notification record so parents can see history in the dashboard.
+ * Fire-and-forget — never throws.
  */
+async function recordNotification(
+  parentId: string,
+  childId: string,
+  childName: string,
+  type: ParentNotificationType,
+  title: string,
+  message: string,
+  meta: Record<string, unknown> = {}
+) {
+  try {
+    await addDoc(collection(db, 'parentNotifications'), {
+      parentId,
+      childId,
+      childName,
+      type,
+      title,
+      message,
+      meta,
+      read: false,
+      createdAt: serverTimestamp(),
+      createdAtIso: new Date().toISOString(),
+    });
+  } catch (e) {
+    console.error('Failed to record parent notification:', e);
+  }
+}
+
 export async function notifyParentsOfQuizCompletion(
   studentId: string,
   studentName: string,
@@ -37,6 +70,15 @@ export async function notifyParentsOfQuizCompletion(
     await Promise.allSettled(
       links.map(async (link) => {
         const parent = await getParentInfo(link.parentId);
+        await recordNotification(
+          link.parentId,
+          studentId,
+          studentName,
+          'quiz_completed',
+          `Quiz completed — ${accuracy}%`,
+          `${studentName} scored ${accuracy}% on "${quizTopic}" (${subject})`,
+          { quizTopic, subject, accuracy, correctAnswers, totalQuestions }
+        );
         if (!parent?.email) return;
         return supabase.functions.invoke('send-email', {
           body: {
@@ -73,6 +115,15 @@ export async function notifyParentsOfSessionBooked(
     await Promise.allSettled(
       links.map(async (link) => {
         const parent = await getParentInfo(link.parentId);
+        await recordNotification(
+          link.parentId,
+          studentId,
+          studentName,
+          'session_booked',
+          'New session booked',
+          `${studentName} booked a session with ${tutorName} for ${subject} on ${date} at ${time}`,
+          { tutorName, subject, date, time }
+        );
         if (!parent?.email) return;
         return supabase.functions.invoke('send-email', {
           body: {
@@ -93,6 +144,54 @@ export async function notifyParentsOfSessionBooked(
   }
 }
 
+export async function notifyParentsOfSessionStatus(
+  studentId: string,
+  studentName: string,
+  tutorName: string,
+  subject: string,
+  date: string,
+  time: string,
+  status: 'accepted' | 'declined' | 'completed' | 'cancelled'
+) {
+  try {
+    const links = await getParentLinksForStudent(studentId);
+    if (!links.length) return;
+
+    const statusLabel = status.charAt(0).toUpperCase() + status.slice(1);
+
+    await Promise.allSettled(
+      links.map(async (link) => {
+        const parent = await getParentInfo(link.parentId);
+        await recordNotification(
+          link.parentId,
+          studentId,
+          studentName,
+          'session_status',
+          `Session ${status}`,
+          `${studentName}'s session with ${tutorName} (${subject}) on ${date} at ${time} was ${status}.`,
+          { tutorName, subject, date, time, status }
+        );
+        if (!parent?.email) return;
+        return supabase.functions.invoke('send-email', {
+          body: {
+            type: 'parent_session_status',
+            to: parent.email,
+            parentName: parent.name,
+            childName: studentName,
+            tutorName,
+            subject,
+            date,
+            time,
+            status,
+          },
+        });
+      })
+    );
+  } catch (e) {
+    console.error('Silent parent notification (session status) failed:', e);
+  }
+}
+
 export async function notifyParentsOfMilestone(
   studentId: string,
   studentName: string,
@@ -106,6 +205,15 @@ export async function notifyParentsOfMilestone(
     await Promise.allSettled(
       links.map(async (link) => {
         const parent = await getParentInfo(link.parentId);
+        await recordNotification(
+          link.parentId,
+          studentId,
+          studentName,
+          'milestone',
+          milestoneTitle,
+          `${studentName}: ${milestoneDescription}`,
+          { milestoneTitle, milestoneDescription }
+        );
         if (!parent?.email) return;
         return supabase.functions.invoke('send-email', {
           body: {

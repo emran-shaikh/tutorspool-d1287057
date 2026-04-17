@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { getParentLinks, getStudentSessions, getStudentGoals, type ParentLink } from "@/lib/firestore";
 import { getStudentGamification, type StudentGamification } from "@/lib/gamification";
-import { Users, BookOpen, Target, Trophy, Plus, Eye } from "lucide-react";
+import { Users, BookOpen, Target, Trophy, Plus, Eye, Bell } from "lucide-react";
 
 export default function ParentDashboard() {
   const { userProfile } = useAuth();
@@ -51,12 +51,20 @@ export default function ParentDashboard() {
             <h1 className="text-3xl font-bold">Parent Dashboard</h1>
             <p className="text-muted-foreground">Monitor your child's learning progress</p>
           </div>
-          <Button asChild>
-            <Link to="/parent/link-child">
-              <Plus className="mr-2 h-4 w-4" />
-              Link a Child
-            </Link>
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" asChild>
+              <Link to="/parent/notifications">
+                <Bell className="mr-2 h-4 w-4" />
+                Notifications
+              </Link>
+            </Button>
+            <Button asChild>
+              <Link to="/parent/link-child">
+                <Plus className="mr-2 h-4 w-4" />
+                Link a Child
+              </Link>
+            </Button>
+          </div>
         </div>
 
         {loading ? (

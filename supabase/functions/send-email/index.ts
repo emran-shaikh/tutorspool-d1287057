@@ -134,7 +134,7 @@ type EmailType =
   | "tutor_session_booking" | "tutor_session_cancel" | "tutor_review_received"
   | "admin_new_student" | "admin_new_tutor" | "tutor_approved"
   | "contact_form" | "demo_request"
-  | "parent_quiz_completed" | "parent_session_booked" | "parent_milestone";
+  | "parent_quiz_completed" | "parent_session_booked" | "parent_session_status" | "parent_milestone";
 
 interface BaseEmailRequest { type: EmailType; }
 interface WelcomeEmailRequest extends BaseEmailRequest { type: "welcome"; to: string; name: string; role?: string; }
@@ -153,6 +153,7 @@ interface ContactFormEmailRequest extends BaseEmailRequest { type: "contact_form
 interface DemoRequestEmailRequest extends BaseEmailRequest { type: "demo_request"; name: string; email: string; phone: string; }
 interface ParentQuizCompletedEmailRequest extends BaseEmailRequest { type: "parent_quiz_completed"; to: string; parentName: string; childName: string; quizTopic: string; subject: string; accuracy: number; correctAnswers: number; totalQuestions: number; }
 interface ParentSessionBookedEmailRequest extends BaseEmailRequest { type: "parent_session_booked"; to: string; parentName: string; childName: string; tutorName: string; subject: string; date: string; time: string; }
+interface ParentSessionStatusEmailRequest extends BaseEmailRequest { type: "parent_session_status"; to: string; parentName: string; childName: string; tutorName: string; subject: string; date: string; time: string; status: "accepted" | "declined" | "completed" | "cancelled"; }
 interface ParentMilestoneEmailRequest extends BaseEmailRequest { type: "parent_milestone"; to: string; parentName: string; childName: string; milestoneTitle: string; milestoneDescription: string; }
 
 type EmailRequest =
@@ -161,7 +162,7 @@ type EmailRequest =
   | TutorSessionBookingEmailRequest | TutorSessionCancelEmailRequest | TutorReviewReceivedEmailRequest
   | AdminNewStudentEmailRequest | AdminNewTutorEmailRequest | TutorApprovedEmailRequest
   | ContactFormEmailRequest | DemoRequestEmailRequest
-  | ParentQuizCompletedEmailRequest | ParentSessionBookedEmailRequest | ParentMilestoneEmailRequest;
+  | ParentQuizCompletedEmailRequest | ParentSessionBookedEmailRequest | ParentSessionStatusEmailRequest | ParentMilestoneEmailRequest;
 
 /* ─── Student Emails ─── */
 
@@ -456,6 +457,28 @@ async function sendParentSessionBookedEmail(payload: ParentSessionBookedEmailReq
   });
 }
 
+async function sendParentSessionStatusEmail(payload: ParentSessionStatusEmailRequest) {
+  const statusMap: Record<string, { label: string; emoji: string; bg: string; border: string }> = {
+    accepted:  { label: "Accepted",  emoji: "✅", bg: "#f0fdf4", border: "#bbf7d0" },
+    declined:  { label: "Declined",  emoji: "❌", bg: "#fef2f2", border: "#fecaca" },
+    completed: { label: "Completed", emoji: "🎉", bg: "#f0fdf4", border: "#bbf7d0" },
+    cancelled: { label: "Cancelled", emoji: "🚫", bg: "#fef2f2", border: "#fecaca" },
+  };
+  const s = statusMap[payload.status] ?? statusMap.accepted;
+  const body = `
+    <p>Hi <strong>${payload.parentName}</strong>,</p>
+    <p>Your child <strong>${payload.childName}</strong>'s tutoring session has been <strong>${s.label.toLowerCase()}</strong>.</p>
+    ${infoBox({ "Tutor": payload.tutorName, "Subject": payload.subject, "Date": payload.date, "Time": payload.time, "Status": s.label }, s.bg, s.border)}
+  `;
+
+  return resend.emails.send({
+    from: FROM_ADDRESS,
+    to: [payload.to],
+    subject: `${s.emoji} ${payload.childName}'s session ${s.label.toLowerCase()} — ${payload.tutorName}`,
+    html: renderLayout("parent", `Session ${s.label}`, body, `${SITE}/parent/dashboard`, "View Dashboard"),
+  });
+}
+
 async function sendParentMilestoneEmail(payload: ParentMilestoneEmailRequest) {
   const body = `
     <p>Hi <strong>${payload.parentName}</strong>,</p>
@@ -511,6 +534,7 @@ serve(async (req) => {
       case "demo_request":       result = await sendDemoRequestEmail(payload); break;
       case "parent_quiz_completed": result = await sendParentQuizCompletedEmail(payload); break;
       case "parent_session_booked": result = await sendParentSessionBookedEmail(payload); break;
+      case "parent_session_status": result = await sendParentSessionStatusEmail(payload); break;
       case "parent_milestone":      result = await sendParentMilestoneEmail(payload); break;
       default:
         return new Response(JSON.stringify({ error: "Unsupported email type" }), {

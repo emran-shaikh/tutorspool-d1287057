@@ -2001,3 +2001,51 @@ export const getParentLinksForStudent = async (childId: string): Promise<ParentL
     return [];
   }
 };
+
+// Parent Notifications history
+export interface ParentNotification {
+  id?: string;
+  parentId: string;
+  childId: string;
+  childName: string;
+  type: 'quiz_completed' | 'session_booked' | 'session_status' | 'milestone';
+  title: string;
+  message: string;
+  meta?: Record<string, unknown>;
+  read: boolean;
+  createdAtIso: string;
+}
+
+export const getParentNotifications = async (parentId: string): Promise<ParentNotification[]> => {
+  try {
+    const q = query(collection(db, 'parentNotifications'), where('parentId', '==', parentId));
+    const snapshot = await getDocs(q);
+    const items = snapshot.docs.map(d => ({ ...d.data(), id: d.id } as ParentNotification));
+    return items.sort((a, b) => (b.createdAtIso || '').localeCompare(a.createdAtIso || ''));
+  } catch (error) {
+    if (isDev) console.error('Error fetching parent notifications:', error);
+    return [];
+  }
+};
+
+export const markParentNotificationRead = async (notificationId: string): Promise<void> => {
+  try {
+    await updateDoc(doc(db, 'parentNotifications', notificationId), { read: true });
+  } catch (error) {
+    if (isDev) console.error('Error marking parent notification read:', error);
+  }
+};
+
+export const markAllParentNotificationsRead = async (parentId: string): Promise<void> => {
+  try {
+    const q = query(
+      collection(db, 'parentNotifications'),
+      where('parentId', '==', parentId),
+      where('read', '==', false)
+    );
+    const snapshot = await getDocs(q);
+    await Promise.all(snapshot.docs.map(d => updateDoc(doc(db, 'parentNotifications', d.id), { read: true })));
+  } catch (error) {
+    if (isDev) console.error('Error marking all parent notifications read:', error);
+  }
+};
