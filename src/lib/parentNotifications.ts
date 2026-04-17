@@ -85,17 +85,19 @@ export async function notifyParentsOfQuizCompletion(
 
     await Promise.allSettled(
       links.map(async (link) => {
-        const parent = await getParentInfo(link.parentId);
-        await recordNotification(
-          link.parentId,
-          studentId,
-          studentName,
-          'quiz_completed',
-          `Quiz completed — ${accuracy}%`,
-          `${studentName} scored ${accuracy}% on "${quizTopic}" (${subject})`,
-          { quizTopic, subject, accuracy, correctAnswers, totalQuestions }
-        );
-        if (!parent?.email) return;
+        const [parent, prefs] = await Promise.all([getParentInfo(link.parentId), getParentPrefs(link.parentId)]);
+        if (prefs.quiz_completed.inApp) {
+          await recordNotification(
+            link.parentId,
+            studentId,
+            studentName,
+            'quiz_completed',
+            `Quiz completed — ${accuracy}%`,
+            `${studentName} scored ${accuracy}% on "${quizTopic}" (${subject})`,
+            { quizTopic, subject, accuracy, correctAnswers, totalQuestions }
+          );
+        }
+        if (!parent?.email || !prefs.quiz_completed.email) return;
         return supabase.functions.invoke('send-email', {
           body: {
             type: 'parent_quiz_completed',
@@ -130,17 +132,19 @@ export async function notifyParentsOfSessionBooked(
 
     await Promise.allSettled(
       links.map(async (link) => {
-        const parent = await getParentInfo(link.parentId);
-        await recordNotification(
-          link.parentId,
-          studentId,
-          studentName,
-          'session_booked',
-          'New session booked',
-          `${studentName} booked a session with ${tutorName} for ${subject} on ${date} at ${time}`,
-          { tutorName, subject, date, time }
-        );
-        if (!parent?.email) return;
+        const [parent, prefs] = await Promise.all([getParentInfo(link.parentId), getParentPrefs(link.parentId)]);
+        if (prefs.session_booked.inApp) {
+          await recordNotification(
+            link.parentId,
+            studentId,
+            studentName,
+            'session_booked',
+            'New session booked',
+            `${studentName} booked a session with ${tutorName} for ${subject} on ${date} at ${time}`,
+            { tutorName, subject, date, time }
+          );
+        }
+        if (!parent?.email || !prefs.session_booked.email) return;
         return supabase.functions.invoke('send-email', {
           body: {
             type: 'parent_session_booked',
@@ -177,17 +181,19 @@ export async function notifyParentsOfSessionStatus(
 
     await Promise.allSettled(
       links.map(async (link) => {
-        const parent = await getParentInfo(link.parentId);
-        await recordNotification(
-          link.parentId,
-          studentId,
-          studentName,
-          'session_status',
-          `Session ${status}`,
-          `${studentName}'s session with ${tutorName} (${subject}) on ${date} at ${time} was ${status}.`,
-          { tutorName, subject, date, time, status }
-        );
-        if (!parent?.email) return;
+        const [parent, prefs] = await Promise.all([getParentInfo(link.parentId), getParentPrefs(link.parentId)]);
+        if (prefs.session_status.inApp) {
+          await recordNotification(
+            link.parentId,
+            studentId,
+            studentName,
+            'session_status',
+            `Session ${status}`,
+            `${studentName}'s session with ${tutorName} (${subject}) on ${date} at ${time} was ${status}.`,
+            { tutorName, subject, date, time, status }
+          );
+        }
+        if (!parent?.email || !prefs.session_status.email) return;
         return supabase.functions.invoke('send-email', {
           body: {
             type: 'parent_session_status',
@@ -220,17 +226,19 @@ export async function notifyParentsOfMilestone(
 
     await Promise.allSettled(
       links.map(async (link) => {
-        const parent = await getParentInfo(link.parentId);
-        await recordNotification(
-          link.parentId,
-          studentId,
-          studentName,
-          'milestone',
-          milestoneTitle,
-          `${studentName}: ${milestoneDescription}`,
-          { milestoneTitle, milestoneDescription }
-        );
-        if (!parent?.email) return;
+        const [parent, prefs] = await Promise.all([getParentInfo(link.parentId), getParentPrefs(link.parentId)]);
+        if (prefs.milestone.inApp) {
+          await recordNotification(
+            link.parentId,
+            studentId,
+            studentName,
+            'milestone',
+            milestoneTitle,
+            `${studentName}: ${milestoneDescription}`,
+            { milestoneTitle, milestoneDescription }
+          );
+        }
+        if (!parent?.email || !prefs.milestone.email) return;
         return supabase.functions.invoke('send-email', {
           body: {
             type: 'parent_milestone',
