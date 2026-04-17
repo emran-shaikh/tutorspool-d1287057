@@ -371,6 +371,16 @@ service cloud.firestore {
       allow read: if isAuthenticated() && (request.auth.uid == resource.data.studentId || isTutor() || isAdmin());
       allow create: if isAuthenticated();
     }
+
+    // Parent Notifications (history of quiz/session/milestone alerts)
+    match /parentNotifications/{notificationId} {
+      // Parent can read only their own notifications
+      allow read: if isAuthenticated() && resource.data.parentId == request.auth.uid;
+      // Any authenticated user can create (students trigger them when they act)
+      allow create: if isAuthenticated();
+      // Only the owning parent can mark as read or delete
+      allow update, delete: if isAuthenticated() && resource.data.parentId == request.auth.uid;
+    }
 ```
 
 ## How to Apply These Rules
