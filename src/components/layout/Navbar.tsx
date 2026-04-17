@@ -44,13 +44,34 @@ export function Navbar() {
             <span>Global</span>
           </Button>
           
-          <Link to="/login" className="hidden sm:block">
-            <Button variant="ghost" size="sm">Sign In</Button>
-          </Link>
-          
-          <Link to="/register" className="hidden sm:block">
-            <Button variant="hero" size="sm">Get Started</Button>
-          </Link>
+          {isLoggedIn ? (
+            <>
+              <Link to={dashboardHref} className="hidden sm:block">
+                <Button variant="ghost" size="sm" className="gap-2">
+                  <User className="h-4 w-4" />
+                  <span className="max-w-[120px] truncate">{firstName}</span>
+                </Button>
+              </Link>
+              <Button
+                variant="hero"
+                size="sm"
+                className="hidden sm:flex gap-2"
+                onClick={handleLogout}
+              >
+                <LogOut className="h-4 w-4" />
+                Logout
+              </Button>
+            </>
+          ) : (
+            <>
+              <Link to="/login" className="hidden sm:block">
+                <Button variant="ghost" size="sm">Sign In</Button>
+              </Link>
+              <Link to="/register" className="hidden sm:block">
+                <Button variant="hero" size="sm">Get Started</Button>
+              </Link>
+            </>
+          )}
 
           {/* Mobile Menu Button */}
           <Button
@@ -81,9 +102,29 @@ export function Navbar() {
               </Link>
             ))}
             <hr className="my-2 border-border" />
-            <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
-              <Button variant="outline" className="w-full">Sign In</Button>
-            </Link>
+            {isLoggedIn ? (
+              <>
+                <Link to={dashboardHref} onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="outline" className="w-full gap-2">
+                    <LayoutDashboard className="h-4 w-4" />
+                    {firstName} — Dashboard
+                  </Button>
+                </Link>
+                <Button variant="hero" className="w-full gap-2" onClick={handleLogout}>
+                  <LogOut className="h-4 w-4" />
+                  Logout
+                </Button>
+              </>
+            ) : (
+              <>
+                <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="outline" className="w-full">Sign In</Button>
+                </Link>
+                <Link to="/register" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="hero" className="w-full">Get Started</Button>
+                </Link>
+              </>
+            )}
           </nav>
         </div>
       )}
