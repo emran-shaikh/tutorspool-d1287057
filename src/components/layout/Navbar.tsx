@@ -1,7 +1,8 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Users, BookOpen, Star, Mail, Info, GraduationCap, Globe, Menu, X, FileText } from "lucide-react";
+import { Users, BookOpen, Star, Mail, Info, GraduationCap, Globe, Menu, X, FileText, User, LogOut, LayoutDashboard } from "lucide-react";
 import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const navLinks = [
   { label: "Subjects", href: "/subjects", icon: BookOpen },
@@ -15,6 +16,21 @@ const navLinks = [
 
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user, userProfile, logout } = useAuth();
+  const navigate = useNavigate();
+  const isLoggedIn = !!user && !!userProfile;
+  const dashboardHref = userProfile ? `/${userProfile.role}/dashboard` : '/';
+  const firstName = userProfile?.fullName?.split(' ')[0] || 'Account';
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      setMobileMenuOpen(false);
+      navigate('/');
+    } catch (e) {
+      console.error('Logout error:', e);
+    }
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -44,13 +60,34 @@ export function Navbar() {
             <span>Global</span>
           </Button>
           
-          <Link to="/login" className="hidden sm:block">
-            <Button variant="ghost" size="sm">Sign In</Button>
-          </Link>
-          
-          <Link to="/register" className="hidden sm:block">
-            <Button variant="hero" size="sm">Get Started</Button>
-          </Link>
+          {isLoggedIn ? (
+            <>
+              <Link to={dashboardHref} className="hidden sm:block">
+                <Button variant="ghost" size="sm" className="gap-2">
+                  <User className="h-4 w-4" />
+                  <span className="max-w-[120px] truncate">{firstName}</span>
+                </Button>
+              </Link>
+              <Button
+                variant="hero"
+                size="sm"
+                className="hidden sm:flex gap-2"
+                onClick={handleLogout}
+              >
+                <LogOut className="h-4 w-4" />
+                Logout
+              </Button>
+            </>
+          ) : (
+            <>
+              <Link to="/login" className="hidden sm:block">
+                <Button variant="ghost" size="sm">Sign In</Button>
+              </Link>
+              <Link to="/register" className="hidden sm:block">
+                <Button variant="hero" size="sm">Get Started</Button>
+              </Link>
+            </>
+          )}
 
           {/* Mobile Menu Button */}
           <Button
@@ -81,9 +118,29 @@ export function Navbar() {
               </Link>
             ))}
             <hr className="my-2 border-border" />
-            <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
-              <Button variant="outline" className="w-full">Sign In</Button>
-            </Link>
+            {isLoggedIn ? (
+              <>
+                <Link to={dashboardHref} onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="outline" className="w-full gap-2">
+                    <LayoutDashboard className="h-4 w-4" />
+                    {firstName} — Dashboard
+                  </Button>
+                </Link>
+                <Button variant="hero" className="w-full gap-2" onClick={handleLogout}>
+                  <LogOut className="h-4 w-4" />
+                  Logout
+                </Button>
+              </>
+            ) : (
+              <>
+                <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="outline" className="w-full">Sign In</Button>
+                </Link>
+                <Link to="/register" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="hero" className="w-full">Get Started</Button>
+                </Link>
+              </>
+            )}
           </nav>
         </div>
       )}

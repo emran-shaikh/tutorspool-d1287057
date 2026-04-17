@@ -56,6 +56,7 @@ import LinkChild from "./pages/parent/LinkChild";
 import ChildProgress from "./pages/parent/ChildProgress";
 import EditParentProfile from "./pages/parent/EditParentProfile";
 import ParentNotifications from "./pages/parent/ParentNotifications";
+import NotificationPreferences from "./pages/parent/NotificationPreferences";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { CookieConsent } from "@/components/CookieConsent";
 
@@ -168,6 +169,7 @@ const App = () => (
               <Route path="/parent/progress/:childId" element={<ProtectedRoute allowedRoles={['parent']}><ChildProgress /></ProtectedRoute>} />
               <Route path="/parent/profile" element={<ProtectedRoute allowedRoles={['parent']}><EditParentProfile /></ProtectedRoute>} />
               <Route path="/parent/notifications" element={<ProtectedRoute allowedRoles={['parent']}><ParentNotifications /></ProtectedRoute>} />
+              <Route path="/parent/notification-preferences" element={<ProtectedRoute allowedRoles={['parent']}><NotificationPreferences /></ProtectedRoute>} />
               
               <Route path="*" element={<NotFound />} />
             </Routes>

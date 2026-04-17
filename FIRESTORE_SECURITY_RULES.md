@@ -381,6 +381,14 @@ service cloud.firestore {
       // Only the owning parent can mark as read or delete
       allow update, delete: if isAuthenticated() && resource.data.parentId == request.auth.uid;
     }
+
+    // Parent Notification Preferences (per-parent toggle settings)
+    match /parentNotificationPrefs/{parentId} {
+      // The owning parent can read/write their preferences
+      allow read, write: if isAuthenticated() && request.auth.uid == parentId;
+      // Anyone authenticated can read prefs of others (needed so student actions can check parent prefs before writing notifications)
+      allow read: if isAuthenticated();
+    }
 ```
 
 ## How to Apply These Rules
