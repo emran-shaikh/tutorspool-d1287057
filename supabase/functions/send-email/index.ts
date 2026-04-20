@@ -516,6 +516,10 @@ serve(async (req) => {
 
     let result: unknown;
 
+    // Log every incoming email request — invaluable for debugging silent flows like parent notifications
+    const recipientLog = "to" in payload ? (payload as { to: string }).to : "(admin)";
+    console.log(`[send-email] type=${payload.type} to=${recipientLog}`);
+
     switch (payload.type) {
       case "welcome":            result = await sendWelcomeEmail(payload); break;
       case "session_booking":    result = await sendBookingEmail(payload); break;
@@ -543,12 +547,15 @@ serve(async (req) => {
         });
     }
 
+    // Surface Resend's own response so we know if the provider rejected the message
+    console.log(`[send-email] success type=${payload.type}`, JSON.stringify(result));
+
     return new Response(JSON.stringify({ success: true, result }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error("send-email function error", error);
+    console.error("[send-email] ERROR", error);
     return new Response(
       JSON.stringify({ success: false, error: error instanceof Error ? error.message : "Unknown error" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
