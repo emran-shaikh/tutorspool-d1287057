@@ -81,11 +81,13 @@ export async function notifyParentsOfQuizCompletion(
 ) {
   try {
     const links = await getParentLinksForStudent(studentId);
+    console.log(`[parentNotify:quiz] student=${studentId} links=${links.length}`);
     if (!links.length) return;
 
     await Promise.allSettled(
       links.map(async (link) => {
         const [parent, prefs] = await Promise.all([getParentInfo(link.parentId), getParentPrefs(link.parentId)]);
+        console.log(`[parentNotify:quiz] parent=${link.parentId} email=${parent?.email} prefs=`, prefs.quiz_completed);
         if (prefs.quiz_completed.inApp) {
           await recordNotification(
             link.parentId,
@@ -97,8 +99,11 @@ export async function notifyParentsOfQuizCompletion(
             { quizTopic, subject, accuracy, correctAnswers, totalQuestions }
           );
         }
-        if (!parent?.email || !prefs.quiz_completed.email) return;
-        return supabase.functions.invoke('send-email', {
+        if (!parent?.email || !prefs.quiz_completed.email) {
+          console.log(`[parentNotify:quiz] skip email — hasEmail=${!!parent?.email} prefEmail=${prefs.quiz_completed.email}`);
+          return;
+        }
+        const res = await supabase.functions.invoke('send-email', {
           body: {
             type: 'parent_quiz_completed',
             to: parent.email,
@@ -111,10 +116,12 @@ export async function notifyParentsOfQuizCompletion(
             totalQuestions,
           },
         });
+        console.log(`[parentNotify:quiz] invoke result for ${parent.email}:`, res);
+        return res;
       })
     );
   } catch (e) {
-    console.error('Silent parent notification (quiz) failed:', e);
+    console.error('[parentNotify:quiz] failed:', e);
   }
 }
 
