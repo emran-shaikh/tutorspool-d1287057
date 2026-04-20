@@ -516,6 +516,10 @@ serve(async (req) => {
 
     let result: unknown;
 
+    // Log every incoming email request — invaluable for debugging silent flows like parent notifications
+    const recipientLog = "to" in payload ? (payload as { to: string }).to : "(admin)";
+    console.log(`[send-email] type=${payload.type} to=${recipientLog}`);
+
     switch (payload.type) {
       case "welcome":            result = await sendWelcomeEmail(payload); break;
       case "session_booking":    result = await sendBookingEmail(payload); break;
