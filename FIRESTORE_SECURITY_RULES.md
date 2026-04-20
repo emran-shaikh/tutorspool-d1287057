@@ -317,9 +317,12 @@ service cloud.firestore {
 
     // Parent Links collection - silent child monitoring
     match /parentLinks/{linkId} {
-      // Parents can read their own links, admins can read all
+      // Parents can read their own links; the linked child can read their own
+      // link (needed by background notification triggers — child's UI never surfaces it);
+      // admins can read all.
       allow read: if isAuthenticated() && (
         resource.data.parentId == request.auth.uid ||
+        resource.data.childId == request.auth.uid ||
         isAdmin()
       );
       
