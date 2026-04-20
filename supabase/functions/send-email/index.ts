@@ -547,12 +547,15 @@ serve(async (req) => {
         });
     }
 
+    // Surface Resend's own response so we know if the provider rejected the message
+    console.log(`[send-email] success type=${payload.type}`, JSON.stringify(result));
+
     return new Response(JSON.stringify({ success: true, result }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error("send-email function error", error);
+    console.error("[send-email] ERROR", error);
     return new Response(
       JSON.stringify({ success: false, error: error instanceof Error ? error.message : "Unknown error" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
