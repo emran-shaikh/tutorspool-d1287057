@@ -132,7 +132,7 @@ type EmailType =
   | "welcome" | "session_booking" | "session_update" | "session_cancel"
   | "session_reminder" | "session_completed" | "review_thankyou"
   | "tutor_session_booking" | "tutor_session_cancel" | "tutor_review_received"
-  | "admin_new_student" | "admin_new_tutor" | "tutor_approved"
+  | "admin_new_student" | "admin_new_tutor" | "tutor_approved" | "tutor_profile_incomplete"
   | "contact_form" | "demo_request"
   | "parent_quiz_completed" | "parent_session_booked" | "parent_session_status" | "parent_milestone";
 
@@ -149,6 +149,7 @@ interface TutorReviewReceivedEmailRequest extends BaseEmailRequest { type: "tuto
 interface AdminNewStudentEmailRequest extends BaseEmailRequest { type: "admin_new_student"; studentName: string; studentEmail: string; }
 interface AdminNewTutorEmailRequest extends BaseEmailRequest { type: "admin_new_tutor"; tutorName: string; tutorEmail: string; }
 interface TutorApprovedEmailRequest extends BaseEmailRequest { type: "tutor_approved"; to: string; tutorName: string; }
+interface TutorProfileIncompleteEmailRequest extends BaseEmailRequest { type: "tutor_profile_incomplete"; to: string; tutorName: string; missingFields: string[]; customMessage?: string; }
 interface ContactFormEmailRequest extends BaseEmailRequest { type: "contact_form"; name: string; email: string; subject: string; message: string; }
 interface DemoRequestEmailRequest extends BaseEmailRequest { type: "demo_request"; name: string; email: string; phone: string; }
 interface ParentQuizCompletedEmailRequest extends BaseEmailRequest { type: "parent_quiz_completed"; to: string; parentName: string; childName: string; quizTopic: string; subject: string; accuracy: number; correctAnswers: number; totalQuestions: number; }
@@ -160,7 +161,7 @@ type EmailRequest =
   | WelcomeEmailRequest | SessionBookingEmailRequest | SessionUpdateEmailRequest
   | SessionReminderEmailRequest | SessionCompletedEmailRequest | ReviewThankYouEmailRequest
   | TutorSessionBookingEmailRequest | TutorSessionCancelEmailRequest | TutorReviewReceivedEmailRequest
-  | AdminNewStudentEmailRequest | AdminNewTutorEmailRequest | TutorApprovedEmailRequest
+  | AdminNewStudentEmailRequest | AdminNewTutorEmailRequest | TutorApprovedEmailRequest | TutorProfileIncompleteEmailRequest
   | ContactFormEmailRequest | DemoRequestEmailRequest
   | ParentQuizCompletedEmailRequest | ParentSessionBookedEmailRequest | ParentSessionStatusEmailRequest | ParentMilestoneEmailRequest;
 
@@ -353,7 +354,28 @@ async function sendTutorApprovedEmail(payload: TutorApprovedEmailRequest) {
   });
 }
 
-/* ─── Admin Emails ─── */
+async function sendTutorProfileIncompleteEmail(payload: TutorProfileIncompleteEmailRequest) {
+  const missingList = payload.missingFields.length
+    ? `<ul style="padding-left:20px;color:#334155;margin:8px 0 16px;">${payload.missingFields.map(f => `<li>${f}</li>`).join("")}</ul>`
+    : "";
+  const customBlock = payload.customMessage
+    ? `<div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:16px 20px;margin:16px 0;color:#7c2d12;font-size:14px;white-space:pre-wrap;">${payload.customMessage}</div>`
+    : "";
+  const body = `
+    <p>Hi <strong>${payload.tutorName}</strong>,</p>
+    <p>Thanks for signing up as a tutor on TutorsPool! Before our team can review and approve your application, we need you to complete the missing details on your profile.</p>
+    ${missingList ? `<p style="margin:0 0 4px;font-weight:600;color:#0f172a;">Missing or incomplete fields:</p>${missingList}` : ""}
+    ${customBlock}
+    <p>A complete profile helps students choose you with confidence and gets you approved faster.</p>
+    <p style="margin-top:4px;font-size:13px;color:#64748b;">If you need help, simply reply to this email.</p>
+  `;
+
+  return resend.emails.send({
+    from: FROM_ADDRESS, to: [payload.to],
+    subject: "Action required: complete your TutorsPool profile to get approved",
+    html: renderLayout("tutor", "Complete Your Tutor Profile", body, `${SITE}/tutor/profile`, "Complete My Profile"),
+  });
+}
 
 async function sendAdminNewStudentEmail(payload: AdminNewStudentEmailRequest) {
   const body = `
@@ -534,6 +556,7 @@ serve(async (req) => {
       case "admin_new_student":  result = await sendAdminNewStudentEmail(payload); break;
       case "admin_new_tutor":    result = await sendAdminNewTutorEmail(payload); break;
       case "tutor_approved":     result = await sendTutorApprovedEmail(payload); break;
+      case "tutor_profile_incomplete": result = await sendTutorProfileIncompleteEmail(payload); break;
       case "contact_form":       result = await sendContactFormEmail(payload); break;
       case "demo_request":       result = await sendDemoRequestEmail(payload); break;
       case "parent_quiz_completed": result = await sendParentQuizCompletedEmail(payload); break;
