@@ -119,6 +119,20 @@ export default function EditTutorProfile() {
     setEditingField(null);
   };
 
+  const isProfileComplete = (p: Partial<TutorProfile>): boolean => {
+    return !!(
+      p.bio?.trim() &&
+      p.experience?.trim() &&
+      p.hourlyRate && p.hourlyRate > 0 &&
+      p.subjects && p.subjects.length > 0 &&
+      p.photoURL &&
+      p.qualifications?.trim() &&
+      p.degreeLevel?.trim() &&
+      p.majorSubjects && p.majorSubjects.length > 0 &&
+      p.teachingStyle?.trim()
+    );
+  };
+
   const handleSave = async () => {
     if (!userProfile?.uid) return;
     setSaving(true);
@@ -141,11 +155,26 @@ export default function EditTutorProfile() {
         teachingStyle
       };
 
+      const wasComplete = profile ? isProfileComplete(profile) : false;
+      const nowComplete = isProfileComplete(profileData);
+
       await createTutorProfile(profileData);
       setProfile(profileData);
       setEditingField(null);
       setIsNewProfile(false);
-      toast({ title: "Profile saved!", description: "Your tutor profile has been updated" });
+
+      if (nowComplete && !wasComplete) {
+        // 🎉 Celebrate profile completion
+        fireLevelUpConfetti();
+        setTimeout(() => fireBadgeConfetti(), 600);
+        toast({
+          title: "🎉 Profile Complete!",
+          description: "Amazing work! Your profile is now fully set up and ready for admin approval.",
+          duration: 6000,
+        });
+      } else {
+        toast({ title: "Profile saved!", description: "Your tutor profile has been updated" });
+      }
     } catch (error) {
       console.error('Error saving profile:', error);
       toast({ title: "Error", description: "Failed to save profile. Please try again.", variant: "destructive" });
