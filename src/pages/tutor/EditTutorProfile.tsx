@@ -14,6 +14,7 @@ import { PhotoUpload } from "@/components/PhotoUpload";
 import { getTutorProfile, createTutorProfile, TutorProfile } from "@/lib/firestore";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { fireLevelUpConfetti, fireBadgeConfetti } from "@/lib/confetti";
 
 const DEGREE_LEVELS = [
   "High School Diploma",
