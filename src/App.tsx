@@ -59,6 +59,8 @@ import ParentNotifications from "./pages/parent/ParentNotifications";
 import NotificationPreferences from "./pages/parent/NotificationPreferences";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { CookieConsent } from "@/components/CookieConsent";
+import { AnalyticsTracker } from "@/components/AnalyticsTracker";
+import VisitorAnalytics from "./pages/admin/VisitorAnalytics";
 
 const queryClient = new QueryClient();
 
