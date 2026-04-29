@@ -112,7 +112,7 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <ErrorBoundary>
-            <Routes>
+            <AnalyticsTracker />
               <Route path="/" element={<Index />} />
               <Route path="/subjects" element={<Subjects />} />
               <Route path="/tutors" element={<FindTutors />} />
@@ -163,6 +163,7 @@ const App = () => (
               <Route path="/admin/blogs/edit/:id" element={<ProtectedRoute allowedRoles={['admin']}><BlogEditor /></ProtectedRoute>} />
               <Route path="/admin/announcements" element={<ProtectedRoute allowedRoles={['admin']}><ManageAnnouncements /></ProtectedRoute>} />
               <Route path="/admin/users/tutor/:uid" element={<ProtectedRoute allowedRoles={['admin']}><AdminEditTutor /></ProtectedRoute>} />
+              <Route path="/admin/analytics" element={<ProtectedRoute allowedRoles={['admin']}><VisitorAnalytics /></ProtectedRoute>} />
               <Route path="/admin/users/student/:uid" element={<ProtectedRoute allowedRoles={['admin']}><AdminEditStudent /></ProtectedRoute>} />
               
               {/* Parent Routes */}
