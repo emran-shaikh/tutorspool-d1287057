@@ -244,22 +244,47 @@ export default function ManageUsers() {
                   <p className="text-center text-muted-foreground py-8">No pending approvals</p>
                 ) : (
                   <div className="space-y-4">
-                    {pendingTutors.map((tutor) => (
-                      <div key={tutor.uid} className="p-4 rounded-lg bg-muted/50 flex items-center justify-between">
+                    {pendingTutors.map((tutor) => {
+                      const missing = getMissingFields(tutor);
+                      const isIncomplete = missing.length > 0;
+                      return (
+                      <div key={tutor.uid} className="p-4 rounded-lg bg-muted/50 flex items-center justify-between flex-wrap gap-3">
                         <div>
-                          <p className="font-medium">{tutor.fullName}</p>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <p className="font-medium">{tutor.fullName}</p>
+                            {isIncomplete && (
+                              <Badge variant="outline" className="border-orange-400 text-orange-600 dark:text-orange-400 gap-1 text-[10px]">
+                                <AlertCircle className="h-3 w-3" /> Profile incomplete ({missing.length})
+                              </Badge>
+                            )}
+                          </div>
                           <p className="text-sm text-muted-foreground">{tutor.email}</p>
                           <div className="flex flex-wrap gap-1 mt-2">
                             {tutor.subjects?.map((subject) => (
                               <Badge key={subject} variant="outline" className="text-xs">{subject}</Badge>
                             ))}
                           </div>
-                          <p className="text-xs text-muted-foreground mt-1">{tutor.experience} experience</p>
+                          <p className="text-xs text-muted-foreground mt-1">{tutor.experience || "No experience set"}</p>
+                          {isIncomplete && (
+                            <p className="text-xs text-orange-600 dark:text-orange-400 mt-1">
+                              Missing: {missing.slice(0, 4).join(", ")}{missing.length > 4 ? `, +${missing.length - 4} more` : ""}
+                            </p>
+                          )}
                         </div>
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 flex-wrap">
                           <Button size="sm" onClick={() => handleApprove(tutor.uid)}>
                             <CheckCircle className="h-4 w-4 mr-1" /> Approve
                           </Button>
+                          {isIncomplete && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="border-orange-400 text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-950"
+                              onClick={() => openNotify(tutor)}
+                            >
+                              <Mail className="h-4 w-4 mr-1" /> Notify to complete
+                            </Button>
+                          )}
                           <Button size="sm" variant="outline" onClick={() => setSelectedTutor(tutor)}>
                             <Eye className="h-4 w-4 mr-1" /> Review
                           </Button>
@@ -277,7 +302,8 @@ export default function ManageUsers() {
                           </Button>
                         </div>
                       </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </CardContent>
