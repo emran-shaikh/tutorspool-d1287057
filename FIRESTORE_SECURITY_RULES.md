@@ -282,6 +282,19 @@ service cloud.firestore {
       allow update, delete: if false;
     }
     
+    // Visitor analytics - public write (anonymous tracking), admin-only reads
+    match /visitorSessions/{sessionId} {
+      allow create: if true;
+      allow update: if true; // session updates from same anonymous visitor
+      allow read: if isAdmin();
+      allow delete: if isAdmin();
+    }
+    match /visitorPageViews/{viewId} {
+      allow create: if true;
+      allow read: if isAdmin();
+      allow update, delete: if false;
+    }
+    
     // Demo requests - public lead capture, admin-only reads
     match /demoRequests/{requestId} {
       allow create: if true;

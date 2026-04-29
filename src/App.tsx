@@ -59,6 +59,8 @@ import ParentNotifications from "./pages/parent/ParentNotifications";
 import NotificationPreferences from "./pages/parent/NotificationPreferences";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { CookieConsent } from "@/components/CookieConsent";
+import { AnalyticsTracker } from "@/components/AnalyticsTracker";
+import VisitorAnalytics from "./pages/admin/VisitorAnalytics";
 
 const queryClient = new QueryClient();
 
@@ -110,6 +112,7 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <ErrorBoundary>
+            <AnalyticsTracker />
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/subjects" element={<Subjects />} />
@@ -161,6 +164,7 @@ const App = () => (
               <Route path="/admin/blogs/edit/:id" element={<ProtectedRoute allowedRoles={['admin']}><BlogEditor /></ProtectedRoute>} />
               <Route path="/admin/announcements" element={<ProtectedRoute allowedRoles={['admin']}><ManageAnnouncements /></ProtectedRoute>} />
               <Route path="/admin/users/tutor/:uid" element={<ProtectedRoute allowedRoles={['admin']}><AdminEditTutor /></ProtectedRoute>} />
+              <Route path="/admin/analytics" element={<ProtectedRoute allowedRoles={['admin']}><VisitorAnalytics /></ProtectedRoute>} />
               <Route path="/admin/users/student/:uid" element={<ProtectedRoute allowedRoles={['admin']}><AdminEditStudent /></ProtectedRoute>} />
               
               {/* Parent Routes */}
