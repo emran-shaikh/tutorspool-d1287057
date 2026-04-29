@@ -132,7 +132,7 @@ type EmailType =
   | "welcome" | "session_booking" | "session_update" | "session_cancel"
   | "session_reminder" | "session_completed" | "review_thankyou"
   | "tutor_session_booking" | "tutor_session_cancel" | "tutor_review_received"
-  | "admin_new_student" | "admin_new_tutor" | "tutor_approved"
+  | "admin_new_student" | "admin_new_tutor" | "tutor_approved" | "tutor_profile_incomplete"
   | "contact_form" | "demo_request"
   | "parent_quiz_completed" | "parent_session_booked" | "parent_session_status" | "parent_milestone";
 
@@ -149,6 +149,7 @@ interface TutorReviewReceivedEmailRequest extends BaseEmailRequest { type: "tuto
 interface AdminNewStudentEmailRequest extends BaseEmailRequest { type: "admin_new_student"; studentName: string; studentEmail: string; }
 interface AdminNewTutorEmailRequest extends BaseEmailRequest { type: "admin_new_tutor"; tutorName: string; tutorEmail: string; }
 interface TutorApprovedEmailRequest extends BaseEmailRequest { type: "tutor_approved"; to: string; tutorName: string; }
+interface TutorProfileIncompleteEmailRequest extends BaseEmailRequest { type: "tutor_profile_incomplete"; to: string; tutorName: string; missingFields: string[]; customMessage?: string; }
 interface ContactFormEmailRequest extends BaseEmailRequest { type: "contact_form"; name: string; email: string; subject: string; message: string; }
 interface DemoRequestEmailRequest extends BaseEmailRequest { type: "demo_request"; name: string; email: string; phone: string; }
 interface ParentQuizCompletedEmailRequest extends BaseEmailRequest { type: "parent_quiz_completed"; to: string; parentName: string; childName: string; quizTopic: string; subject: string; accuracy: number; correctAnswers: number; totalQuestions: number; }
