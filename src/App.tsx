@@ -113,6 +113,7 @@ const App = () => (
         <AuthProvider>
           <ErrorBoundary>
             <AnalyticsTracker />
+            <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/subjects" element={<Subjects />} />
               <Route path="/tutors" element={<FindTutors />} />
