@@ -26,6 +26,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Textarea } from "@/components/ui/textarea";
 
 interface UserData {
   uid: string;
@@ -556,6 +557,51 @@ export default function ManageUsers() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Notify Tutor Dialog */}
+      <Dialog open={!!notifyTutor} onOpenChange={(open) => { if (!open) { setNotifyTutor(null); setNotifyMessage(""); } }}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Mail className="h-5 w-5 text-orange-500" />
+              Notify Tutor to Complete Profile
+            </DialogTitle>
+            <DialogDescription>
+              An email will be sent to <strong>{notifyTutor?.email}</strong> with the missing fields and your message.
+            </DialogDescription>
+          </DialogHeader>
+          {notifyTutor && (
+            <div className="space-y-4">
+              <div className="p-3 rounded-lg bg-orange-50 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-900">
+                <p className="text-xs font-semibold text-orange-700 dark:text-orange-300 mb-1">Missing fields detected:</p>
+                <div className="flex flex-wrap gap-1">
+                  {getMissingFields(notifyTutor).map((m) => (
+                    <Badge key={m} variant="outline" className="text-xs border-orange-300 text-orange-700 dark:text-orange-300">{m}</Badge>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <p className="text-sm font-medium mb-2">Message</p>
+                <Textarea
+                  rows={10}
+                  value={notifyMessage}
+                  onChange={(e) => setNotifyMessage(e.target.value)}
+                  placeholder="Write a friendly message asking them to complete their profile..."
+                />
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setNotifyTutor(null)} disabled={isNotifying}>
+                  Cancel
+                </Button>
+                <Button onClick={handleSendNotification} disabled={isNotifying || !notifyMessage.trim()}>
+                  <Mail className="h-4 w-4 mr-2" />
+                  {isNotifying ? "Sending..." : "Send Email"}
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 }
