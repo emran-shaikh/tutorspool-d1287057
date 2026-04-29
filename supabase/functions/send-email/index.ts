@@ -556,6 +556,7 @@ serve(async (req) => {
       case "admin_new_student":  result = await sendAdminNewStudentEmail(payload); break;
       case "admin_new_tutor":    result = await sendAdminNewTutorEmail(payload); break;
       case "tutor_approved":     result = await sendTutorApprovedEmail(payload); break;
+      case "tutor_profile_incomplete": result = await sendTutorProfileIncompleteEmail(payload); break;
       case "contact_form":       result = await sendContactFormEmail(payload); break;
       case "demo_request":       result = await sendDemoRequestEmail(payload); break;
       case "parent_quiz_completed": result = await sendParentQuizCompletedEmail(payload); break;
