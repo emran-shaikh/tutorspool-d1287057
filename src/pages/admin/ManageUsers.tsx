@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Users, UserCheck, Ban, CheckCircle, Eye, X, Trash2, ShieldAlert, Pencil } from "lucide-react";
+import { ArrowLeft, Users, UserCheck, Ban, CheckCircle, Eye, X, Trash2, ShieldAlert, Pencil, Mail, AlertCircle } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { getAllUsers, getAllTutors, approveTutor, updateUserStatus, deleteUser, TutorProfile, createAdminNotification } from "@/lib/firestore";
 import { useToast } from "@/hooks/use-toast";
@@ -44,6 +44,57 @@ export default function ManageUsers() {
   const [selectedTutor, setSelectedTutor] = useState<TutorProfile | null>(null);
   const [userToDelete, setUserToDelete] = useState<{ uid: string; name: string; role: string } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [notifyTutor, setNotifyTutor] = useState<TutorProfile | null>(null);
+  const [notifyMessage, setNotifyMessage] = useState("");
+  const [isNotifying, setIsNotifying] = useState(false);
+
+  const getMissingFields = (t: TutorProfile): string[] => {
+    const missing: string[] = [];
+    if (!t.bio?.trim()) missing.push("Bio");
+    if (!t.experience?.trim()) missing.push("Experience");
+    if (!t.hourlyRate || t.hourlyRate <= 0) missing.push("Hourly Rate");
+    if (!t.subjects || t.subjects.length === 0) missing.push("Subjects you teach");
+    if (!t.photoURL) missing.push("Profile Photo");
+    if (!t.qualifications?.trim()) missing.push("Qualifications");
+    if (!t.degreeLevel?.trim()) missing.push("Degree Level");
+    if (!t.majorSubjects || t.majorSubjects.length === 0) missing.push("Major / Specialization Subjects");
+    if (!t.teachingStyle?.trim()) missing.push("Teaching Style");
+    return missing;
+  };
+
+  const openNotify = (t: TutorProfile) => {
+    const missing = getMissingFields(t);
+    setNotifyMessage(
+      `Hi ${t.fullName},\n\nWe noticed your tutor profile is missing some important details. Please log in and complete the following so our team can review and approve your application:\n\n${missing.map(m => `• ${m}`).join("\n")}\n\nA complete profile gets approved much faster and helps students trust your expertise.\n\nThanks,\nTutorsPool Team`
+    );
+    setNotifyTutor(t);
+  };
+
+  const handleSendNotification = async () => {
+    if (!notifyTutor?.email) return;
+    setIsNotifying(true);
+    try {
+      const missing = getMissingFields(notifyTutor);
+      const { error } = await supabase.functions.invoke("send-email", {
+        body: {
+          type: "tutor_profile_incomplete",
+          to: notifyTutor.email,
+          tutorName: notifyTutor.fullName,
+          missingFields: missing,
+          customMessage: notifyMessage,
+        },
+      });
+      if (error) throw error;
+      toast({ title: "Notification sent", description: `Email sent to ${notifyTutor.email}` });
+      setNotifyTutor(null);
+      setNotifyMessage("");
+    } catch (e) {
+      console.error("Failed to send notification", e);
+      toast({ title: "Error", description: "Failed to send notification email.", variant: "destructive" });
+    } finally {
+      setIsNotifying(false);
+    }
+  };
 
   useEffect(() => {
     fetchData();
