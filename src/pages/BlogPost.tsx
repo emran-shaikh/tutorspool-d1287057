@@ -92,26 +92,38 @@ export default function BlogPost() {
     }
   };
 
+  // Use a public OG image (social crawlers cannot fetch base64 data URIs).
+  // The og-blog edge function renders a branded PNG that includes the cover image.
+  const supaUrl = import.meta.env.VITE_SUPABASE_URL;
+  const ogImageUrl = `${supaUrl}/functions/v1/og-blog?slug=${encodeURIComponent(post.slug)}`;
+  const canonicalUrl = `${window.location.origin}/blog/${post.slug}`;
+
   return (
     <>
       <Helmet>
         <title>{post.metaTitle || post.title} | TutorsPool Blog</title>
         <meta name="description" content={post.metaDescription || post.excerpt} />
         <meta name="keywords" content={post.tags.join(', ')} />
-        <link rel="canonical" href={`${window.location.origin}/blog/${post.slug}`} />
+        <link rel="canonical" href={canonicalUrl} />
         
         {/* Open Graph */}
         <meta property="og:type" content="article" />
         <meta property="og:title" content={post.metaTitle || post.title} />
         <meta property="og:description" content={post.metaDescription || post.excerpt} />
-        {post.coverImage && <meta property="og:image" content={post.coverImage} />}
-        <meta property="og:url" content={`${window.location.origin}/blog/${post.slug}`} />
+        <meta property="og:image" content={ogImageUrl} />
+        <meta property="og:image:secure_url" content={ogImageUrl} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:type" content="image/png" />
+        <meta property="og:image:alt" content={post.title} />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:site_name" content="TutorsPool" />
         
         {/* Twitter Card */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={post.metaTitle || post.title} />
         <meta name="twitter:description" content={post.metaDescription || post.excerpt} />
-        {post.coverImage && <meta name="twitter:image" content={post.coverImage} />}
+        <meta name="twitter:image" content={ogImageUrl} />
         
         <script type="application/ld+json">
           {JSON.stringify(structuredData)}
