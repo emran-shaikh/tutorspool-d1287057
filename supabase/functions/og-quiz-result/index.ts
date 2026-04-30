@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { Resvg, initWasm } from "https://esm.sh/@resvg/resvg-wasm@2.6.2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -6,6 +7,18 @@ const corsHeaders = {
 };
 
 const FIREBASE_PROJECT_ID = "tutorspooldb";
+
+let wasmReady: Promise<void> | null = null;
+async function ensureWasm() {
+  if (!wasmReady) {
+    wasmReady = (async () => {
+      const wasmRes = await fetch("https://esm.sh/@resvg/resvg-wasm@2.6.2/index_bg.wasm");
+      const wasmBytes = await wasmRes.arrayBuffer();
+      await initWasm(wasmBytes);
+    })();
+  }
+  return wasmReady;
+}
 
 async function getFirestoreDoc(collection: string, docId: string) {
   const url = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/${collection}/${docId}`;
@@ -40,6 +53,15 @@ function getPerformanceLabel(accuracy: number) {
   return "Keep Learning!";
 }
 
+async function svgToPng(svg: string): Promise<Uint8Array> {
+  await ensureWasm();
+  const resvg = new Resvg(svg, {
+    fitTo: { mode: "width", value: 1200 },
+    font: { loadSystemFonts: false },
+  });
+  return resvg.render().asPng();
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -53,11 +75,11 @@ serve(async (req) => {
       return new Response("Missing resultId", { status: 400, headers: corsHeaders });
     }
 
-    // Fetch result from Firestore REST API
     const resultFields = await getFirestoreDoc("quizResults", resultId);
     if (!resultFields) {
-      return new Response(generateFallbackSVG(), {
-        headers: { ...corsHeaders, "Content-Type": "image/svg+xml", "Cache-Control": "public, max-age=3600" },
+      const png = await svgToPng(generateFallbackSVG());
+      return new Response(png, {
+        headers: { ...corsHeaders, "Content-Type": "image/png", "Cache-Control": "public, max-age=3600" },
       });
     }
 
@@ -81,19 +103,27 @@ serve(async (req) => {
     const label = getPerformanceLabel(accuracy);
 
     const svg = generateOGImage({ accuracy, correctAnswers, totalQuestions, studentName, subject, topic, emoji, label });
+    const png = await svgToPng(svg);
 
-    return new Response(svg, {
+    return new Response(png, {
       headers: {
         ...corsHeaders,
-        "Content-Type": "image/svg+xml",
+        "Content-Type": "image/png",
         "Cache-Control": "public, max-age=3600",
       },
     });
   } catch (error) {
     console.error("OG image error:", error);
-    return new Response(generateFallbackSVG(), {
-      headers: { ...corsHeaders, "Content-Type": "image/svg+xml" },
-    });
+    try {
+      const png = await svgToPng(generateFallbackSVG());
+      return new Response(png, {
+        headers: { ...corsHeaders, "Content-Type": "image/png" },
+      });
+    } catch {
+      return new Response(generateFallbackSVG(), {
+        headers: { ...corsHeaders, "Content-Type": "image/svg+xml" },
+      });
+    }
   }
 });
 
@@ -126,60 +156,42 @@ function generateOGImage(data: OGData): string {
       <stop offset="0%" style="stop-color:#fbbf24"/>
       <stop offset="100%" style="stop-color:#f59e0b"/>
     </linearGradient>
-    <linearGradient id="progressBg" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" style="stop-color:rgba(255,255,255,0.1)"/>
-      <stop offset="100%" style="stop-color:rgba(255,255,255,0.05)"/>
-    </linearGradient>
   </defs>
 
-  <!-- Background -->
   <rect width="1200" height="630" fill="url(#bg)"/>
-  
-  <!-- Decorative circles -->
   <circle cx="100" cy="530" r="200" fill="rgba(139,92,246,0.08)"/>
   <circle cx="1100" cy="100" r="180" fill="rgba(232,121,249,0.06)"/>
 
-  <!-- TutorsPool Logo Area -->
   <rect x="50" y="35" width="38" height="38" rx="8" fill="url(#accent)" opacity="0.9"/>
-  <text x="58" y="62" font-family="Arial, sans-serif" font-size="22" fill="white">🎓</text>
   <text x="100" y="62" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="white">TutorsPool</text>
-  <text x="262" y="62" font-family="Arial, sans-serif" font-size="13" fill="rgba(255,255,255,0.4)">SmartGen™ Quiz</text>
+  <text x="262" y="62" font-family="Arial, sans-serif" font-size="13" fill="rgba(255,255,255,0.4)">SmartGen Quiz</text>
 
-  <!-- Trophy Icon -->
   <circle cx="600" cy="185" r="55" fill="url(#trophy)" opacity="0.9"/>
-  <text x="600" y="200" font-family="Arial, sans-serif" font-size="45" fill="white" text-anchor="middle">${data.emoji}</text>
+  <text x="600" y="205" font-family="Arial, sans-serif" font-size="50" fill="white" text-anchor="middle">${data.emoji}</text>
 
-  <!-- Score -->
-  <text x="600" y="290" font-family="Arial, sans-serif" font-size="80" font-weight="bold" fill="url(#accent)" text-anchor="middle">${data.accuracy}%</text>
-  <text x="600" y="325" font-family="Arial, sans-serif" font-size="22" fill="rgba(255,255,255,0.6)" text-anchor="middle">${data.label}</text>
+  <text x="600" y="305" font-family="Arial, sans-serif" font-size="90" font-weight="bold" fill="#e879f9" text-anchor="middle">${data.accuracy}%</text>
+  <text x="600" y="340" font-family="Arial, sans-serif" font-size="24" fill="rgba(255,255,255,0.7)" text-anchor="middle">${data.label}</text>
 
-  <!-- Progress bar background -->
-  <rect x="370" y="350" width="460" height="12" rx="6" fill="url(#progressBg)"/>
-  <!-- Progress bar fill -->
-  <rect x="370" y="350" width="${progressWidth}" height="12" rx="6" fill="url(#accent)"/>
+  <rect x="370" y="365" width="460" height="14" rx="7" fill="rgba(255,255,255,0.1)"/>
+  <rect x="370" y="365" width="${progressWidth}" height="14" rx="7" fill="url(#accent)"/>
 
-  <!-- Stats -->
-  <rect x="310" y="390" width="130" height="80" rx="12" fill="rgba(34,197,94,0.12)" stroke="rgba(34,197,94,0.25)" stroke-width="1"/>
-  <text x="375" y="425" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="#4ade80" text-anchor="middle">${data.correctAnswers}</text>
-  <text x="375" y="452" font-family="Arial, sans-serif" font-size="13" fill="rgba(255,255,255,0.5)" text-anchor="middle">Correct</text>
+  <rect x="310" y="410" width="130" height="80" rx="12" fill="rgba(34,197,94,0.18)" stroke="rgba(34,197,94,0.4)" stroke-width="1.5"/>
+  <text x="375" y="445" font-family="Arial, sans-serif" font-size="30" font-weight="bold" fill="#4ade80" text-anchor="middle">${data.correctAnswers}</text>
+  <text x="375" y="472" font-family="Arial, sans-serif" font-size="13" fill="rgba(255,255,255,0.6)" text-anchor="middle">Correct</text>
 
-  <rect x="460" y="390" width="130" height="80" rx="12" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
-  <text x="525" y="425" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="rgba(255,255,255,0.7)" text-anchor="middle">${data.totalQuestions}</text>
-  <text x="525" y="452" font-family="Arial, sans-serif" font-size="13" fill="rgba(255,255,255,0.5)" text-anchor="middle">Total</text>
+  <rect x="460" y="410" width="130" height="80" rx="12" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+  <text x="525" y="445" font-family="Arial, sans-serif" font-size="30" font-weight="bold" fill="white" text-anchor="middle">${data.totalQuestions}</text>
+  <text x="525" y="472" font-family="Arial, sans-serif" font-size="13" fill="rgba(255,255,255,0.6)" text-anchor="middle">Total</text>
 
-  <rect x="610" y="390" width="130" height="80" rx="12" fill="rgba(239,68,68,0.12)" stroke="rgba(239,68,68,0.25)" stroke-width="1"/>
-  <text x="675" y="425" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="#f87171" text-anchor="middle">${data.totalQuestions - data.correctAnswers}</text>
-  <text x="675" y="452" font-family="Arial, sans-serif" font-size="13" fill="rgba(255,255,255,0.5)" text-anchor="middle">Wrong</text>
+  <rect x="610" y="410" width="130" height="80" rx="12" fill="rgba(239,68,68,0.18)" stroke="rgba(239,68,68,0.4)" stroke-width="1.5"/>
+  <text x="675" y="445" font-family="Arial, sans-serif" font-size="30" font-weight="bold" fill="#f87171" text-anchor="middle">${data.totalQuestions - data.correctAnswers}</text>
+  <text x="675" y="472" font-family="Arial, sans-serif" font-size="13" fill="rgba(255,255,255,0.6)" text-anchor="middle">Wrong</text>
 
-  <!-- Subject & Topic -->
-  <text x="600" y="520" font-family="Arial, sans-serif" font-size="18" fill="rgba(255,255,255,0.7)" text-anchor="middle">${escapeXml(data.subject)} · ${escapeXml(data.topic)}</text>
+  <text x="600" y="535" font-family="Arial, sans-serif" font-size="20" font-weight="600" fill="rgba(255,255,255,0.85)" text-anchor="middle">${escapeXml(data.subject)} - ${escapeXml(data.topic)}</text>
+  <text x="600" y="565" font-family="Arial, sans-serif" font-size="15" fill="rgba(255,255,255,0.5)" text-anchor="middle">Completed by ${escapeXml(data.studentName)}</text>
 
-  <!-- Student name -->
-  <text x="600" y="550" font-family="Arial, sans-serif" font-size="14" fill="rgba(255,255,255,0.4)" text-anchor="middle">Completed by ${escapeXml(data.studentName)}</text>
-
-  <!-- Bottom CTA -->
-  <rect x="460" y="575" width="280" height="36" rx="18" fill="url(#accent)" opacity="0.15"/>
-  <text x="600" y="599" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="url(#accent)" text-anchor="middle">Join TutorsPool · Start Learning Free</text>
+  <rect x="430" y="585" width="340" height="38" rx="19" fill="rgba(232,121,249,0.2)"/>
+  <text x="600" y="610" font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="#e879f9" text-anchor="middle">Join TutorsPool - Start Learning Free</text>
 </svg>`;
 }
 
@@ -188,18 +200,13 @@ function generateFallbackSVG(): string {
   <defs>
     <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" style="stop-color:#1e1145"/>
-      <stop offset="50%" style="stop-color:#2d1b69"/>
       <stop offset="100%" style="stop-color:#4a1942"/>
-    </linearGradient>
-    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" style="stop-color:#a78bfa"/>
-      <stop offset="100%" style="stop-color:#e879f9"/>
     </linearGradient>
   </defs>
   <rect width="1200" height="630" fill="url(#bg)"/>
-  <text x="600" y="280" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="white" text-anchor="middle">🎓 TutorsPool</text>
-  <text x="600" y="340" font-family="Arial, sans-serif" font-size="28" fill="url(#accent)" text-anchor="middle">SmartGen™ Quiz Results</text>
-  <text x="600" y="400" font-family="Arial, sans-serif" font-size="18" fill="rgba(255,255,255,0.5)" text-anchor="middle">Transform Your Learning Journey</text>
+  <text x="600" y="280" font-family="Arial, sans-serif" font-size="56" font-weight="bold" fill="white" text-anchor="middle">TutorsPool</text>
+  <text x="600" y="350" font-family="Arial, sans-serif" font-size="30" fill="#e879f9" text-anchor="middle">SmartGen Quiz Results</text>
+  <text x="600" y="410" font-family="Arial, sans-serif" font-size="20" fill="rgba(255,255,255,0.6)" text-anchor="middle">Transform Your Learning Journey</text>
 </svg>`;
 }
 

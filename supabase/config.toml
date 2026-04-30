@@ -14,3 +14,12 @@ verify_jwt = false
 
 [functions.notify-quiz-assignment]
 verify_jwt = false
+
+[functions.og-quiz-result]
+verify_jwt = false
+
+[functions.og-blog]
+verify_jwt = false
+
+[functions.sitemap]
+verify_jwt = false
