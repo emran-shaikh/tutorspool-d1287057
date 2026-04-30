@@ -1,6 +1,8 @@
 {
   "rewrites": [
     { "source": "/sitemap.xml", "destination": "https://yafjkpckhzpkrptmzcms.supabase.co/functions/v1/sitemap" },
+    { "source": "/blog/:slug", "destination": "https://yafjkpckhzpkrptmzcms.supabase.co/functions/v1/og-meta?path=/blog/:slug" },
+    { "source": "/shared-results/:id", "destination": "https://yafjkpckhzpkrptmzcms.supabase.co/functions/v1/og-meta?path=/shared-results/:id" },
     { "source": "/(.*)", "destination": "/" }
   ]
 }
