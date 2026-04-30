@@ -194,8 +194,10 @@ export default function BlogEditor() {
       }
 
       navigate('/admin/blogs');
-    } catch (error) {
-      toast({ title: "Error", description: "Failed to save blog post", variant: "destructive" });
+    } catch (error: any) {
+      console.error('Blog save failed:', error);
+      const msg = error?.message || error?.code || 'Failed to save blog post';
+      toast({ title: "Error", description: msg, variant: "destructive" });
     } finally {
       setSaving(false);
     }
