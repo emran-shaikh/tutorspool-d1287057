@@ -115,16 +115,43 @@ export default function BlogEditor() {
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-      toast({ title: "File too large", description: "Please select an image under 5MB", variant: "destructive" });
+    if (file.size > 10 * 1024 * 1024) {
+      toast({ title: "File too large", description: "Please select an image under 10MB", variant: "destructive" });
       return;
     }
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setCoverImage(reader.result as string);
-    };
-    reader.readAsDataURL(file);
+    // Resize/compress to keep Firestore document under the 1 MiB limit
+    try {
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+
+      const img = new Image();
+      img.src = dataUrl;
+      await new Promise((res, rej) => { img.onload = res; img.onerror = rej; });
+
+      const MAX_W = 1200;
+      const scale = Math.min(1, MAX_W / img.width);
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      const ctx = canvas.getContext('2d')!;
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      const compressed = canvas.toDataURL('image/jpeg', 0.8);
+
+      // Firestore field cap is ~1 MiB; base64 inflates ~33%, keep well under
+      if (compressed.length > 700_000) {
+        const more = canvas.toDataURL('image/jpeg', 0.6);
+        setCoverImage(more);
+      } else {
+        setCoverImage(compressed);
+      }
+    } catch (err) {
+      toast({ title: "Image error", description: "Could not process image. Try a smaller one.", variant: "destructive" });
+    }
   };
 
   const handleSave = async (publish: boolean = false) => {
@@ -167,8 +194,10 @@ export default function BlogEditor() {
       }
 
       navigate('/admin/blogs');
-    } catch (error) {
-      toast({ title: "Error", description: "Failed to save blog post", variant: "destructive" });
+    } catch (error: any) {
+      console.error('Blog save failed:', error);
+      const msg = error?.message || error?.code || 'Failed to save blog post';
+      toast({ title: "Error", description: msg, variant: "destructive" });
     } finally {
       setSaving(false);
     }
