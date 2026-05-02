@@ -1,6 +1,6 @@
 // Server-side rendered OG meta tags for blog posts and quiz results.
 // Social crawlers (Facebook/WhatsApp/X/LinkedIn) don't run JS, so we serve
-// HTML with the right meta tags. Real users get redirected to the SPA.
+// the app shell HTML with the right meta tags injected for these shareable routes.
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
@@ -68,9 +68,15 @@ async function getQuizResult(resultId: string) {
   return data.fields || null;
 }
 
-function isCrawler(ua: string): boolean {
-  const u = ua.toLowerCase();
-  return /(facebookexternalhit|facebot|twitterbot|linkedinbot|slackbot|whatsapp|telegrambot|discordbot|pinterest|redditbot|skypeuripreview|googlebot|bingbot|applebot|embedly|quora link preview|outbrain|vkshare|w3c_validator)/i.test(u);
+function getSiteOrigin(req: Request): string {
+  const forwardedHost = req.headers.get("x-forwarded-host");
+  const forwardedProto = req.headers.get("x-forwarded-proto") || "https";
+
+  if (forwardedHost && !forwardedHost.includes("supabase.co")) {
+    return `${forwardedProto}://${forwardedHost}`;
+  }
+
+  return SITE_URL;
 }
 
 function htmlShell(opts: {
@@ -109,16 +115,80 @@ function htmlShell(opts: {
 <meta name="twitter:title" content="${t}" />
 <meta name="twitter:description" content="${d}" />
 <meta name="twitter:image" content="${img}" />
-
-<meta http-equiv="refresh" content="0; url=${u}" />
 </head>
 <body>
 <h1>${t}</h1>
 <p>${d}</p>
 <p><a href="${u}">Continue to ${t}</a></p>
-<script>window.location.replace(${JSON.stringify(url)});</script>
 </body>
 </html>`;
+}
+
+function injectHeadMeta(appHtml: string, opts: {
+  title: string;
+  description: string;
+  image: string;
+  url: string;
+  type?: string;
+}): string {
+  const { title, description, image, url, type = "article" } = opts;
+  const t = escapeHtml(title);
+  const d = escapeHtml(description);
+  const img = escapeHtml(image);
+  const u = escapeHtml(url);
+
+  const metaBlock = `
+<title>${t}</title>
+<meta name="description" content="${d}" />
+<link rel="canonical" href="${u}" />
+<meta property="og:type" content="${type}" />
+<meta property="og:title" content="${t}" />
+<meta property="og:description" content="${d}" />
+<meta property="og:image" content="${img}" />
+<meta property="og:image:secure_url" content="${img}" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:type" content="image/png" />
+<meta property="og:image:alt" content="${t}" />
+<meta property="og:url" content="${u}" />
+<meta property="og:site_name" content="TutorsPool" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="${t}" />
+<meta name="twitter:description" content="${d}" />
+<meta name="twitter:image" content="${img}" />`;
+
+  if (!appHtml.includes("</head>")) {
+    return htmlShell(opts);
+  }
+
+  return appHtml
+    .replace(/<title>.*?<\/title>/is, "")
+    .replace(/<meta\s+name=["']description["'][^>]*>/is, "")
+    .replace(/<link\s+rel=["']canonical["'][^>]*>/is, "")
+    .replace("</head>", `${metaBlock}\n</head>`);
+}
+
+async function fetchAppShell(siteOrigin: string): Promise<string | null> {
+  const originsToTry = [siteOrigin, SITE_URL].filter((origin, index, list) => list.indexOf(origin) === index);
+
+  for (const origin of originsToTry) {
+    try {
+      const res = await fetch(`${origin}/`, {
+        headers: {
+          "user-agent": "TutorsPool OG Meta",
+          "accept": "text/html,application/xhtml+xml",
+        },
+      });
+
+      if (res.ok) {
+        return await res.text();
+      }
+    } catch (_) {
+      // Try the next available origin.
+    }
+  }
+
+  return null;
 }
 
 serve(async (req) => {
@@ -127,14 +197,9 @@ serve(async (req) => {
   try {
     const url = new URL(req.url);
     const path = url.searchParams.get("path") || "/";
-    const ua = req.headers.get("user-agent") || "";
-    const crawler = isCrawler(ua);
-
-    // Real users: redirect immediately to the SPA route
-    const targetUrl = `${SITE_URL}${path}`;
-    if (!crawler) {
-      return Response.redirect(targetUrl, 302);
-    }
+    const siteOrigin = getSiteOrigin(req);
+    const targetUrl = `${siteOrigin}${path}`;
+    const appShell = await fetchAppShell(siteOrigin);
 
     // Blog post: /blog/:slug
     const blogMatch = path.match(/^\/blog\/([^/?#]+)/);
@@ -145,15 +210,19 @@ serve(async (req) => {
         const title = getVal(fields.metaTitle) || getVal(fields.title) || "TutorsPool Blog";
         const desc = getVal(fields.metaDescription) || getVal(fields.excerpt) || "Read on TutorsPool";
         const ogImage = `${SUPABASE_URL}/functions/v1/og-blog?slug=${encodeURIComponent(slug)}`;
+        const html = appShell
+          ? injectHeadMeta(appShell, { title, description: desc, image: ogImage, url: targetUrl, type: "article" })
+          : htmlShell({ title, description: desc, image: ogImage, url: targetUrl, type: "article" });
+
         return new Response(
-          htmlShell({ title, description: desc, image: ogImage, url: targetUrl, type: "article" }),
+          html,
           { headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "public, max-age=300" } }
         );
       }
     }
 
-    // Shared quiz results: /shared-results/:id
-    const resultMatch = path.match(/^\/shared-results\/([^/?#]+)/);
+    // Shared quiz results: /results/:id
+    const resultMatch = path.match(/^\/results\/([^/?#]+)/);
     if (resultMatch) {
       const id = decodeURIComponent(resultMatch[1]);
       const fields = await getQuizResult(id);
@@ -164,9 +233,13 @@ serve(async (req) => {
         ? `${studentName} scored ${score}/${total} on TutorsPool!`
         : "Quiz Achievement on TutorsPool";
       const desc = "Check out this learning achievement powered by SmartGen™ by TutorsPool.";
-      const ogImage = `${SUPABASE_URL}/functions/v1/og-quiz-result?id=${encodeURIComponent(id)}`;
+      const ogImage = `${SUPABASE_URL}/functions/v1/og-quiz-result?resultId=${encodeURIComponent(id)}`;
+      const html = appShell
+        ? injectHeadMeta(appShell, { title, description: desc, image: ogImage, url: targetUrl, type: "article" })
+        : htmlShell({ title, description: desc, image: ogImage, url: targetUrl, type: "article" });
+
       return new Response(
-        htmlShell({ title, description: desc, image: ogImage, url: targetUrl, type: "article" }),
+        html,
         { headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "public, max-age=300" } }
       );
     }
