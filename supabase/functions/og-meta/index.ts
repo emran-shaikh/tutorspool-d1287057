@@ -176,9 +176,11 @@ function injectHeadMeta(appHtml: string, opts: {
   }
 
   return appHtml
-    .replace(/<title>.*?<\/title>/is, "")
-    .replace(/<meta\s+name=["']description["'][^>]*>/is, "")
-    .replace(/<link\s+rel=["']canonical["'][^>]*>/is, "")
+    .replace(/<title>[\s\S]*?<\/title>/i, "")
+    .replace(/<meta\s+name=["']description["'][^>]*>/gi, "")
+    .replace(/<link\s+rel=["']canonical["'][^>]*>/gi, "")
+    .replace(/<meta\s+property=["']og:[^"']+["'][^>]*>/gi, "")
+    .replace(/<meta\s+name=["']twitter:[^"']+["'][^>]*>/gi, "")
     .replace("</head>", `${metaBlock}\n</head>`);
 }
 
