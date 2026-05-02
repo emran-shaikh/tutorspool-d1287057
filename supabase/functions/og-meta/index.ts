@@ -40,10 +40,24 @@ async function findBlogBySlug(slug: string) {
     structuredQuery: {
       from: [{ collectionId: "blogPosts" }],
       where: {
-        fieldFilter: {
-          field: { fieldPath: "slug" },
-          op: "EQUAL",
-          value: { stringValue: slug },
+        compositeFilter: {
+          op: "AND",
+          filters: [
+            {
+              fieldFilter: {
+                field: { fieldPath: "slug" },
+                op: "EQUAL",
+                value: { stringValue: slug },
+              },
+            },
+            {
+              fieldFilter: {
+                field: { fieldPath: "isPublished" },
+                op: "EQUAL",
+                value: { booleanValue: true },
+              },
+            },
+          ],
         },
       },
       limit: 1,
@@ -162,9 +176,11 @@ function injectHeadMeta(appHtml: string, opts: {
   }
 
   return appHtml
-    .replace(/<title>.*?<\/title>/is, "")
-    .replace(/<meta\s+name=["']description["'][^>]*>/is, "")
-    .replace(/<link\s+rel=["']canonical["'][^>]*>/is, "")
+    .replace(/<title>[\s\S]*?<\/title>/i, "")
+    .replace(/<meta\s+name=["']description["'][^>]*>/gi, "")
+    .replace(/<link\s+rel=["']canonical["'][^>]*>/gi, "")
+    .replace(/<meta\s+property=["']og:[^"']+["'][^>]*>/gi, "")
+    .replace(/<meta\s+name=["']twitter:[^"']+["'][^>]*>/gi, "")
     .replace("</head>", `${metaBlock}\n</head>`);
 }
 
