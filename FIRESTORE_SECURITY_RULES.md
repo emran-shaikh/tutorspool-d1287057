@@ -154,16 +154,9 @@ service cloud.firestore {
     
     // Blog posts collection
     match /blogPosts/{postId} {
-      // Anyone can read (get) a published blog post, admins can read all
-      allow get: if resource.data.isPublished == true || isAdmin();
-
-      // Allow list/query when the query is constrained to published posts,
-      // or when the requester is an admin. This is required for server-side
-      // OG meta generation that queries blog posts by slug.
-      allow list: if isAdmin()
-        || ('isPublished' in request.query.filters
-            && request.query.filters.isPublished == true);
-
+      // Anyone can read published blog posts
+      allow read: if resource.data.isPublished == true || isAdmin();
+      
       // Only admins can create blog posts
       allow create: if isAdmin();
       
