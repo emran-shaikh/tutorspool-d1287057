@@ -40,10 +40,24 @@ async function findBlogBySlug(slug: string) {
     structuredQuery: {
       from: [{ collectionId: "blogPosts" }],
       where: {
-        fieldFilter: {
-          field: { fieldPath: "slug" },
-          op: "EQUAL",
-          value: { stringValue: slug },
+        compositeFilter: {
+          op: "AND",
+          filters: [
+            {
+              fieldFilter: {
+                field: { fieldPath: "slug" },
+                op: "EQUAL",
+                value: { stringValue: slug },
+              },
+            },
+            {
+              fieldFilter: {
+                field: { fieldPath: "isPublished" },
+                op: "EQUAL",
+                value: { booleanValue: true },
+              },
+            },
+          ],
         },
       },
       limit: 1,
