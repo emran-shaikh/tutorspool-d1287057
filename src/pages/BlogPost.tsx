@@ -160,55 +160,55 @@ export default function BlogPost() {
                 <div className="flex flex-wrap items-center gap-3 text-sm">
                   <span className="text-muted-foreground">Share this article:</span>
                   <div className="flex flex-wrap gap-2">
-                    <a
-                      href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.origin + '/blog/' + post.slug)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border text-muted-foreground hover:text-primary hover:border-primary transition-colors"
-                      aria-label="Share on Facebook"
-                    >
-                      <Facebook className="h-4 w-4" />
-                    </a>
-                    <a
-                      href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.origin + '/blog/' + post.slug)}&text=${encodeURIComponent(post.title)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border text-muted-foreground hover:text-primary hover:border-primary transition-colors"
-                      aria-label="Share on X (Twitter)"
-                    >
-                      <Twitter className="h-4 w-4" />
-                    </a>
-                    <a
-                      href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.origin + '/blog/' + post.slug)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border text-muted-foreground hover:text-primary hover:border-primary transition-colors"
-                      aria-label="Share on LinkedIn"
-                    >
-                      <Linkedin className="h-4 w-4" />
-                    </a>
-                    <button
-                      type="button"
-                      onClick={async () => {
-                        try {
-                          await navigator.clipboard.writeText(window.location.origin + '/blog/' + post.slug);
-                          toast({
-                            title: "Link copied",
-                            description: "The blog URL has been copied to your clipboard.",
-                          });
-                        } catch (error) {
-                          toast({
-                            title: "Copy failed",
-                            description: "Unable to copy the link. Please try again.",
-                            variant: "destructive",
-                          });
-                        }
-                      }}
-                      className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border text-muted-foreground hover:text-primary hover:border-primary transition-colors"
-                      aria-label="Copy link"
-                    >
-                      <Link2 className="h-4 w-4" />
-                    </button>
+                    {(() => {
+                      const shareUrl = `https://tutorspool.com/share/blog/${post.slug}`;
+                      return (
+                        <>
+                          <a
+                            href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border text-muted-foreground hover:text-primary hover:border-primary transition-colors"
+                            aria-label="Share on Facebook"
+                          >
+                            <Facebook className="h-4 w-4" />
+                          </a>
+                          <a
+                            href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(post.title)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border text-muted-foreground hover:text-primary hover:border-primary transition-colors"
+                            aria-label="Share on X (Twitter)"
+                          >
+                            <Twitter className="h-4 w-4" />
+                          </a>
+                          <a
+                            href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border text-muted-foreground hover:text-primary hover:border-primary transition-colors"
+                            aria-label="Share on LinkedIn"
+                          >
+                            <Linkedin className="h-4 w-4" />
+                          </a>
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              try {
+                                await navigator.clipboard.writeText(shareUrl);
+                                toast({ title: "Link copied", description: "The blog URL has been copied to your clipboard." });
+                              } catch {
+                                toast({ title: "Copy failed", description: "Unable to copy the link. Please try again.", variant: "destructive" });
+                              }
+                            }}
+                            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border text-muted-foreground hover:text-primary hover:border-primary transition-colors"
+                            aria-label="Copy link"
+                          >
+                            <Link2 className="h-4 w-4" />
+                          </button>
+                        </>
+                      );
+                    })()}
                   </div>
                 </div>
               </header>
