@@ -13,8 +13,7 @@ import { createAdminNotification } from "@/lib/firestore";
 import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 
-// Admin security key - in production, this should be stored securely and rotated
-const ADMIN_SECURITY_KEY = "TutorsPool2024Admin!";
+// Admin security key validation is performed server-side via the verify-admin-key edge function.
 
 const registerSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters").max(100),
@@ -92,10 +91,22 @@ export default function Register() {
         });
         return;
       }
-      if (adminSecurityKey !== ADMIN_SECURITY_KEY) {
+      try {
+        const { data, error } = await supabase.functions.invoke("verify-admin-key", {
+          body: { key: adminSecurityKey },
+        });
+        if (error || !data?.valid) {
+          toast({
+            title: "Invalid Security Key",
+            description: "The admin security key is incorrect. Please contact an existing admin for the correct key.",
+            variant: "destructive",
+          });
+          return;
+        }
+      } catch {
         toast({
-          title: "Invalid Security Key",
-          description: "The admin security key is incorrect. Please contact an existing admin for the correct key.",
+          title: "Verification Failed",
+          description: "Could not verify admin key. Please try again.",
           variant: "destructive",
         });
         return;
