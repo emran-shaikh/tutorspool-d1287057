@@ -17,3 +17,6 @@ verify_jwt = false
 
 [functions.verify-admin-key]
 verify_jwt = false
+
+[functions.blog-share]
+verify_jwt = false
