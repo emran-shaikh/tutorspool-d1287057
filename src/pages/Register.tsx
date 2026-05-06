@@ -91,10 +91,22 @@ export default function Register() {
         });
         return;
       }
-      if (adminSecurityKey !== ADMIN_SECURITY_KEY) {
+      try {
+        const { data, error } = await supabase.functions.invoke("verify-admin-key", {
+          body: { key: adminSecurityKey },
+        });
+        if (error || !data?.valid) {
+          toast({
+            title: "Invalid Security Key",
+            description: "The admin security key is incorrect. Please contact an existing admin for the correct key.",
+            variant: "destructive",
+          });
+          return;
+        }
+      } catch {
         toast({
-          title: "Invalid Security Key",
-          description: "The admin security key is incorrect. Please contact an existing admin for the correct key.",
+          title: "Verification Failed",
+          description: "Could not verify admin key. Please try again.",
           variant: "destructive",
         });
         return;
