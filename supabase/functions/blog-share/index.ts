@@ -89,8 +89,6 @@ serve(async (req) => {
 <meta property="og:description" content="${description}" />
 <meta property="og:image" content="${escapeHtml(image)}" />
 <meta property="og:image:secure_url" content="${escapeHtml(image)}" />
-<meta property="og:image:width" content="1200" />
-<meta property="og:image:height" content="630" />
 <meta property="og:url" content="${targetUrl}" />
 <meta property="og:site_name" content="TutorsPool" />
 
