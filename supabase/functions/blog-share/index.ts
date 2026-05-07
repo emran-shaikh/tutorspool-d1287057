@@ -24,6 +24,21 @@ function escapeHtml(str: string): string {
     .replace(/'/g, "&#39;");
 }
 
+function isDataUrl(value: string | null | undefined): value is string {
+  return Boolean(value && value.startsWith("data:image/"));
+}
+
+function parseDataImage(dataUrl: string) {
+  const match = dataUrl.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/);
+  if (!match) return null;
+
+  const [, contentType, base64] = match;
+  return {
+    contentType,
+    bytes: Uint8Array.from(atob(base64), (char) => char.charCodeAt(0)),
+  };
+}
+
 async function findBlogBySlug(slug: string) {
   const url = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents:runQuery`;
   const body = {
@@ -66,13 +81,32 @@ serve(async (req) => {
     const isBot = BOT_REGEX.test(userAgent);
 
     const fields = await findBlogBySlug(slug);
+    const coverImage = getVal(fields?.coverImage);
+
+    if (url.searchParams.get("asset") === "image") {
+      const parsed = parseDataImage(coverImage || "");
+
+      if (!parsed) {
+        return new Response("Not found", { status: 404, headers: corsHeaders });
+      }
+
+      return new Response(parsed.bytes, {
+        headers: {
+          ...corsHeaders,
+          "Content-Type": parsed.contentType,
+          "Cache-Control": "public, max-age=3600",
+        },
+      });
+    }
 
     const targetUrl = `https://tutorspool.com/blog/${slug}`;
     const title = escapeHtml(getVal(fields?.metaTitle) || getVal(fields?.title) || "TutorsPool Blog");
     const description = escapeHtml(
       getVal(fields?.metaDescription) || getVal(fields?.excerpt) || "Read this article on TutorsPool"
     );
-    const image = getVal(fields?.coverImage) || "https://tutorspool.com/logo.png";
+    const image = isDataUrl(coverImage)
+      ? `https://yafjkpckhzpkrptmzcms.supabase.co/functions/v1/blog-share?slug=${encodeURIComponent(slug)}&asset=image`
+      : coverImage || "https://tutorspool.com/logo.png";
 
     // Bots: serve minimal OG-tagged HTML, no redirect (avoids redirect chain).
     // Humans: redirect to actual SPA blog post.
