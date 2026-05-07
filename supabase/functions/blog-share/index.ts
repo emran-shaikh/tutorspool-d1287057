@@ -68,7 +68,7 @@ serve(async (req) => {
     );
     const image =
       getVal(fields?.coverImage) ||
-      "https://tutorspool.com/icon.png";
+      "https://tutorspool.com/logo.png";
 
     const html = `<!doctype html>
 <html lang="en">
