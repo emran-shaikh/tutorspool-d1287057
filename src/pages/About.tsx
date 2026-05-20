@@ -79,6 +79,21 @@ export default function About() {
         <title>About Us - TutorsPool | Our Mission & Team</title>
         <meta name="description" content="Learn about TutorsPool's mission to make quality education accessible. Meet our leadership team and discover our values." />
         <link rel="canonical" href={`${window.location.origin}/about`} />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="About Us - TutorsPool | Our Mission & Team" />
+        <meta property="og:description" content="Learn about TutorsPool's mission to make quality education accessible. Meet our leadership team and discover our values." />
+        <meta property="og:url" content={`${window.location.origin}/about`} />
+        <meta name="twitter:title" content="About Us - TutorsPool | Our Mission & Team" />
+        <meta name="twitter:description" content="Learn about TutorsPool's mission to make quality education accessible. Meet our leadership team and discover our values." />
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "TutorsPool",
+          "url": "https://tutorspool.lovable.app",
+          "logo": "https://tutorspool.lovable.app/logo.png",
+          "email": "support@tutorspool.com",
+          "telephone": "+92-345-3284284"
+        })}</script>
       </Helmet>
       <div className="min-h-screen flex flex-col">
       <Navbar />

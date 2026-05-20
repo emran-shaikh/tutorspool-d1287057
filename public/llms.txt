@@ -1,0 +1,21 @@
+# TutorsPool
+
+> TutorsPool is an online tutoring platform connecting students with expert tutors for personalized 1-on-1 sessions in math, science, languages, test prep, and more.
+
+## Pages
+
+- [Home](/): Overview of TutorsPool's personalized online tutoring.
+- [Find Tutors](/tutors): Browse and filter expert tutors by subject and availability.
+- [Subjects](/subjects): Explore subjects offered across all academic levels.
+- [Reviews](/reviews): Read student and parent reviews of TutorsPool tutors.
+- [About](/about): Our mission, values, and leadership team.
+- [Contact](/contact): Reach our support team via email, phone, or form.
+- [Blog](/blog): Educational insights, learning tips, and study strategies.
+- [FAQ](/faq): Common questions about accounts, sessions, and payments.
+- [Help Center](/help): Guides for students, tutors, and parents.
+- [Careers](/careers): Open roles at TutorsPool.
+
+## Optional
+
+- [Terms](/terms): Terms of service.
+- [Privacy](/privacy): Privacy policy.

@@ -33,6 +33,22 @@ const Index = () => {
         <meta name="twitter:title" content={title} />
         <meta name="twitter:description" content={description} />
         <meta name="twitter:image" content={imageUrl} />
+
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "TutorsPool",
+          "url": "https://tutorspool.lovable.app",
+        })}</script>
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "TutorsPool",
+          "url": "https://tutorspool.lovable.app",
+          "logo": "https://tutorspool.lovable.app/logo.png",
+          "email": "support@tutorspool.com",
+          "telephone": "+92-345-3284284",
+        })}</script>
       </Helmet>
 
       <div className="min-h-screen flex flex-col">
