@@ -54,7 +54,7 @@ export default function SharedQuizResults() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-violet-950 via-purple-900 to-fuchsia-950 flex items-center justify-center">
-        <Loader2 className="h-10 w-10 animate-spin text-white/60" />
+        <Loader2 className="h-10 w-10 animate-spin text-white/85" />
       </div>
     );
   }
@@ -108,8 +108,8 @@ export default function SharedQuizResults() {
           />
           <SharedResultsCTA quizId={quiz.id} quizTopic={quiz.topic} />
           <div className="text-center mt-8 pb-8">
-            <p className="text-white/30 text-xs">
-              Powered by <span className="font-semibold text-white/50">TutorsPool</span> · SmartGen™ Learning
+            <p className="text-white/70 text-xs">
+              Powered by <span className="font-semibold text-white/80">TutorsPool</span> · SmartGen™ Learning
             </p>
           </div>
         </main>
