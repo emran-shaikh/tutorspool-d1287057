@@ -84,6 +84,21 @@ export default function FAQ() {
           content="Find quick answers to common questions about TutorsPool, including accounts, sessions, tutors, security, and payments."
         />
         <link rel="canonical" href={canonicalUrl} />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="FAQ - TutorsPool | Frequently Asked Questions" />
+        <meta property="og:description" content="Find quick answers to common questions about TutorsPool, including accounts, sessions, tutors, security, and payments." />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta name="twitter:title" content="FAQ - TutorsPool | Frequently Asked Questions" />
+        <meta name="twitter:description" content="Find quick answers to common questions about TutorsPool, including accounts, sessions, tutors, security, and payments." />
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": faqGroups.flatMap((g) => g.items).map((item) => ({
+            "@type": "Question",
+            "name": item.question,
+            "acceptedAnswer": { "@type": "Answer", "text": item.answer },
+          })),
+        })}</script>
       </Helmet>
 
       <div className="min-h-screen flex flex-col">
