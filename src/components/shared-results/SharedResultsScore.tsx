@@ -41,7 +41,7 @@ export default function SharedResultsScore({ quiz, result }: Props) {
         </div>
         <h1 className="text-3xl font-bold text-white mt-6 mb-1">Quiz Complete!</h1>
         <p className={`text-lg ${performance.color}`}>{performance.message}</p>
-        <p className="text-white/50 text-sm mt-2">
+        <p className="text-white/80 text-sm mt-2">
           {result.studentName} completed this quiz
         </p>
       </div>
@@ -49,7 +49,7 @@ export default function SharedResultsScore({ quiz, result }: Props) {
       {/* Score Card */}
       <Card className="mb-6 bg-white/10 border-white/10 backdrop-blur-sm text-white">
         <CardHeader className="text-center pb-2">
-          <CardTitle className="text-base text-white/60">
+          <CardTitle className="text-base text-white/85">
             {quiz.subject} · {quiz.topic}
           </CardTitle>
         </CardHeader>
@@ -60,7 +60,7 @@ export default function SharedResultsScore({ quiz, result }: Props) {
                 {result.accuracy}%
               </span>
             </div>
-            <p className="text-white/50 mt-1">
+            <p className="text-white/80 mt-1">
               {result.correctAnswers}/{result.totalQuestions} Questions Correct
             </p>
           </div>
@@ -73,21 +73,21 @@ export default function SharedResultsScore({ quiz, result }: Props) {
             <div className="text-center p-3 bg-green-500/10 rounded-xl border border-green-500/20">
               <CheckCircle className="h-6 w-6 text-green-400 mx-auto mb-1" />
               <p className="text-xl font-bold text-green-400">{result.correctAnswers}</p>
-              <p className="text-xs text-white/50">Right</p>
+              <p className="text-xs text-white/80">Right</p>
             </div>
             <div className="text-center p-3 bg-red-500/10 rounded-xl border border-red-500/20">
               <XCircle className="h-6 w-6 text-red-400 mx-auto mb-1" />
               <p className="text-xl font-bold text-red-400">{result.wrongAnswers}</p>
-              <p className="text-xs text-white/50">Wrong</p>
+              <p className="text-xs text-white/80">Wrong</p>
             </div>
             <div className="text-center p-3 bg-white/5 rounded-xl border border-white/10">
-              <MinusCircle className="h-6 w-6 text-white/40 mx-auto mb-1" />
-              <p className="text-xl font-bold text-white/60">{result.skipped}</p>
-              <p className="text-xs text-white/50">Skipped</p>
+              <MinusCircle className="h-6 w-6 text-white/75 mx-auto mb-1" />
+              <p className="text-xl font-bold text-white/85">{result.skipped}</p>
+              <p className="text-xs text-white/80">Skipped</p>
             </div>
           </div>
 
-          <p className="text-center text-white/40 text-sm">
+          <p className="text-center text-white/75 text-sm">
             ⏱️ Completed in {formatTime(result.timeTaken)}
           </p>
         </CardContent>

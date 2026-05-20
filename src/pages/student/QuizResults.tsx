@@ -198,7 +198,7 @@ export default function QuizResults() {
                 <p className="text-sm text-muted-foreground">Wrong</p>
               </div>
               <div className="text-center p-4 bg-gray-50 dark:bg-gray-900/30 rounded-xl">
-                <MinusCircle className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                <MinusCircle className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
                 <p className="text-2xl font-bold text-gray-600">{result.skipped}</p>
                 <p className="text-sm text-muted-foreground">Skipped</p>
               </div>
