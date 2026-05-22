@@ -1,76 +1,121 @@
+# Admin-Mediated Student ↔ Tutor Connections
 
+Goal: Admin creates a formal "connection" between a student and a tutor. Once active, the tutor can directly assign quizzes, tasks, and learning resources to that student (with admin always able to view/audit), without re-going through admin each time. Admin retains oversight and can pause/revoke.
 
-## Plan: Add Parent Role with Silent Child Monitoring
+## Concept
 
-This feature adds a new "Parent" role that can monitor their child's academic progress, sessions, quiz results, and learning goals — without the child being notified or aware of the oversight.
+A new `studentTutorConnections` Firestore collection acts as the "contract" between one student and one tutor. Tutors can only assign work to students they're connected to. Admin creates, audits, pauses, or revokes connections. Parents linked to the student automatically see all activity through existing `parentLinks` + notification system.
 
-### How It Works
+## Data Model (Firestore)
 
-1. **Parent registers** with the "parent" role and links to their child by entering the child's email during registration or from their dashboard
-2. **Linking mechanism**: Parent enters child's email → system looks up the student account → creates a `parentLinks` record in Firestore mapping parent UID to student UID
-3. **Parent dashboard** shows a read-only view of the child's data: sessions, quiz results, learning goals, achievements, and gamification stats
-4. **No notifications to child**: The child's UI has zero awareness of the parent link — no alerts, no indicators, no changes to their experience
-5. **Email notifications to parent**: When the child completes a quiz, books/completes a session, or hits a milestone, the parent receives an email notification silently
+**`studentTutorConnections/{connectionId}`**
+- `studentId`, `studentName`, `studentEmail`
+- `tutorId`, `tutorName`, `tutorEmail`
+- `subjects: string[]` (e.g. ["Math", "Physics"])
+- `status`: `active | paused | revoked`
+- `createdBy` (admin uid), `createdAt`
+- `notes` (admin internal note)
+- `revokedAt`, `revokedBy` (optional)
 
-### Files to Create
+Indexing: composite read by `tutorId + status`, `studentId + status` (filter client-side per project convention if composite indexes get heavy).
 
-| File | Purpose |
-|------|---------|
-| `src/pages/dashboard/ParentDashboard.tsx` | Main parent dashboard with child overview |
-| `src/pages/parent/LinkChild.tsx` | Page to link/manage child accounts |
-| `src/pages/parent/ChildProgress.tsx` | Detailed view of child's sessions, goals, quiz results |
-| `src/pages/parent/EditParentProfile.tsx` | Parent profile editing |
+**`tutorAssignments/{assignmentId}`** (new — generalized beyond quizzes)
+- `connectionId` (FK to the connection — enforces the link)
+- `tutorId`, `studentId`
+- `type`: `quiz | task | resource | flashcard`
+- `title`, `description`
+- `payload`: `{ quizId? , resourceUrl?, fileUrl?, instructions? }`
+- `dueDate` (optional)
+- `status`: `pending | submitted | completed`
+- `createdAt`, `updatedAt`
 
-### Files to Modify
+Existing `quizAssignments` stays as-is for quizzes (still works), but new code path requires an active connection before creating one.
 
-| File | Change |
-|------|--------|
-| `src/contexts/AuthContext.tsx` | Add `'parent'` to `UserRole` type |
-| `src/pages/Register.tsx` | Add parent role option with "Heart" icon, remove admin from default role selector grid |
-| `src/App.tsx` | Add parent routes and dashboard redirect |
-| `src/components/layout/DashboardLayout.tsx` | Support `'parent'` role in layout |
-| `src/lib/firestore.ts` | Add `parentLinks` collection CRUD functions, add functions to fetch child data by parent UID |
-| `FIRESTORE_SECURITY_RULES.md` | Add rules for `parentLinks` collection |
-| `supabase/functions/send-email/index.ts` | Add parent notification email templates |
+## Firestore Security Rules
 
-### Firestore Collections
-
-**`parentLinks`** — maps parent to child:
 ```
-{
-  parentId: string,      // parent's UID
-  childId: string,       // student's UID
-  childEmail: string,    // for display
-  childName: string,     // cached name
-  linkedAt: string,      // ISO timestamp
-  status: 'active' | 'pending'
+match /studentTutorConnections/{id} {
+  allow read: if isAuthenticated() && (
+    resource.data.studentId == request.auth.uid ||
+    resource.data.tutorId == request.auth.uid ||
+    isAdmin() ||
+    isLinkedParent(resource.data.studentId)
+  );
+  allow create, update, delete: if isAdmin();
+}
+
+match /tutorAssignments/{id} {
+  allow read: if isAuthenticated() && (
+    resource.data.studentId == request.auth.uid ||
+    resource.data.tutorId == request.auth.uid ||
+    isAdmin() ||
+    isLinkedParent(resource.data.studentId)
+  );
+  // Tutor can create only if an active connection exists (verified client-side + admin auditable);
+  // immutability of connectionId enforced on update.
+  allow create: if isAuthenticated() && isTutor()
+    && request.resource.data.tutorId == request.auth.uid;
+  allow update: if isAuthenticated() && (
+    (resource.data.tutorId == request.auth.uid && isTutor()) ||
+    (resource.data.studentId == request.auth.uid && isStudent()) ||
+    isAdmin()
+  );
+  allow delete: if isAdmin() || (isTutor() && resource.data.tutorId == request.auth.uid);
 }
 ```
 
-### Security Rules for `parentLinks`
-- Parents can read/create/delete their own links (where `parentId == uid`)
-- Students cannot see `parentLinks` at all (no read access for students)
-- Admins have full access
+Update `FIRESTORE_SECURITY_RULES.md` with these blocks.
 
-### Parent Dashboard Features
-- **Child Overview Card**: Name, grade, active goals count, sessions count
-- **Recent Sessions**: Last 5 sessions with status
-- **Quiz Results**: Scores, completion dates, subjects
-- **Learning Goals**: Progress bars for each goal
-- **Achievements**: XP, level, streak data
-- All data is fetched using existing firestore functions (`getStudentSessions`, `getStudentGoals`, `getStudentResults`, `getStudentGamification`) but called with the child's UID
+## UI / Pages
 
-### Email Notifications (Silent)
-Parent receives emails when child:
-- Completes a quiz (with score summary)
-- Books or completes a session
-- Achieves a new level or milestone
+**Admin**
+- New page: `src/pages/admin/ManageConnections.tsx`
+  - List all connections with filters (status, tutor, student)
+  - "Create Connection" dialog: pick student + tutor + subjects + optional note
+  - Actions: Pause / Resume / Revoke / Delete
+  - Audit view: latest assignments per connection
+- Add route + nav entry in `AdminDashboard.tsx`
 
-These are triggered from existing flows (quiz completion, session updates) by checking if the student has a linked parent and sending the notification only to the parent.
+**Tutor**
+- New page: `src/pages/tutor/MyStudents.tsx`
+  - Lists students from active connections only
+  - Per-student panel with tabs: Assignments | Quizzes | Resources | Activity
+  - "Assign Quiz" picks from tutor's quizzes (reuses `quizAssignments`)
+  - "Assign Task" / "Share Resource" creates `tutorAssignments`
+- Block legacy "assign to any student" flows: filter the student picker by active connection
 
-### Technical Details
-- The linking flow validates that the entered email belongs to an existing student account
-- A parent can link multiple children
-- The child's dashboard, notifications, and UI remain completely unchanged
-- Parent data access reuses existing Firestore query functions, just called with the child's UID from the parent's context
+**Student**
+- New page: `src/pages/student/MyTutors.tsx` shows connected tutors + active subjects
+- Dashboard widget "Assigned by your tutor" pulling `tutorAssignments` where `studentId == me`
+- Existing quiz/assignment pages keep working
 
+**Parent (silent)**
+- Existing `parentLinks` system already propagates session/quiz events. Add notification triggers when:
+  - A new connection is created for their child
+  - Tutor assigns a new task/resource
+- Reuses `parentNotifications` collection + `parent/notifications` page
+
+## Notifications
+
+- On connection create → email/notify both student and tutor (via `send-email` edge function)
+- On assignment create → notify student (in-app + email) and linked parents (silent)
+
+## Implementation Steps
+
+1. Update `FIRESTORE_SECURITY_RULES.md` with new collection rules (user pastes into Firebase Console).
+2. Add helper functions in `src/lib/firestore.ts`:
+   - `createConnection`, `updateConnectionStatus`, `getConnectionsForTutor`, `getConnectionsForStudent`, `getActiveConnection(tutorId, studentId)`
+   - `createTutorAssignment`, `getAssignmentsForStudent`, `getAssignmentsForTutor`, `updateAssignmentStatus`
+3. Build `ManageConnections.tsx` (admin) + route wiring + nav link.
+4. Build `MyStudents.tsx` (tutor) with assign dialogs; gate existing `CreateQuiz`/assign flows behind active-connection check.
+5. Build `MyTutors.tsx` (student) + dashboard widget for assignments.
+6. Hook notification triggers (reuse `send-email` and `parentNotifications`).
+7. Add memory entry documenting the connection model and security gating.
+
+## Out of Scope
+
+- Tutor-initiated connection requests (admin-only creation per your spec).
+- Real-time chat between student and tutor.
+- Billing/scheduling changes (sessions flow stays unchanged).
+
+Once you approve, I'll implement in this order.
