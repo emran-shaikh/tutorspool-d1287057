@@ -61,6 +61,9 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { CookieConsent } from "@/components/CookieConsent";
 import { AnalyticsTracker } from "@/components/AnalyticsTracker";
 import VisitorAnalytics from "./pages/admin/VisitorAnalytics";
+import ManageConnections from "./pages/admin/ManageConnections";
+import MyStudents from "./pages/tutor/MyStudents";
+import MyTutors from "./pages/student/MyTutors";
 
 const queryClient = new QueryClient();
 
@@ -144,6 +147,7 @@ const App = () => (
               <Route path="/student/quiz/:quizId" element={<ProtectedRoute allowedRoles={['student']}><TakeQuiz /></ProtectedRoute>} />
               <Route path="/student/quiz/:quizId/results" element={<ProtectedRoute allowedRoles={['student']}><QuizResults /></ProtectedRoute>} />
               <Route path="/student/achievements" element={<ProtectedRoute allowedRoles={['student']}><Achievements /></ProtectedRoute>} />
+              <Route path="/student/tutors-connected" element={<ProtectedRoute allowedRoles={['student']}><MyTutors /></ProtectedRoute>} />
               
               {/* Tutor Routes */}
               <Route path="/tutor/dashboard" element={<ProtectedRoute allowedRoles={['tutor']}><TutorDashboard /></ProtectedRoute>} />
@@ -153,6 +157,7 @@ const App = () => (
               <Route path="/tutor/quizzes" element={<ProtectedRoute allowedRoles={['tutor']}><ManageQuizzes /></ProtectedRoute>} />
               <Route path="/tutor/quizzes/create" element={<ProtectedRoute allowedRoles={['tutor']}><CreateQuiz /></ProtectedRoute>} />
               <Route path="/tutor/quizzes/:quizId" element={<ProtectedRoute allowedRoles={['tutor']}><QuizDetail /></ProtectedRoute>} />
+              <Route path="/tutor/students" element={<ProtectedRoute allowedRoles={['tutor']}><MyStudents /></ProtectedRoute>} />
               
               {/* Admin Routes */}
               <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
@@ -166,6 +171,7 @@ const App = () => (
               <Route path="/admin/users/tutor/:uid" element={<ProtectedRoute allowedRoles={['admin']}><AdminEditTutor /></ProtectedRoute>} />
               <Route path="/admin/analytics" element={<ProtectedRoute allowedRoles={['admin']}><VisitorAnalytics /></ProtectedRoute>} />
               <Route path="/admin/users/student/:uid" element={<ProtectedRoute allowedRoles={['admin']}><AdminEditStudent /></ProtectedRoute>} />
+              <Route path="/admin/connections" element={<ProtectedRoute allowedRoles={['admin']}><ManageConnections /></ProtectedRoute>} />
               
               {/* Parent Routes */}
               <Route path="/parent/dashboard" element={<ProtectedRoute allowedRoles={['parent']}><ParentDashboard /></ProtectedRoute>} />
