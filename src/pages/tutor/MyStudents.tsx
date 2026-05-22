@@ -97,7 +97,7 @@ export default function MyStudents() {
         studentId: activeConn.studentId,
         studentName: activeConn.studentName,
         type,
-        title: type === "quiz" ? (selectedQuiz?.title || "Quiz") : title.trim(),
+        title: type === "quiz" ? (selectedQuiz?.topic || "Quiz") : title.trim(),
         description: description.trim() || undefined,
         payload: {
           ...(type === "resource" ? { resourceUrl: resourceUrl.trim() } : {}),
@@ -234,7 +234,7 @@ export default function MyStudents() {
                   <SelectTrigger><SelectValue placeholder={quizzes.length ? "Select quiz" : "No quizzes yet — create one first"} /></SelectTrigger>
                   <SelectContent>
                     {quizzes.map(q => (
-                      <SelectItem key={q.id} value={q.id!}>{q.title}</SelectItem>
+                      <SelectItem key={q.id} value={q.id!}>{q.topic}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
