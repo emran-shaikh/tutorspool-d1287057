@@ -247,6 +247,24 @@ export default function TutorDashboard() {
             </Button>
           </CardContent>
         </Card>
+
+        <Card className="border-emerald-100 dark:border-emerald-900 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/50 dark:to-teal-950/50">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <div className="p-1.5 rounded-md bg-gradient-to-br from-emerald-500 to-teal-500">
+                <Users className="h-4 w-4 text-white" />
+              </div>
+              My Students
+            </CardTitle>
+            <CardDescription>Assign tasks, quizzes & resources to connected students</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground mb-4">View students an admin connected to you and send work directly.</p>
+            <Button className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-lg shadow-emerald-500/25" asChild>
+              <Link to="/tutor/students">Open My Students</Link>
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     </DashboardLayout>
   );
