@@ -381,6 +381,24 @@ export default function StudentDashboard() {
           </CardContent>
         </Card>
 
+        <Card className="border-blue-100 dark:border-blue-900 bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-cyan-950/50 dark:to-blue-950/50">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <div className="p-1.5 rounded-md bg-gradient-to-br from-cyan-500 to-blue-500">
+                <GraduationCap className="h-4 w-4 text-white" />
+              </div>
+              My Tutors
+            </CardTitle>
+            <CardDescription>Work assigned by your connected tutors</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground mb-4">See tasks, quizzes and resources your tutors sent you.</p>
+            <Button className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 shadow-lg shadow-cyan-500/25" asChild>
+              <Link to="/student/tutors-connected">View My Tutors</Link>
+            </Button>
+          </CardContent>
+        </Card>
+
         {/* Leaderboard */}
         <Leaderboard />
       </div>
