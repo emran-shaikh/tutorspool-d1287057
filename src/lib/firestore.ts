@@ -2049,3 +2049,159 @@ export const markAllParentNotificationsRead = async (parentId: string): Promise<
     if (isDev) console.error('Error marking all parent notifications read:', error);
   }
 };
+
+// ============= Student-Tutor Connections =============
+export interface StudentTutorConnection {
+  id?: string;
+  studentId: string;
+  studentName: string;
+  studentEmail?: string;
+  tutorId: string;
+  tutorName: string;
+  tutorEmail?: string;
+  subjects: string[];
+  status: 'active' | 'paused' | 'revoked';
+  notes?: string;
+  createdBy: string;
+  createdAt: string;
+  revokedAt?: string;
+  revokedBy?: string;
+}
+
+export const createConnection = async (
+  conn: Omit<StudentTutorConnection, 'id' | 'createdAt' | 'status'> & { status?: StudentTutorConnection['status'] }
+): Promise<string> => {
+  const ref = await addDoc(collection(db, 'studentTutorConnections'), {
+    ...conn,
+    status: conn.status || 'active',
+    createdAt: new Date().toISOString(),
+  });
+  return ref.id;
+};
+
+export const updateConnectionStatus = async (
+  connectionId: string,
+  status: StudentTutorConnection['status'],
+  actorUid?: string
+): Promise<void> => {
+  const data: any = { status };
+  if (status === 'revoked') {
+    data.revokedAt = new Date().toISOString();
+    data.revokedBy = actorUid || '';
+  }
+  await updateDoc(doc(db, 'studentTutorConnections', connectionId), data);
+};
+
+export const deleteConnection = async (connectionId: string): Promise<void> => {
+  await deleteDoc(doc(db, 'studentTutorConnections', connectionId));
+};
+
+export const getAllConnections = async (): Promise<StudentTutorConnection[]> => {
+  try {
+    const snap = await getDocs(collection(db, 'studentTutorConnections'));
+    return snap.docs
+      .map(d => ({ ...d.data(), id: d.id } as StudentTutorConnection))
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  } catch (e) {
+    if (isDev) console.error('Error fetching connections:', e);
+    return [];
+  }
+};
+
+export const getConnectionsForTutor = async (tutorId: string): Promise<StudentTutorConnection[]> => {
+  try {
+    const q = query(collection(db, 'studentTutorConnections'), where('tutorId', '==', tutorId));
+    const snap = await getDocs(q);
+    return snap.docs.map(d => ({ ...d.data(), id: d.id } as StudentTutorConnection));
+  } catch (e) {
+    if (isDev) console.error('Error fetching tutor connections:', e);
+    return [];
+  }
+};
+
+export const getConnectionsForStudent = async (studentId: string): Promise<StudentTutorConnection[]> => {
+  try {
+    const q = query(collection(db, 'studentTutorConnections'), where('studentId', '==', studentId));
+    const snap = await getDocs(q);
+    return snap.docs.map(d => ({ ...d.data(), id: d.id } as StudentTutorConnection));
+  } catch (e) {
+    if (isDev) console.error('Error fetching student connections:', e);
+    return [];
+  }
+};
+
+// ============= Tutor Assignments (tasks / resources / quizzes / flashcards) =============
+export interface TutorAssignment {
+  id?: string;
+  connectionId: string;
+  tutorId: string;
+  tutorName?: string;
+  studentId: string;
+  studentName?: string;
+  type: 'task' | 'resource' | 'quiz' | 'flashcard';
+  title: string;
+  description?: string;
+  payload?: {
+    quizId?: string;
+    resourceUrl?: string;
+    fileUrl?: string;
+    instructions?: string;
+  };
+  dueDate?: string;
+  status: 'pending' | 'submitted' | 'completed';
+  createdAt: string;
+  updatedAt: string;
+}
+
+export const createTutorAssignment = async (
+  a: Omit<TutorAssignment, 'id' | 'createdAt' | 'updatedAt' | 'status'> & { status?: TutorAssignment['status'] }
+): Promise<string> => {
+  const now = new Date().toISOString();
+  const ref = await addDoc(collection(db, 'tutorAssignments'), {
+    ...a,
+    status: a.status || 'pending',
+    createdAt: now,
+    updatedAt: now,
+  });
+  return ref.id;
+};
+
+export const getAssignmentsForStudent = async (studentId: string): Promise<TutorAssignment[]> => {
+  try {
+    const q = query(collection(db, 'tutorAssignments'), where('studentId', '==', studentId));
+    const snap = await getDocs(q);
+    return snap.docs
+      .map(d => ({ ...d.data(), id: d.id } as TutorAssignment))
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  } catch (e) {
+    if (isDev) console.error('Error fetching student assignments (tutor):', e);
+    return [];
+  }
+};
+
+export const getAssignmentsForTutor = async (tutorId: string): Promise<TutorAssignment[]> => {
+  try {
+    const q = query(collection(db, 'tutorAssignments'), where('tutorId', '==', tutorId));
+    const snap = await getDocs(q);
+    return snap.docs
+      .map(d => ({ ...d.data(), id: d.id } as TutorAssignment))
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  } catch (e) {
+    if (isDev) console.error('Error fetching tutor assignments:', e);
+    return [];
+  }
+};
+
+export const updateTutorAssignmentStatus = async (
+  assignmentId: string,
+  status: TutorAssignment['status']
+): Promise<void> => {
+  await updateDoc(doc(db, 'tutorAssignments', assignmentId), {
+    status,
+    updatedAt: new Date().toISOString(),
+  });
+};
+
+export const deleteTutorAssignment = async (assignmentId: string): Promise<void> => {
+  await deleteDoc(doc(db, 'tutorAssignments', assignmentId));
+};

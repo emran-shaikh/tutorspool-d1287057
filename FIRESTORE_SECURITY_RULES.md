@@ -313,6 +313,35 @@ service cloud.firestore {
       allow update: if isAdmin();
       allow delete: if isAdmin();
     }
+
+    // Student-Tutor Connections (admin creates; student/tutor/admin/linked parent can read)
+    match /studentTutorConnections/{connectionId} {
+      allow read: if isAuthenticated() && (
+        resource.data.studentId == request.auth.uid ||
+        resource.data.tutorId == request.auth.uid ||
+        isAdmin() ||
+        isLinkedParent(resource.data.studentId)
+      );
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Tutor Assignments (tutor assigns tasks/quizzes/resources to connected students)
+    match /tutorAssignments/{assignmentId} {
+      allow read: if isAuthenticated() && (
+        resource.data.studentId == request.auth.uid ||
+        resource.data.tutorId == request.auth.uid ||
+        isAdmin() ||
+        isLinkedParent(resource.data.studentId)
+      );
+      allow create: if isAuthenticated() && isTutor()
+        && request.resource.data.tutorId == request.auth.uid;
+      allow update: if isAuthenticated() && (
+        (resource.data.tutorId == request.auth.uid && isTutor()) ||
+        (resource.data.studentId == request.auth.uid && isStudent()) ||
+        isAdmin()
+      );
+      allow delete: if isAdmin() || (isAuthenticated() && isTutor() && resource.data.tutorId == request.auth.uid);
+    }
     
     // Student Gamification profiles (public read for leaderboard)
     match /studentGamification/{studentId} {
