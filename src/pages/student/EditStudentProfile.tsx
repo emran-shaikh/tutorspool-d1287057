@@ -123,9 +123,18 @@ export default function EditStudentProfile() {
       
       toast({ title: "Profile saved!", description: "Your profile has been updated" });
       navigate('/student/dashboard');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving profile:', error);
-      toast({ title: "Error", description: "Failed to save profile", variant: "destructive" });
+      const code = error?.code || "";
+      let message = error?.message || "Something went wrong while saving your profile.";
+      if (code === "permission-denied") {
+        message = "You don't have permission to update this profile. Please sign out and back in, then try again.";
+      } else if (code === "unavailable" || code === "failed-precondition") {
+        message = "Couldn't reach the server. Check your internet connection and try again.";
+      } else if (message.includes("Unsupported field value")) {
+        message = "One of the fields contains an invalid value. Please review your entries and try again.";
+      }
+      toast({ title: "Couldn't save profile", description: message, variant: "destructive" });
     } finally {
       setSaving(false);
     }
