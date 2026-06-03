@@ -106,18 +106,18 @@ export default function EditStudentProfile() {
     setSaving(true);
     
     try {
-      const profileData: StudentProfile = {
+      const profileData: Record<string, any> = {
         uid: userProfile.uid,
         fullName: userProfile.fullName,
         email: userProfile.email,
-        photoURL: photoURL || undefined,
         createdAt: profile?.createdAt || new Date().toISOString(),
-        currentlyStudying,
-        gradeLevel,
-        learningGoals,
-        interests,
-        preferredSubjects
+        currentlyStudying: currentlyStudying || "",
+        gradeLevel: gradeLevel || "",
+        learningGoals: learningGoals || "",
+        interests: interests || [],
+        preferredSubjects: preferredSubjects || [],
       };
+      if (photoURL) profileData.photoURL = photoURL;
 
       await setDoc(doc(db, 'studentProfiles', userProfile.uid), profileData, { merge: true });
       
