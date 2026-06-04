@@ -134,12 +134,32 @@ export default function MyStudents() {
 
   return (
     <DashboardLayout role="tutor">
-      <div className="mb-6">
-        <h1 className="font-display text-3xl font-bold mb-1 flex items-center gap-2">
-          <Users className="h-7 w-7 text-emerald-600" /> My Students
-        </h1>
-        <p className="text-muted-foreground">Students connected to you by an admin. Assign tasks, quizzes and resources directly.</p>
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+        <div>
+          <h1 className="font-display text-3xl font-bold mb-1 flex items-center gap-2">
+            <Users className="h-7 w-7 text-emerald-600" /> My Students
+          </h1>
+          <p className="text-muted-foreground">Students connected to you by an admin. Assign tasks, quizzes and resources directly.</p>
+        </div>
+        <Button asChild variant="outline" className="border-emerald-600 text-emerald-700 hover:bg-emerald-50">
+          <a
+            href="https://wa.me/447367324532?text=Hi%20TutorsPool%20Admin%2C%20please%20connect%20a%20new%20student%20to%20my%20tutor%20account."
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Plus className="h-4 w-4 mr-2" /> Request New Student
+          </a>
+        </Button>
       </div>
+
+      <Card className="mb-6 border-amber-200 bg-amber-50/50">
+        <CardContent className="py-3 text-sm text-amber-900 flex items-start gap-2">
+          <LinkIcon className="h-4 w-4 mt-0.5 flex-shrink-0" />
+          <span>
+            New students are connected to your account by an admin. To add another student, contact the admin using the <strong>Request New Student</strong> button above — they'll create the connection and it will appear here automatically.
+          </span>
+        </CardContent>
+      </Card>
 
       {activeConnections.length === 0 ? (
         <Card className="border-emerald-200">
