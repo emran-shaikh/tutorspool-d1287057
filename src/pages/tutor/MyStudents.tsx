@@ -168,14 +168,28 @@ export default function MyStudents() {
                           Subjects: {c.subjects.join(", ") || "—"} · {c.studentEmail}
                         </CardDescription>
                       </div>
-                      <Button onClick={() => startAssign(c)} className="bg-emerald-600 hover:bg-emerald-700">
-                        <Plus className="h-4 w-4 mr-2" /> Assign
+                      <Button onClick={() => startAssign(c)} size="lg" className="bg-emerald-600 hover:bg-emerald-700 shadow-md">
+                        <Plus className="h-5 w-5 mr-2" /> Assign New Work
                       </Button>
                     </div>
                   </CardHeader>
                   <CardContent>
+                    <div className="mb-3 flex items-center justify-between gap-2 flex-wrap">
+                      <p className="text-sm font-medium text-muted-foreground">
+                        {items.length === 0 ? "No assignments yet — send the first one." : `${items.length} assignment${items.length === 1 ? "" : "s"} sent. Add more anytime.`}
+                      </p>
+                      <Button onClick={() => startAssign(c)} variant="outline" size="sm">
+                        <Plus className="h-4 w-4 mr-1" /> Add task / quiz / resource
+                      </Button>
+                    </div>
                     {items.length === 0 ? (
-                      <p className="text-muted-foreground text-center py-6">No assignments yet.</p>
+                      <div className="text-center py-8 border-2 border-dashed rounded-lg">
+                        <ClipboardList className="h-10 w-10 mx-auto mb-3 text-muted-foreground opacity-50" />
+                        <p className="text-muted-foreground mb-3">You haven't assigned anything to {c.studentName} yet.</p>
+                        <Button onClick={() => startAssign(c)} className="bg-emerald-600 hover:bg-emerald-700">
+                          <Plus className="h-4 w-4 mr-2" /> Assign Now
+                        </Button>
+                      </div>
                     ) : (
                       <div className="space-y-2">
                         {items.map(a => (
