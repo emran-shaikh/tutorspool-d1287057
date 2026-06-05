@@ -42,26 +42,11 @@ export default function ManageConnections() {
   const [subjectsText, setSubjectsText] = useState("");
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
-  const [studentSearch, setStudentSearch] = useState("");
-  const [tutorSearch, setTutorSearch] = useState("");
+  const [studentPopoverOpen, setStudentPopoverOpen] = useState(false);
+  const [tutorPopoverOpen, setTutorPopoverOpen] = useState(false);
 
-  const filteredStudents = useMemo(() => {
-    const q = studentSearch.trim().toLowerCase();
-    if (!q) return students;
-    return students.filter(s =>
-      (s.fullName || "").toLowerCase().includes(q) ||
-      (s.email || "").toLowerCase().includes(q)
-    );
-  }, [students, studentSearch]);
-
-  const filteredTutors = useMemo(() => {
-    const q = tutorSearch.trim().toLowerCase();
-    if (!q) return tutors;
-    return tutors.filter(t =>
-      (t.fullName || "").toLowerCase().includes(q) ||
-      (t.email || "").toLowerCase().includes(q)
-    );
-  }, [tutors, tutorSearch]);
+  const selectedStudent = students.find(s => s.uid === studentId);
+  const selectedTutor = tutors.find(t => t.uid === tutorId);
 
   useEffect(() => { fetchAll(); }, []);
 
