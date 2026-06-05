@@ -39,6 +39,26 @@ export default function ManageConnections() {
   const [subjectsText, setSubjectsText] = useState("");
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
+  const [studentSearch, setStudentSearch] = useState("");
+  const [tutorSearch, setTutorSearch] = useState("");
+
+  const filteredStudents = useMemo(() => {
+    const q = studentSearch.trim().toLowerCase();
+    if (!q) return students;
+    return students.filter(s =>
+      (s.fullName || "").toLowerCase().includes(q) ||
+      (s.email || "").toLowerCase().includes(q)
+    );
+  }, [students, studentSearch]);
+
+  const filteredTutors = useMemo(() => {
+    const q = tutorSearch.trim().toLowerCase();
+    if (!q) return tutors;
+    return tutors.filter(t =>
+      (t.fullName || "").toLowerCase().includes(q) ||
+      (t.email || "").toLowerCase().includes(q)
+    );
+  }, [tutors, tutorSearch]);
 
   useEffect(() => { fetchAll(); }, []);
 
@@ -147,10 +167,21 @@ export default function ManageConnections() {
             <div className="space-y-4">
               <div>
                 <Label>Student</Label>
+                <div className="relative mb-2">
+                  <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    value={studentSearch}
+                    onChange={e => setStudentSearch(e.target.value)}
+                    placeholder="Search students by name or email"
+                    className="pl-9"
+                  />
+                </div>
                 <Select value={studentId} onValueChange={setStudentId}>
                   <SelectTrigger><SelectValue placeholder="Select student" /></SelectTrigger>
                   <SelectContent>
-                    {students.map(s => (
+                    {filteredStudents.length === 0 ? (
+                      <div className="px-2 py-1.5 text-sm text-muted-foreground">No matches</div>
+                    ) : filteredStudents.map(s => (
                       <SelectItem key={s.uid} value={s.uid}>{s.fullName || s.email}</SelectItem>
                     ))}
                   </SelectContent>
@@ -158,10 +189,21 @@ export default function ManageConnections() {
               </div>
               <div>
                 <Label>Tutor</Label>
+                <div className="relative mb-2">
+                  <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    value={tutorSearch}
+                    onChange={e => setTutorSearch(e.target.value)}
+                    placeholder="Search tutors by name or email"
+                    className="pl-9"
+                  />
+                </div>
                 <Select value={tutorId} onValueChange={setTutorId}>
                   <SelectTrigger><SelectValue placeholder="Select tutor" /></SelectTrigger>
                   <SelectContent>
-                    {tutors.map(t => (
+                    {filteredTutors.length === 0 ? (
+                      <div className="px-2 py-1.5 text-sm text-muted-foreground">No matches</div>
+                    ) : filteredTutors.map(t => (
                       <SelectItem key={t.uid} value={t.uid}>{t.fullName}</SelectItem>
                     ))}
                   </SelectContent>
