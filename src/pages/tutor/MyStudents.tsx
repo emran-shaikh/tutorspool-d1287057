@@ -143,7 +143,7 @@ export default function MyStudents() {
         </div>
         <Button asChild variant="outline" className="border-emerald-600 text-emerald-700 hover:bg-emerald-50">
           <a
-            href="https://wa.me/447367324532?text=Hi%20TutorsPool%20Admin%2C%20please%20connect%20a%20new%20student%20to%20my%20tutor%20account."
+            href="https://wa.me/923453284284?text=Hi%20TutorsPool%20Admin%2C%20please%20connect%20a%20new%20student%20to%20my%20tutor%20account."
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -194,13 +194,10 @@ export default function MyStudents() {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <div className="mb-3 flex items-center justify-between gap-2 flex-wrap">
+                    <div className="mb-3">
                       <p className="text-sm font-medium text-muted-foreground">
                         {items.length === 0 ? "No assignments yet — send the first one." : `${items.length} assignment${items.length === 1 ? "" : "s"} sent. Add more anytime.`}
                       </p>
-                      <Button onClick={() => startAssign(c)} variant="outline" size="sm">
-                        <Plus className="h-4 w-4 mr-1" /> Add task / quiz / resource
-                      </Button>
                     </div>
                     {items.length === 0 ? (
                       <div className="text-center py-8 border-2 border-dashed rounded-lg">
