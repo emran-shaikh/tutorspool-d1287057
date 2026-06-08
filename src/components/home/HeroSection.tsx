@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Users, Clock, TrendingUp, Star, Radio, BookOpen, Loader2 } from "lucide-react";
-import heroImage from "@/assets/hero-tutoring.jpg";
+import heroImage from "@/assets/hero-tutoring.webp";
 import { usePlatformStats } from "@/hooks/usePlatformStats";
 
 export function HeroSection() {
