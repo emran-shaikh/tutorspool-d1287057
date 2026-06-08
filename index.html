@@ -1,40 +1,12 @@
 <!doctype html>
 <html lang="en">
   <head>
-     <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-EMJX84775R"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-EMJX84775R');
-    </script>
-    <!-- Google AdSense - only loads if cookie consent accepted -->
-    <script>
-      (function() {
-        try {
-          var consent = localStorage.getItem('cookie_consent');
-          if (consent === 'accepted') {
-            var s = document.createElement('script');
-            s.async = true;
-            s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8398028846106746';
-            s.crossOrigin = 'anonymous';
-            document.head.appendChild(s);
-          }
-        } catch(e) {}
-      })();
-    </script>
-    <script type="text/javascript">
-      (function(c,l,a,r,i,t,y){
-        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-      })(window, document, "clarity", "script", "x271cefooe");
-    </script>
+    <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" media="print" onload="this.media='all'" />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" /></noscript>
     <title>TutorsPool - Transform Your Learning Journey</title>
     <meta name="description" content="Connect with world-class tutors for personalized 1-on-1 sessions. Master any subject with expert guidance and flexible scheduling." />
     <meta name="author" content="TutorsPool" />
@@ -49,8 +21,37 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@TutorsPool" />
     <meta name="twitter:image" content="https://tutorspool.com/logo.png" />
-    
+
     <link rel="canonical" href="https://tutorspool.com" />
+
+    <!-- Deferred analytics: load after page is interactive to protect LCP/INP -->
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EMJX84775R');
+      function __loadAnalytics(){
+        var ga=document.createElement('script');
+        ga.async=true; ga.src='https://www.googletagmanager.com/gtag/js?id=G-EMJX84775R';
+        document.head.appendChild(ga);
+        (function(c,l,a,r,i,t,y){
+          c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+          t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+          y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+        })(window, document, "clarity", "script", "x271cefooe");
+        try {
+          if (localStorage.getItem('cookie_consent') === 'accepted') {
+            var s=document.createElement('script');
+            s.async=true;
+            s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8398028846106746';
+            s.crossOrigin='anonymous';
+            document.head.appendChild(s);
+          }
+        } catch(e) {}
+      }
+      if (document.readyState === 'complete') { setTimeout(__loadAnalytics, 1500); }
+      else { window.addEventListener('load', function(){ setTimeout(__loadAnalytics, 1500); }); }
+    </script>
   </head>
 
   <body>
