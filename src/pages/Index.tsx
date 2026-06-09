@@ -38,14 +38,14 @@ const Index = () => {
           "@context": "https://schema.org",
           "@type": "WebSite",
           "name": "TutorsPool",
-          "url": "https://tutorspool.lovable.app",
+          "url": "https://tutorspool.com",
         })}</script>
         <script type="application/ld+json">{JSON.stringify({
           "@context": "https://schema.org",
           "@type": "Organization",
           "name": "TutorsPool",
-          "url": "https://tutorspool.lovable.app",
-          "logo": "https://tutorspool.lovable.app/logo.png",
+          "url": "https://tutorspool.com",
+          "logo": "https://tutorspool.com/logo.png",
           "email": "support@tutorspool.com",
           "telephone": "+92-345-3284284",
         })}</script>

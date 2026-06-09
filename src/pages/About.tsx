@@ -89,8 +89,8 @@ export default function About() {
           "@context": "https://schema.org",
           "@type": "Organization",
           "name": "TutorsPool",
-          "url": "https://tutorspool.lovable.app",
-          "logo": "https://tutorspool.lovable.app/logo.png",
+          "url": "https://tutorspool.com",
+          "logo": "https://tutorspool.com/logo.png",
           "email": "support@tutorspool.com",
           "telephone": "+92-345-3284284"
         })}</script>

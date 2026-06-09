@@ -3,6 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      // Redirect the published .lovable.app host to the primary domain (preview/sandbox untouched)
+      (function(){
+        try {
+          var h = location.hostname;
+          if (h === 'tutorspool.lovable.app' || h === 'www.tutorspool.lovable.app') {
+            location.replace('https://tutorspool.com' + location.pathname + location.search + location.hash);
+          }
+        } catch(e) {}
+      })();
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" media="print" onload="this.media='all'" />

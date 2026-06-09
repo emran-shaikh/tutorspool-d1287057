@@ -13,4 +13,4 @@ Allow: /
 User-agent: *
 Allow: /
 
-Sitemap: https://tutorspool.lovable.app/sitemap.xml
+Sitemap: https://tutorspool.com/sitemap.xml
