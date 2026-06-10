@@ -342,6 +342,13 @@ service cloud.firestore {
       );
       allow delete: if isAdmin() || (isAuthenticated() && isTutor() && resource.data.tutorId == request.auth.uid);
     }
+
+    // Email Log — server-only (written by lifecycle-emails edge function via service account)
+    match /emailLog/{logId} {
+      allow read: if isAdmin();
+      allow write: if false; // service account bypasses rules
+    }
+    
     
     // Student Gamification profiles (public read for leaderboard)
     match /studentGamification/{studentId} {

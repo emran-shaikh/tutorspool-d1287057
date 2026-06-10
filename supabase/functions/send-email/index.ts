@@ -134,7 +134,20 @@ type EmailType =
   | "tutor_session_booking" | "tutor_session_cancel" | "tutor_review_received"
   | "admin_new_student" | "admin_new_tutor" | "tutor_approved" | "tutor_profile_incomplete"
   | "contact_form" | "demo_request"
-  | "parent_quiz_completed" | "parent_session_booked" | "parent_session_status" | "parent_milestone";
+  | "parent_quiz_completed" | "parent_session_booked" | "parent_session_status" | "parent_milestone"
+  | "lifecycle";
+
+interface LifecycleEmailRequest extends BaseEmailRequest {
+  type: "lifecycle";
+  to: string;
+  role: Role;
+  subject: string;
+  headline: string;
+  bodyHtml: string;
+  ctaUrl?: string;
+  ctaLabel?: string;
+  unsubscribeUrl?: string;
+}
 
 interface BaseEmailRequest { type: EmailType; }
 interface WelcomeEmailRequest extends BaseEmailRequest { type: "welcome"; to: string; name: string; role?: string; }
@@ -163,7 +176,23 @@ type EmailRequest =
   | TutorSessionBookingEmailRequest | TutorSessionCancelEmailRequest | TutorReviewReceivedEmailRequest
   | AdminNewStudentEmailRequest | AdminNewTutorEmailRequest | TutorApprovedEmailRequest | TutorProfileIncompleteEmailRequest
   | ContactFormEmailRequest | DemoRequestEmailRequest
-  | ParentQuizCompletedEmailRequest | ParentSessionBookedEmailRequest | ParentSessionStatusEmailRequest | ParentMilestoneEmailRequest;
+  | ParentQuizCompletedEmailRequest | ParentSessionBookedEmailRequest | ParentSessionStatusEmailRequest | ParentMilestoneEmailRequest
+  | LifecycleEmailRequest;
+
+async function sendLifecycleEmail(payload: LifecycleEmailRequest) {
+  let html = renderLayout(payload.role, payload.headline, payload.bodyHtml, payload.ctaUrl, payload.ctaLabel);
+  if (payload.unsubscribeUrl) {
+    const unsub = `<div style="text-align:center;padding:8px 40px 20px;font-size:11px;color:#94a3b8;">Don't want these reminders? <a href="${payload.unsubscribeUrl}" style="color:#94a3b8;text-decoration:underline;">Unsubscribe</a></div>`;
+    html = html.replace("</body>", unsub + "</body>");
+  }
+  return resend.emails.send({
+    from: FROM_ADDRESS,
+    to: [payload.to],
+    subject: payload.subject,
+    html,
+    headers: payload.unsubscribeUrl ? { "List-Unsubscribe": `<${payload.unsubscribeUrl}>`, "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" } : undefined,
+  });
+}
 
 /* ─── Student Emails ─── */
 
@@ -563,6 +592,7 @@ serve(async (req) => {
       case "parent_session_booked": result = await sendParentSessionBookedEmail(payload); break;
       case "parent_session_status": result = await sendParentSessionStatusEmail(payload); break;
       case "parent_milestone":      result = await sendParentMilestoneEmail(payload); break;
+      case "lifecycle":             result = await sendLifecycleEmail(payload); break;
       default:
         return new Response(JSON.stringify({ error: "Unsupported email type" }), {
           status: 400,

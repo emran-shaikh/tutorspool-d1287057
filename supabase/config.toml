@@ -20,3 +20,10 @@ verify_jwt = false
 
 [functions.blog-share]
 verify_jwt = false
+
+[functions.lifecycle-emails]
+verify_jwt = false
+
+[functions.email-unsubscribe]
+verify_jwt = false
+
