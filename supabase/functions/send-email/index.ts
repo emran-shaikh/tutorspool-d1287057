@@ -134,7 +134,20 @@ type EmailType =
   | "tutor_session_booking" | "tutor_session_cancel" | "tutor_review_received"
   | "admin_new_student" | "admin_new_tutor" | "tutor_approved" | "tutor_profile_incomplete"
   | "contact_form" | "demo_request"
-  | "parent_quiz_completed" | "parent_session_booked" | "parent_session_status" | "parent_milestone";
+  | "parent_quiz_completed" | "parent_session_booked" | "parent_session_status" | "parent_milestone"
+  | "lifecycle";
+
+interface LifecycleEmailRequest extends BaseEmailRequest {
+  type: "lifecycle";
+  to: string;
+  role: Role;
+  subject: string;
+  headline: string;
+  bodyHtml: string;
+  ctaUrl?: string;
+  ctaLabel?: string;
+  unsubscribeUrl?: string;
+}
 
 interface BaseEmailRequest { type: EmailType; }
 interface WelcomeEmailRequest extends BaseEmailRequest { type: "welcome"; to: string; name: string; role?: string; }
