@@ -176,7 +176,23 @@ type EmailRequest =
   | TutorSessionBookingEmailRequest | TutorSessionCancelEmailRequest | TutorReviewReceivedEmailRequest
   | AdminNewStudentEmailRequest | AdminNewTutorEmailRequest | TutorApprovedEmailRequest | TutorProfileIncompleteEmailRequest
   | ContactFormEmailRequest | DemoRequestEmailRequest
-  | ParentQuizCompletedEmailRequest | ParentSessionBookedEmailRequest | ParentSessionStatusEmailRequest | ParentMilestoneEmailRequest;
+  | ParentQuizCompletedEmailRequest | ParentSessionBookedEmailRequest | ParentSessionStatusEmailRequest | ParentMilestoneEmailRequest
+  | LifecycleEmailRequest;
+
+async function sendLifecycleEmail(payload: LifecycleEmailRequest) {
+  let html = renderLayout(payload.role, payload.headline, payload.bodyHtml, payload.ctaUrl, payload.ctaLabel);
+  if (payload.unsubscribeUrl) {
+    const unsub = `<div style="text-align:center;padding:8px 40px 20px;font-size:11px;color:#94a3b8;">Don't want these reminders? <a href="${payload.unsubscribeUrl}" style="color:#94a3b8;text-decoration:underline;">Unsubscribe</a></div>`;
+    html = html.replace("</body>", unsub + "</body>");
+  }
+  return resend.emails.send({
+    from: FROM_ADDRESS,
+    to: [payload.to],
+    subject: payload.subject,
+    html,
+    headers: payload.unsubscribeUrl ? { "List-Unsubscribe": `<${payload.unsubscribeUrl}>`, "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" } : undefined,
+  });
+}
 
 /* ─── Student Emails ─── */
 
