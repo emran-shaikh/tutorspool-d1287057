@@ -595,7 +595,6 @@ serve(async (req) => {
       case "lifecycle":             result = await sendLifecycleEmail(payload); break;
       default:
         return new Response(JSON.stringify({ error: "Unsupported email type" }), {
-        return new Response(JSON.stringify({ error: "Unsupported email type" }), {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
