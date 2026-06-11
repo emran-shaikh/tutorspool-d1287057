@@ -3,7 +3,7 @@
 // Also supports POST for RFC 8058 (List-Unsubscribe-Post: List-Unsubscribe=One-Click).
 
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { patchDoc, getDoc } from "../_shared/firestore.ts";
+import { patchDoc, getDoc, createDoc } from "../_shared/firestore.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
