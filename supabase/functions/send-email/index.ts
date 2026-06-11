@@ -147,6 +147,7 @@ interface LifecycleEmailRequest extends BaseEmailRequest {
   ctaUrl?: string;
   ctaLabel?: string;
   unsubscribeUrl?: string;
+  trackingId?: string;
 }
 
 interface BaseEmailRequest { type: EmailType; }
