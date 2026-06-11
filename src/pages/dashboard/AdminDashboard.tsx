@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, UserCheck, Video, TrendingUp, Download, Shield, BookOpen, FileText, Plus, Megaphone, BarChart3, Link2 } from "lucide-react";
+import { Users, UserCheck, Video, TrendingUp, Download, Shield, BookOpen, FileText, Plus, Megaphone, BarChart3, Link2, Mail } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { getAllUsers, getAllTutors, getAllSessions } from "@/lib/firestore";
 import { NotificationCard } from "@/components/admin/NotificationCenter";
