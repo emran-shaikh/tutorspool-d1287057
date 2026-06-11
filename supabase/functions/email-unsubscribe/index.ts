@@ -55,6 +55,17 @@ serve(async (req) => {
       },
     }, ["emailPreferences"]);
 
+    // Analytics: log unsubscribe event (no trackingId — global opt-out)
+    await createDoc("emailEvents", {
+      trackingId: null,
+      userId: uid,
+      role: user.data.role ?? null,
+      kind: "lifecycle",
+      event: "unsubscribe",
+      at: new Date().toISOString(),
+      meta: {},
+    }).catch((e) => console.error("emailEvents unsubscribe log failed", e));
+
     return htmlResponse("<h1>You're unsubscribed ✅</h1><p>You won't receive any more lifecycle reminder emails. Important account emails (sessions, security) will still be sent.</p>");
   } catch (err) {
     console.error("[email-unsubscribe] ERROR", err);
