@@ -259,6 +259,21 @@ export default function AdminDashboard() {
             </Button>
           </CardContent>
         </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Mail className="h-5 w-5 text-primary" />
+              Email Analytics
+            </CardTitle>
+            <CardDescription>Opens, clicks, conversions & unsubscribes per type/role</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Button variant="default" className="w-full justify-start" asChild>
+              <Link to="/admin/email-analytics"><Mail className="h-4 w-4 mr-2" /> View Email Analytics</Link>
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     </DashboardLayout>
   );
