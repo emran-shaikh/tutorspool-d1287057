@@ -348,6 +348,12 @@ service cloud.firestore {
       allow read: if isAdmin();
       allow write: if false; // service account bypasses rules
     }
+
+    // Email Events — opens/clicks/unsubscribes from email-track + email-unsubscribe edge functions
+    match /emailEvents/{eventId} {
+      allow read: if isAdmin();
+      allow write: if false; // service account bypasses rules
+    }
     
     
     // Student Gamification profiles (public read for leaderboard)

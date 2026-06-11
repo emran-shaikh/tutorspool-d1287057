@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, UserCheck, Video, TrendingUp, Download, Shield, BookOpen, FileText, Plus, Megaphone, BarChart3, Link2 } from "lucide-react";
+import { Users, UserCheck, Video, TrendingUp, Download, Shield, BookOpen, FileText, Plus, Megaphone, BarChart3, Link2, Mail } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { getAllUsers, getAllTutors, getAllSessions } from "@/lib/firestore";
 import { NotificationCard } from "@/components/admin/NotificationCenter";
@@ -256,6 +256,21 @@ export default function AdminDashboard() {
           <CardContent className="space-y-3">
             <Button variant="default" className="w-full justify-start" asChild>
               <Link to="/admin/connections"><Link2 className="h-4 w-4 mr-2" /> Manage Connections</Link>
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Mail className="h-5 w-5 text-primary" />
+              Email Analytics
+            </CardTitle>
+            <CardDescription>Opens, clicks, conversions & unsubscribes per type/role</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Button variant="default" className="w-full justify-start" asChild>
+              <Link to="/admin/email-analytics"><Mail className="h-4 w-4 mr-2" /> View Email Analytics</Link>
             </Button>
           </CardContent>
         </Card>

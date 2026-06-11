@@ -3,7 +3,7 @@
 // Also supports POST for RFC 8058 (List-Unsubscribe-Post: List-Unsubscribe=One-Click).
 
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { patchDoc, getDoc } from "../_shared/firestore.ts";
+import { patchDoc, getDoc, createDoc } from "../_shared/firestore.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -54,6 +54,17 @@ serve(async (req) => {
         unsubscribedAt: new Date().toISOString(),
       },
     }, ["emailPreferences"]);
+
+    // Analytics: log unsubscribe event (no trackingId — global opt-out)
+    await createDoc("emailEvents", {
+      trackingId: null,
+      userId: uid,
+      role: user.data.role ?? null,
+      kind: "lifecycle",
+      event: "unsubscribe",
+      at: new Date().toISOString(),
+      meta: {},
+    }).catch((e) => console.error("emailEvents unsubscribe log failed", e));
 
     return htmlResponse("<h1>You're unsubscribed ✅</h1><p>You won't receive any more lifecycle reminder emails. Important account emails (sessions, security) will still be sent.</p>");
   } catch (err) {

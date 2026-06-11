@@ -67,6 +67,7 @@ const VisitorAnalytics = lazy(() => import("./pages/admin/VisitorAnalytics"));
 const ManageConnections = lazy(() => import("./pages/admin/ManageConnections"));
 const MyStudents = lazy(() => import("./pages/tutor/MyStudents"));
 const MyTutors = lazy(() => import("./pages/student/MyTutors"));
+const EmailAnalytics = lazy(() => import("./pages/admin/EmailAnalytics"));
 
 const RouteFallback = () => (
   <div className="min-h-screen flex items-center justify-center">
@@ -182,6 +183,7 @@ const App = () => (
                 <Route path="/admin/analytics" element={<ProtectedRoute allowedRoles={['admin']}><VisitorAnalytics /></ProtectedRoute>} />
                 <Route path="/admin/users/student/:uid" element={<ProtectedRoute allowedRoles={['admin']}><AdminEditStudent /></ProtectedRoute>} />
                 <Route path="/admin/connections" element={<ProtectedRoute allowedRoles={['admin']}><ManageConnections /></ProtectedRoute>} />
+                <Route path="/admin/email-analytics" element={<ProtectedRoute allowedRoles={['admin']}><EmailAnalytics /></ProtectedRoute>} />
 
                 {/* Parent Routes */}
                 <Route path="/parent/dashboard" element={<ProtectedRoute allowedRoles={['parent']}><ParentDashboard /></ProtectedRoute>} />

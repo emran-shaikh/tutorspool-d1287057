@@ -85,6 +85,11 @@ async function sendLifecycle(opts: {
   ctaUrl: string; ctaLabel: string;
 }): Promise<void> {
   const unsub = await unsubUrl(opts.userId);
+  // Create emailLog FIRST so we have an id to use as trackingId for open/click events.
+  const trackingId = await createDoc("emailLog", {
+    userId: opts.userId, role: opts.role, kind: opts.kind,
+    sentAt: new Date().toISOString(), status: "pending",
+  });
   const res = await fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
     method: "POST",
     headers: {
@@ -95,10 +100,15 @@ async function sendLifecycle(opts: {
       type: "lifecycle", to: opts.to, role: opts.role,
       subject: opts.subject, headline: opts.headline, bodyHtml: opts.bodyHtml,
       ctaUrl: opts.ctaUrl, ctaLabel: opts.ctaLabel, unsubscribeUrl: unsub,
+      trackingId,
     }),
   });
   if (!res.ok) throw new Error(`send-email failed: ${await res.text()}`);
-  await createDoc("emailLog", { userId: opts.userId, kind: opts.kind, sentAt: new Date().toISOString(), status: "sent" });
+  // Mark log as sent + record a 'sent' event for analytics rollups.
+  await createDoc("emailEvents", {
+    trackingId, userId: opts.userId, role: opts.role, kind: opts.kind,
+    event: "sent", at: new Date().toISOString(), meta: { to: opts.to },
+  }).catch((e) => console.error("emailEvents sent log failed", e));
 }
 
 // ── Rules ───────────────────────────────────────────────────────────────

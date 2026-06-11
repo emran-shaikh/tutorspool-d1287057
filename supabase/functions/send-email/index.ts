@@ -147,6 +147,7 @@ interface LifecycleEmailRequest extends BaseEmailRequest {
   ctaUrl?: string;
   ctaLabel?: string;
   unsubscribeUrl?: string;
+  trackingId?: string;
 }
 
 interface BaseEmailRequest { type: EmailType; }
@@ -179,8 +180,22 @@ type EmailRequest =
   | ParentQuizCompletedEmailRequest | ParentSessionBookedEmailRequest | ParentSessionStatusEmailRequest | ParentMilestoneEmailRequest
   | LifecycleEmailRequest;
 
+const TRACK_BASE = `${Deno.env.get("SUPABASE_URL") ?? ""}/functions/v1/email-track`;
+
 async function sendLifecycleEmail(payload: LifecycleEmailRequest) {
-  let html = renderLayout(payload.role, payload.headline, payload.bodyHtml, payload.ctaUrl, payload.ctaLabel);
+  // Wrap CTA url with click-tracking redirect
+  let ctaUrl = payload.ctaUrl;
+  if (ctaUrl && payload.trackingId) {
+    ctaUrl = `${TRACK_BASE}?e=${payload.trackingId}&t=click&u=${encodeURIComponent(ctaUrl)}`;
+  }
+  let html = renderLayout(payload.role, payload.headline, payload.bodyHtml, ctaUrl, payload.ctaLabel);
+
+  // Inject open-tracking pixel
+  if (payload.trackingId) {
+    const pixel = `<img src="${TRACK_BASE}?e=${payload.trackingId}&t=open" width="1" height="1" alt="" style="display:block;border:0;width:1px;height:1px;" />`;
+    html = html.replace("</body>", pixel + "</body>");
+  }
+
   if (payload.unsubscribeUrl) {
     const unsub = `<div style="text-align:center;padding:8px 40px 20px;font-size:11px;color:#94a3b8;">Don't want these reminders? <a href="${payload.unsubscribeUrl}" style="color:#94a3b8;text-decoration:underline;">Unsubscribe</a></div>`;
     html = html.replace("</body>", unsub + "</body>");
