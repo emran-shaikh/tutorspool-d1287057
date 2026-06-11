@@ -27,3 +27,7 @@ verify_jwt = false
 [functions.email-unsubscribe]
 verify_jwt = false
 
+[functions.email-track]
+verify_jwt = false
+
+
