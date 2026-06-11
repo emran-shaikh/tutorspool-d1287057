@@ -161,7 +161,7 @@ export async function getDoc(path: string): Promise<FsDoc | null> {
   return { id: json.name.split("/").pop(), data: fromFields(json.fields ?? {}) };
 }
 
-export async function createDoc(collection: string, data: Record<string, any>): Promise<void> {
+export async function createDoc(collection: string, data: Record<string, any>): Promise<string> {
   const token = await getAccessToken();
   const pid = projectId();
   const res = await fetch(`${FS_BASE(pid)}/${collection}`, {
@@ -170,6 +170,8 @@ export async function createDoc(collection: string, data: Record<string, any>): 
     body: JSON.stringify({ fields: toFields(data) }),
   });
   if (!res.ok) throw new Error(`createDoc ${collection}: ${res.status} ${await res.text()}`);
+  const json = await res.json();
+  return (json.name as string).split("/").pop()!;
 }
 
 export async function patchDoc(path: string, data: Record<string, any>, updateMask?: string[]): Promise<void> {
