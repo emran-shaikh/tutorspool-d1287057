@@ -234,7 +234,7 @@ export default function EmailAnalytics() {
                     const ctor = r.uniqueOpens.size ? Math.round((r.uniqueClicks.size / r.uniqueOpens.size) * 100) : 0;
                     return (
                       <TableRow key={r.key}>
-                        <TableCell className="font-medium">{r.kind}</TableCell>
+                        <TableCell className="font-medium">{labelFor(r.kind)}</TableCell>
                         <TableCell className="capitalize">{r.role}</TableCell>
                         <TableCell className="text-right">{r.sent}</TableCell>
                         <TableCell className="text-right">{r.uniqueOpens.size}</TableCell>
