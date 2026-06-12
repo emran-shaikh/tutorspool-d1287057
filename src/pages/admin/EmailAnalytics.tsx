@@ -21,8 +21,16 @@ interface EmailEvent {
   at: string;
 }
 
+interface SentLog {
+  id: string;          // doc id == trackingId
+  userId: string | null;
+  role: Role;
+  kind: string | null;
+  sentAt: string;
+}
+
 interface RowAgg {
-  key: string;        // `${kind}__${role}`
+  key: string;
   kind: string;
   role: string;
   sent: number;
@@ -35,6 +43,7 @@ interface RowAgg {
 
 export default function EmailAnalytics() {
   const [events, setEvents] = useState<EmailEvent[]>([]);
+  const [sentLogs, setSentLogs] = useState<SentLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,9 +51,13 @@ export default function EmailAnalytics() {
     setLoading(true);
     setError(null);
     try {
-      const q = query(collection(db, "emailEvents"), orderBy("at", "desc"), limit(2000));
-      const snap = await getDocs(q);
-      const list: EmailEvent[] = snap.docs.map((d) => {
+      // Pull both collections in parallel. emailLog is the source of truth for "sent".
+      const [evSnap, logSnap] = await Promise.all([
+        getDocs(query(collection(db, "emailEvents"), orderBy("at", "desc"), limit(3000))),
+        getDocs(query(collection(db, "emailLog"), orderBy("sentAt", "desc"), limit(3000))),
+      ]);
+
+      setEvents(evSnap.docs.map((d) => {
         const x = d.data() as Partial<EmailEvent>;
         return {
           id: d.id,
@@ -55,11 +68,21 @@ export default function EmailAnalytics() {
           event: (x.event as EventType) ?? "sent",
           at: (x.at as string) ?? "",
         };
-      });
-      setEvents(list);
+      }));
+
+      setSentLogs(logSnap.docs.map((d) => {
+        const x = d.data() as Partial<SentLog>;
+        return {
+          id: d.id,
+          userId: (x.userId as string) ?? null,
+          role: (x.role as Role) ?? null,
+          kind: (x.kind as string) ?? null,
+          sentAt: (x.sentAt as string) ?? "",
+        };
+      }));
     } catch (err: any) {
       console.error("[EmailAnalytics] load failed", err);
-      setError(err?.message || "Failed to load analytics. Make sure Firestore rules allow admin reads on emailEvents.");
+      setError(err?.message || "Failed to load analytics. Make sure Firestore rules allow admin reads on emailEvents and emailLog.");
     } finally {
       setLoading(false);
     }
@@ -68,38 +91,48 @@ export default function EmailAnalytics() {
   useEffect(() => { load(); }, []);
 
   const totals = useMemo(() => {
-    let sent = 0, opens = 0, clicks = 0, unsubs = 0;
+    const sent = sentLogs.length;
+    let opens = 0, clicks = 0, unsubs = 0;
     const uOpen = new Set<string>(), uClick = new Set<string>();
     for (const e of events) {
-      if (e.event === "sent") sent++;
-      else if (e.event === "open") { opens++; if (e.trackingId) uOpen.add(e.trackingId); }
+      if (e.event === "open") { opens++; if (e.trackingId) uOpen.add(e.trackingId); }
       else if (e.event === "click") { clicks++; if (e.trackingId) uClick.add(e.trackingId); }
       else if (e.event === "unsubscribe") unsubs++;
     }
     const openRate = sent ? Math.round((uOpen.size / sent) * 100) : 0;
     const clickRate = sent ? Math.round((uClick.size / sent) * 100) : 0;
-    const ctor = uOpen.size ? Math.round((uClick.size / uOpen.size) * 100) : 0;
-    return { sent, opens, clicks, unsubs, uniqueOpens: uOpen.size, uniqueClicks: uClick.size, openRate, clickRate, ctor };
-  }, [events]);
+    return { sent, opens, clicks, unsubs, uniqueOpens: uOpen.size, uniqueClicks: uClick.size, openRate, clickRate };
+  }, [events, sentLogs]);
 
   const rows = useMemo<RowAgg[]>(() => {
     const map = new Map<string, RowAgg>();
-    for (const e of events) {
-      const kind = e.kind || "(unknown)";
-      const role = e.role || "(none)";
-      const key = `${kind}__${role}`;
+    const keyOf = (kind: string | null, role: Role) => `${kind || "(unknown)"}__${role || "(none)"}`;
+    const ensure = (kind: string | null, role: Role): RowAgg => {
+      const key = keyOf(kind, role);
       let r = map.get(key);
       if (!r) {
-        r = { key, kind, role, sent: 0, opens: 0, clicks: 0, unsubs: 0, uniqueOpens: new Set(), uniqueClicks: new Set() };
+        r = { key, kind: kind || "(unknown)", role: role || "(none)", sent: 0, opens: 0, clicks: 0, unsubs: 0, uniqueOpens: new Set(), uniqueClicks: new Set() };
         map.set(key, r);
       }
-      if (e.event === "sent") r.sent++;
-      else if (e.event === "open") { r.opens++; if (e.trackingId) r.uniqueOpens.add(e.trackingId); }
+      return r;
+    };
+    for (const s of sentLogs) ensure(s.kind, s.role).sent++;
+    for (const e of events) {
+      const r = ensure(e.kind, e.role);
+      if (e.event === "open") { r.opens++; if (e.trackingId) r.uniqueOpens.add(e.trackingId); }
       else if (e.event === "click") { r.clicks++; if (e.trackingId) r.uniqueClicks.add(e.trackingId); }
       else if (e.event === "unsubscribe") r.unsubs++;
     }
     return Array.from(map.values()).sort((a, b) => b.sent - a.sent);
-  }, [events]);
+  }, [events, sentLogs]);
+
+  const recent = useMemo(() => {
+    const merged: { id: string; event: string; kind: string | null; role: Role; at: string }[] = [
+      ...sentLogs.map((s) => ({ id: `s_${s.id}`, event: "sent", kind: s.kind, role: s.role, at: s.sentAt })),
+      ...events.map((e) => ({ id: e.id, event: e.event, kind: e.kind, role: e.role, at: e.at })),
+    ];
+    return merged.sort((a, b) => (b.at || "").localeCompare(a.at || "")).slice(0, 25);
+  }, [events, sentLogs]);
 
   const stats = [
     { label: "Emails Sent", value: totals.sent, icon: Mail, color: "text-primary" },
@@ -154,14 +187,14 @@ export default function EmailAnalytics() {
             Per Email Type × Role
           </CardTitle>
           <CardDescription>
-            Open rate = unique opens / sent. Click rate = unique clicks / sent. CTOR = clicks ÷ opens (conversion proxy).
+            Sent comes from emailLog (every send creates one). Opens/clicks/unsubs are tracked via the pixel & redirect.
           </CardDescription>
         </CardHeader>
         <CardContent>
           {loading ? (
             <div className="py-8 text-center"><div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto" /></div>
           ) : rows.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-6">No email events yet. Lifecycle emails will appear here once sent.</p>
+            <p className="text-sm text-muted-foreground text-center py-6">No emails sent yet.</p>
           ) : (
             <div className="overflow-x-auto">
               <Table>
@@ -207,11 +240,14 @@ export default function EmailAnalytics() {
       <Card>
         <CardHeader>
           <CardTitle>Recent Events</CardTitle>
-          <CardDescription>Last 25 tracked events</CardDescription>
+          <CardDescription>Last 25 sends & tracked events</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-1.5 max-h-96 overflow-y-auto">
-            {events.slice(0, 25).map((e) => (
+            {recent.length === 0 && (
+              <p className="text-sm text-muted-foreground text-center py-4">No activity yet.</p>
+            )}
+            {recent.map((e) => (
               <div key={e.id} className="flex items-center justify-between text-sm px-3 py-2 rounded-lg bg-muted/30">
                 <span className="flex items-center gap-2">
                   <span className={`px-2 py-0.5 rounded text-xs font-medium ${
