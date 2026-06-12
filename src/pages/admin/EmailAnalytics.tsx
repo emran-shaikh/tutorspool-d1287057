@@ -272,7 +272,7 @@ export default function EmailAnalytics() {
                     e.event === "unsubscribe" ? "bg-destructive/10 text-destructive" :
                     "bg-primary/10 text-primary"
                   }`}>{e.event}</span>
-                  <span className="font-medium">{e.kind}</span>
+                  <span className="font-medium">{labelFor(e.kind || "")}</span>
                   <span className="text-muted-foreground text-xs capitalize">{e.role}</span>
                 </span>
                 <span className="text-muted-foreground text-xs">{e.at ? new Date(e.at).toLocaleString() : ""}</span>
