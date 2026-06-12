@@ -41,6 +41,22 @@ interface RowAgg {
   uniqueClicks: Set<string>;
 }
 
+const KIND_LABELS: Record<string, string> = {
+  tutor_profile_incomplete: "Tutor – Complete your profile",
+  tutor_no_availability: "Tutor – Add availability",
+  tutor_inactive: "Tutor – We miss you",
+  tutor_assign_nudge: "Tutor – Assign work to student",
+  student_profile_incomplete: "Student – Complete your profile",
+  student_browse_nudge: "Student – Browse tutors",
+  student_book_nudge: "Student – Book your first session",
+  student_quiz_pending: "Student – Quiz reminder",
+  student_streak_save: "Student – Save your streak",
+  student_inactive: "Student – We miss you",
+  parent_view_progress: "Parent – View child progress",
+  parent_weekly_digest: "Parent – Weekly digest",
+};
+const labelFor = (k: string) => KIND_LABELS[k] || k.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+
 export default function EmailAnalytics() {
   const [events, setEvents] = useState<EmailEvent[]>([]);
   const [sentLogs, setSentLogs] = useState<SentLog[]>([]);
