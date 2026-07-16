@@ -26,7 +26,7 @@ export default function FindTutors() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [subjectFilter, setSubjectFilter] = useState("All Subjects");
-  const [selectedTutor, setSelectedTutor] = useState<TutorWithRating | null>(null);
+  
 
   useEffect(() => {
     fetchTutorsWithRatings();
