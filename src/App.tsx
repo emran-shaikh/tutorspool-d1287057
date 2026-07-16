@@ -17,6 +17,7 @@ const Login = lazy(() => import("./pages/Login"));
 const Register = lazy(() => import("./pages/Register"));
 const Subjects = lazy(() => import("./pages/Subjects"));
 const FindTutors = lazy(() => import("./pages/FindTutors"));
+const TutorProfilePage = lazy(() => import("./pages/TutorProfilePage"));
 const Reviews = lazy(() => import("./pages/Reviews"));
 const About = lazy(() => import("./pages/About"));
 const Contact = lazy(() => import("./pages/Contact"));
@@ -131,6 +132,7 @@ const App = () => (
                 <Route path="/" element={<Index />} />
                 <Route path="/subjects" element={<Subjects />} />
                 <Route path="/tutors" element={<FindTutors />} />
+                <Route path="/tutors/:uid" element={<TutorProfilePage />} />
                 <Route path="/reviews" element={<Reviews />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/contact" element={<Contact />} />

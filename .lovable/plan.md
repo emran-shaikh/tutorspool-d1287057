@@ -1,96 +1,55 @@
+# Tutor Profile Detail Page
 
-# Lifecycle & Engagement Email Automation
+Replace the "View Profile" popup on `FindTutors` with a real routed page styled like the attached reference design, using only fields we already have in Firestore. Sections with no available data are omitted (no invented values).
 
-Goal: gently keep Students, Tutors, and Parents engaged by emailing only the users who need a nudge for their *next concrete step* — never blast everyone. Frequency capped so it feels helpful, not spammy.
+## New page
 
-## Targeting Rules (who gets what)
+Create `src/pages/TutorProfilePage.tsx` at route `/tutors/:uid` (public), registered in `src/App.tsx`.
 
-### Tutors
-| Trigger | Condition | Email | Cadence |
-|---|---|---|---|
-| Profile incomplete | Missing photo / subjects / bio / availability / hourly rate | "Finish your tutor profile to start receiving students" | Day 1, Day 3, Day 7, then every 7 days (max 4 total) |
-| Approved but no availability set | `isApproved=true` & no availability slots | "Add availability so students can book you" | Day 1, Day 4 (max 2) |
-| No sessions in 14 days | Active tutor, last session > 14d | "Your students miss you — log back in" | Once per 14d window |
-| New assignment opportunity | Student connected but tutor hasn't assigned anything in 7d | "Assign a task or quiz to {studentName}" | Weekly |
+Data source: `getTutorProfile(uid)` + `getAllReviews()` filtered by `tutorId` (same pattern as `FindTutors`).
 
-### Students
-| Trigger | Condition | Email | Cadence |
-|---|---|---|---|
-| Profile incomplete | Missing grade / subjects of interest | "Complete your profile to get matched" | Day 1, Day 3, Day 7 (max 3) |
-| Registered but no tutor browsed | No `FindTutors` visit & no booking in 3d | "Browse tutors for your subjects" | Day 3, Day 7 (max 2) |
-| No session booked | Profile complete, no booking in 7d | "Book your first session — 50% off demo" | Day 7, Day 14 (max 2) |
-| Quiz assigned, not attempted | `quizAssignments.status=pending` > 2d | "Your tutor assigned you a quiz" | Day 2, Day 5 |
-| Streak about to break | Streak ≥ 3, no activity today (evening) | "Don't break your {n}-day streak!" | Daily at 7 PM |
-| Inactive 14d | No login 14d | "Pick up where you left off" | Once per 14d |
+## Layout (mirrors the reference)
 
-### Parents
-| Trigger | Condition | Email | Cadence |
-|---|---|---|---|
-| Linked but no child progress viewed | `parentLinks` exists, no `ChildProgress` visit in 7d | "See your child's weekly progress" | Weekly digest (Sun) |
-| Weekly digest | Active link | Auto-summary of child's sessions/quizzes | Weekly (Sun 6 PM) |
+Two-column layout on desktop, single column on mobile.
 
-## Universal Rules
+**Top hero banner** (soft orange gradient, matches design):
+- Back to Tutors link (→ `/find-tutors`)
+- Large circular avatar (`photoURL` or initials fallback) with online dot only if we track presence — we don't, so omit dot
+- Name + verified check (show check only if `isApproved`)
+- `degreeLevel` line with grad cap icon (only if present)
+- "New Tutor" pill if `reviewCount === 0`
+- Member since `createdAt` (formatted "Month YYYY")
+- Three stat cards: Students, Sessions, Rating — we only have Rating (`avgRating` + `reviewCount`). Students/Sessions are NOT in our data, so we render just the Rating stat card (single card, or a compact row) — no fabricated numbers.
+- Right-side sticky booking card: `$hourlyRate/hr`, "Session Rate", **Book a Session** button (routes to `/student/book/:uid` for students, `/login` otherwise — same `BookButton` logic as FindTutors). Omit "Send Message" and "Save Tutor" (no backing feature).
 
-- **Suppression**: don't email if user emailed in last 48h (any lifecycle category), or if user opted out.
-- **Unsubscribe**: each lifecycle email has a one-click unsubscribe → writes `emailPreferences.lifecycle=false` in user doc.
-- **Hard cap**: max 2 lifecycle emails per user per week.
-- **Verified email only**: skip unverified accounts.
-- **Quiet hours**: send 9 AM – 8 PM in user's timezone (fallback Asia/Karachi).
+**Left column:**
+- **About Me** — `bio` (only if present)
+- **Subjects I Teach** — badges from `subjects[]`
+- **Qualification** — `qualifications` (only if present)
+- **Teaching Experience** — `experience` (only if present)
+- **Teaching Style** — `teachingStyle` (only if present)
 
-## Technical Design
+**Right column:**
+- **Student Reviews** — list from reviews filtered by `tutorId`; show avg rating, count, and each review's rating + text + reviewer name (fields already used elsewhere). Hidden entirely if no reviews.
+- **Report Tutor** — omit (no backing feature).
 
-### New Firestore collections
-- `emailLog/{id}`: `{userId, type, sentAt, status}` — used for cadence/suppression checks.
-- `emailPreferences` field on `users` doc: `{lifecycle: boolean, digest: boolean, unsubscribedAt?}`.
+Availability, Speaks, Gender, Timezone, Achievements, "Ready to achieve..." CTA card — all omitted because we have no data for them.
 
-### New Edge Function: `lifecycle-emails`
-- Runs on a schedule (pg_cron, hourly).
-- For each rule above:
-  1. Query Firestore for matching users (via Firebase Admin SDK using existing service patterns, or via a small Firestore REST call with service account).
-  2. Check `emailLog` for cadence + 48h suppression + weekly cap.
-  3. Check `emailPreferences.lifecycle !== false`.
-  4. Call existing `send-email` function with the right template `type`.
-  5. Write `emailLog` entry.
+## Wire up entry point
 
-### New email templates (added to `send-email/index.ts`)
-- `tutor_profile_incomplete`
-- `tutor_no_availability`
-- `tutor_inactive`
-- `tutor_assign_nudge`
-- `student_profile_incomplete`
-- `student_browse_nudge`
-- `student_book_nudge`
-- `student_quiz_pending`
-- `student_streak_save`
-- `student_inactive`
-- `parent_view_progress`
-- `parent_weekly_digest`
+In `src/pages/FindTutors.tsx`:
+- Remove the `<Dialog>` block wrapping the "View Profile" button
+- Replace with `<Link to={`/tutors/${tutor.uid}`}>` wrapping the same styled "View Profile" button
+- Drop unused `Dialog*` imports and `selectedTutor` state
 
-All templates keep existing role-themed styling (Blue=Student, Emerald=Tutor, Purple=Admin/Parent) and include the standard footer + unsubscribe link.
+## Styling
 
-### Unsubscribe endpoint
-- New Edge Function `email-unsubscribe?uid=...&token=...` → toggles `emailPreferences.lifecycle=false`. Token is HMAC of uid + secret.
+Use existing design tokens (primary orange, card, muted) and shadcn components (`Card`, `Badge`, `Button`, `Avatar`). Soft orange gradient hero via `bg-gradient-to-br from-primary/10 via-orange-100/40 to-transparent` to match the reference's warm banner. Sticky booking card on `lg:` with `lg:sticky lg:top-24`.
 
-### Cron schedule (pg_cron + pg_net)
-- `lifecycle-emails` hourly (handles all triggers; each trigger checks its own time-of-day rules).
-- `parent-weekly-digest` Sundays 18:00 Asia/Karachi.
-- `student-streak-save` daily 19:00 Asia/Karachi.
+## Files
 
-### Admin controls (optional Phase 2)
-- Page `src/pages/admin/EmailCampaigns.tsx`: toggle each rule on/off, view send counts, see `emailLog` last 7 days.
+- Create: `src/pages/TutorProfilePage.tsx`
+- Edit: `src/App.tsx` (add route)
+- Edit: `src/pages/FindTutors.tsx` (dialog → link)
 
-## Rollout Plan
-
-1. Add `emailPreferences` field + unsubscribe edge function + token signing secret.
-2. Extend `send-email` with 12 new templates (reuse existing themed layout).
-3. Build `lifecycle-emails` edge function with all rule evaluators (modular: one function per rule).
-4. Add `emailLog` collection + Firestore rules (admin-only read; service write).
-5. Wire pg_cron schedules (hourly + 2 dailies).
-6. (Phase 2) Admin dashboard page + per-rule toggles.
-
-## Out of Scope (for now)
-- A/B testing copy
-- SMS/WhatsApp nudges (already covered by chatbot escalation)
-- Re-engagement of fully-churned users (>60d) — needs separate win-back campaign
-
-Approve and I'll implement in the order above.
+No backend, no schema, no new fields.
