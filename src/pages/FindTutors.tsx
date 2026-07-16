@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+
 import { Search, Star, Clock, DollarSign, GraduationCap, Users, Filter, ChevronRight, Award, ArrowRight, MapPin, Sparkles } from "lucide-react";
 import { getTutors, TutorProfile, getAllReviews, Review } from "@/lib/firestore";
 import { useAuth } from "@/contexts/AuthContext";
