@@ -291,90 +291,14 @@ export default function FindTutors() {
 
                       {/* Action buttons */}
                       <div className="flex gap-2.5">
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button
-                              variant="outline"
-                              className="flex-1 rounded-xl border-border/60 hover:border-primary/40 hover:bg-primary/5 transition-colors"
-                              onClick={() => setSelectedTutor(tutor)}
-                            >
-                              View Profile
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-                            <DialogHeader>
-                              <div className="flex flex-col items-center text-center">
-                                <Avatar className="h-28 w-28 mb-4 ring-4 ring-primary/10 shadow-xl">
-                                  <AvatarImage src={tutor.photoURL} alt={tutor.fullName} className="object-cover" />
-                                  <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/10 text-primary text-3xl font-semibold">
-                                    {getInitials(tutor.fullName)}
-                                  </AvatarFallback>
-                                </Avatar>
-                                <DialogTitle className="text-2xl font-display">{tutor.fullName}</DialogTitle>
-                                <DialogDescription className="flex items-center gap-2 mt-2">
-                                  {tutor.reviewCount > 0 ? (
-                                    <span className="flex items-center gap-1.5">
-                                      <div className="flex gap-0.5">{renderStars(tutor.avgRating)}</div>
-                                      <span className="font-medium text-foreground">{tutor.avgRating.toFixed(1)}</span>
-                                      <span>({tutor.reviewCount} {tutor.reviewCount === 1 ? 'review' : 'reviews'})</span>
-                                    </span>
-                                  ) : (
-                                    <span>New tutor</span>
-                                  )}
-                                </DialogDescription>
-                                {tutor.degreeLevel && (
-                                  <Badge variant="outline" className="mt-3 border-primary/20">
-                                    <GraduationCap className="h-3 w-3 mr-1" />
-                                    {tutor.degreeLevel}
-                                  </Badge>
-                                )}
-                              </div>
-                            </DialogHeader>
-                            <div className="space-y-5 py-4">
-                              {tutor.qualifications && (
-                                <div className="p-3.5 rounded-xl bg-primary/5 border border-primary/10">
-                                  <p className="text-sm font-medium flex items-center gap-2">
-                                    <Award className="h-4 w-4 text-primary shrink-0" />
-                                    {tutor.qualifications}
-                                  </p>
-                                </div>
-                              )}
-                              <div>
-                                <h4 className="font-semibold mb-2.5 text-sm uppercase tracking-wider text-muted-foreground">Subjects</h4>
-                                <div className="flex flex-wrap gap-2">
-                                  {tutor.subjects.map((subject) => (
-                                    <Badge key={subject} variant="secondary" className="px-3 py-1">{subject}</Badge>
-                                  ))}
-                                </div>
-                              </div>
-                              <div>
-                                <h4 className="font-semibold mb-2.5 text-sm uppercase tracking-wider text-muted-foreground">About</h4>
-                                <p className="text-sm text-muted-foreground leading-relaxed">
-                                  {tutor.bio || "Passionate educator with years of experience helping students achieve their goals."}
-                                </p>
-                              </div>
-                              {tutor.teachingStyle && (
-                                <div>
-                                  <h4 className="font-semibold mb-2.5 text-sm uppercase tracking-wider text-muted-foreground">Teaching Style</h4>
-                                  <p className="text-sm text-muted-foreground leading-relaxed">{tutor.teachingStyle}</p>
-                                </div>
-                              )}
-                              <div className="grid grid-cols-2 gap-3">
-                                <div className="p-4 rounded-xl bg-muted/50 text-center">
-                                  <Clock className="h-4 w-4 mx-auto mb-1.5 text-muted-foreground" />
-                                  <p className="text-xs text-muted-foreground">Experience</p>
-                                  <p className="font-semibold mt-0.5">{tutor.experience || "2+ years"}</p>
-                                </div>
-                                <div className="p-4 rounded-xl bg-primary/5 text-center border border-primary/10">
-                                  <DollarSign className="h-4 w-4 mx-auto mb-1.5 text-primary" />
-                                  <p className="text-xs text-muted-foreground">Hourly Rate</p>
-                                  <p className="font-bold text-primary mt-0.5">${tutor.hourlyRate || 30}/hr</p>
-                                </div>
-                              </div>
-                              <BookButton tutorId={tutor.uid} size="lg" className="w-full" />
-                            </div>
-                          </DialogContent>
-                        </Dialog>
+                        <Link to={`/tutors/${tutor.uid}`} className="flex-1">
+                          <Button
+                            variant="outline"
+                            className="w-full rounded-xl border-border/60 hover:border-primary/40 hover:bg-primary/5 transition-colors"
+                          >
+                            View Profile
+                          </Button>
+                        </Link>
 
                         <BookButton tutorId={tutor.uid} className="flex-1" />
                       </div>
