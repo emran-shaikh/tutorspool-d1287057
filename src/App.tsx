@@ -17,6 +17,7 @@ const Login = lazy(() => import("./pages/Login"));
 const Register = lazy(() => import("./pages/Register"));
 const Subjects = lazy(() => import("./pages/Subjects"));
 const FindTutors = lazy(() => import("./pages/FindTutors"));
+const TutorProfilePage = lazy(() => import("./pages/TutorProfilePage"));
 const Reviews = lazy(() => import("./pages/Reviews"));
 const About = lazy(() => import("./pages/About"));
 const Contact = lazy(() => import("./pages/Contact"));
