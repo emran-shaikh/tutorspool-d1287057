@@ -17,6 +17,8 @@ import {
   Sparkles,
   User,
   ChevronRight,
+  AlertTriangle,
+  ArrowRight,
 } from "lucide-react";
 import { getTutorProfile, getAllReviews, TutorProfile, Review } from "@/lib/firestore";
 import { useAuth } from "@/contexts/AuthContext";
