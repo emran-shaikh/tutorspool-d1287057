@@ -153,7 +153,7 @@ export function FeaturedTutors() {
                 </div>
 
                 {/* CTA */}
-                <Link to="/tutors" className="w-full">
+                <Link to={`/tutors/${tutor.uid}`} className="w-full">
                   <Button
                     variant="outline"
                     className="w-full group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary transition-all duration-300"
