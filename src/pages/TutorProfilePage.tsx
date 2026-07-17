@@ -255,6 +255,26 @@ export default function TutorProfilePage() {
                     </CardContent>
                   </Card>
                 )}
+
+                {/* CTA banner */}
+                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary/15 via-orange-100/60 to-primary/5 border border-primary/15 p-5 sm:p-6">
+                  <div className="flex items-center justify-between gap-4 flex-wrap">
+                    <div className="min-w-0">
+                      <h3 className="font-display text-xl font-bold">Ready to achieve your academic goals?</h3>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Book a session with {tutor.fullName} now and start learning!
+                      </p>
+                      <Link to={bookHref} className="inline-block mt-4">
+                        <Button className="shadow-lg shadow-primary/20">
+                          Book a Session Now <ArrowRight className="h-4 w-4 ml-1" />
+                        </Button>
+                      </Link>
+                    </div>
+                    <div className="hidden sm:flex h-20 w-20 rounded-2xl bg-primary/10 items-center justify-center shrink-0">
+                      <GraduationCap className="h-10 w-10 text-primary" />
+                    </div>
+                  </div>
+                </div>
               </div>
 
               {/* Right column */}
