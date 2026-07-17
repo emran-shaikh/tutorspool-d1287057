@@ -321,6 +321,24 @@ export default function TutorProfilePage() {
                     </CardContent>
                   </Card>
                 )}
+
+                <Card className="border-destructive/20">
+                  <CardContent className="p-5 sm:p-6">
+                    <h2 className="flex items-center gap-2 font-display text-lg font-bold mb-2">
+                      <AlertTriangle className="h-5 w-5 text-primary" /> Report Tutor
+                    </h2>
+                    <p className="text-sm font-medium">Found something inappropriate?</p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Report this tutor to our support team.
+                    </p>
+                    <Link
+                      to="/contact"
+                      className="inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline mt-3"
+                    >
+                      Report Now <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  </CardContent>
+                </Card>
               </div>
             </div>
           </div>
