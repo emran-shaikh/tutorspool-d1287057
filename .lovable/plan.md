@@ -1,55 +1,93 @@
-# Tutor Profile Detail Page
 
-Replace the "View Profile" popup on `FindTutors` with a real routed page styled like the attached reference design, using only fields we already have in Firestore. Sections with no available data are omitted (no invented values).
+# Multi-language Support (English, Arabic RTL, Spanish)
 
-## New page
+## Goal
+Make TutorsPool accessible globally with a language switcher (replacing the "Global" navbar button), auto-detection on first visit, and AI-translated dynamic content (tutor bios, blog posts).
 
-Create `src/pages/TutorProfilePage.tsx` at route `/tutors/:uid` (public), registered in `src/App.tsx`.
+## 1. Setup — i18n framework
+- Install `react-i18next`, `i18next`, `i18next-browser-languagedetector`.
+- Create `src/i18n/index.ts` — initialize with EN/AR/ES, fallback EN, detector (localStorage → navigator), cache in `localStorage['tp_lang']`.
+- Wrap `App.tsx` root with i18n init import.
 
-Data source: `getTutorProfile(uid)` + `getAllReviews()` filtered by `tutorId` (same pattern as `FindTutors`).
+## 2. Translation files
+Create `src/i18n/locales/{en,ar,es}.json` with nested namespaces:
+- `common` (buttons, actions: Sign In, Get Started, Book, Save, Cancel…)
+- `nav` (Subjects, Find Tutors, Reviews, Blog, About, Contact, Become a Tutor)
+- `home` (hero headline/sub, CTA, features, stats labels)
+- `footer` (links, tagline, copyright)
+- `auth` (login/register form labels + validation)
+- `tutor` (profile page section titles: About Me, Subjects I Teach, Qualification, Book a Session…)
+- `student`, `dashboard`, `misc`
 
-## Layout (mirrors the reference)
+Only static UI strings — no user data.
 
-Two-column layout on desktop, single column on mobile.
+## 3. Language switcher (replaces "Global" button)
+- New `src/components/LanguageSwitcher.tsx`: dropdown showing 🇺🇸 English / 🇸🇦 العربية / 🇪🇸 Español.
+- On change: `i18n.changeLanguage(lang)`, persist to localStorage, set `<html lang>` and `<html dir>` (RTL for Arabic).
+- Replace the `Global` button in `Navbar.tsx` (desktop + mobile).
 
-**Top hero banner** (soft orange gradient, matches design):
-- Back to Tutors link (→ `/find-tutors`)
-- Large circular avatar (`photoURL` or initials fallback) with online dot only if we track presence — we don't, so omit dot
-- Name + verified check (show check only if `isApproved`)
-- `degreeLevel` line with grad cap icon (only if present)
-- "New Tutor" pill if `reviewCount === 0`
-- Member since `createdAt` (formatted "Month YYYY")
-- Three stat cards: Students, Sessions, Rating — we only have Rating (`avgRating` + `reviewCount`). Students/Sessions are NOT in our data, so we render just the Rating stat card (single card, or a compact row) — no fabricated numbers.
-- Right-side sticky booking card: `$hourlyRate/hr`, "Session Rate", **Book a Session** button (routes to `/student/book/:uid` for students, `/login` otherwise — same `BookButton` logic as FindTutors). Omit "Send Message" and "Save Tutor" (no backing feature).
+## 4. RTL support for Arabic
+- Add a small effect in `i18n/index.ts` that syncs `document.documentElement.dir` on language change.
+- Tailwind: enable logical-property utilities are already fine; add a tiny `[dir="rtl"]` overrides layer in `index.css` only where visual mirroring is needed (icon spacing in Navbar, hero arrows).
 
-**Left column:**
-- **About Me** — `bio` (only if present)
-- **Subjects I Teach** — badges from `subjects[]`
-- **Qualification** — `qualifications` (only if present)
-- **Teaching Experience** — `experience` (only if present)
-- **Teaching Style** — `teachingStyle` (only if present)
+## 5. Wire translations into pages
+Replace hardcoded English strings with `t('key')` in high-visibility surfaces first:
+- `Navbar.tsx`, `Footer.tsx`
+- `pages/Index.tsx` + home components (Hero, Features, CTA, FeaturedTutors labels)
+- `pages/About.tsx`, `Contact.tsx`, `FAQ.tsx`, `Subjects.tsx`, `Reviews.tsx`, `FindTutors.tsx` filters/labels
+- `TutorProfilePage.tsx` section titles
+- `Login.tsx`, `Register.tsx`
+- Dashboard shells (StudentDashboard, TutorDashboard, ParentDashboard) — nav labels only
 
-**Right column:**
-- **Student Reviews** — list from reviews filtered by `tutorId`; show avg rating, count, and each review's rating + text + reviewer name (fields already used elsewhere). Hidden entirely if no reviews.
-- **Report Tutor** — omit (no backing feature).
+Leave admin pages in English (internal tool) — out of scope.
 
-Availability, Speaks, Gender, Timezone, Achievements, "Ready to achieve..." CTA card — all omitted because we have no data for them.
+## 6. Dynamic content translation (tutor bios + blog posts)
+New Edge Function `supabase/functions/translate-content/index.ts`:
+- Input: `{ text: string, targetLang: 'en'|'ar'|'es', cacheKey?: string }`.
+- Uses Lovable AI Gateway (`google/gemini-2.5-flash` — cheap, fast, multilingual) with a strict "translate only, preserve meaning, keep proper nouns" system prompt.
+- Cache results in a new Firestore collection `translations/{sha256(cacheKey+lang)}` → `{ text, lang, createdAt }` so we translate each bio/post once per language.
+- Return `{ translated }`.
 
-## Wire up entry point
+Client hook `src/hooks/useTranslatedText.ts`:
+- `useTranslatedText(sourceText, cacheKey)` → returns current-language text.
+- If `i18n.language === 'en'` or source empty → returns source directly (no call).
+- Otherwise checks a tiny in-memory + `sessionStorage` cache, else invokes the edge function.
 
-In `src/pages/FindTutors.tsx`:
-- Remove the `<Dialog>` block wrapping the "View Profile" button
-- Replace with `<Link to={`/tutors/${tutor.uid}`}>` wrapping the same styled "View Profile" button
-- Drop unused `Dialog*` imports and `selectedTutor` state
+Apply the hook to:
+- `TutorProfilePage.tsx` → `bio`, `teachingStyle` (cacheKey = `tutor:{uid}:bio`, `tutor:{uid}:style`).
+- `BlogPost.tsx` → `title`, `excerpt`, `content` (cacheKey = `blog:{id}:{field}`).
+- `FindTutors.tsx` cards → tutor bio preview (optional; feature-flag if too many calls).
 
-## Styling
+Fallback: on error, show original text silently.
 
-Use existing design tokens (primary orange, card, muted) and shadcn components (`Card`, `Badge`, `Button`, `Avatar`). Soft orange gradient hero via `bg-gradient-to-br from-primary/10 via-orange-100/40 to-transparent` to match the reference's warm banner. Sticky booking card on `lg:` with `lg:sticky lg:top-24`.
+## 7. Firestore rules
+Add public read + server-only write for `translations` collection to `FIRESTORE_SECURITY_RULES.md` (and remind user to paste).
 
-## Files
+```
+match /translations/{id} {
+  allow read: if true;
+  allow write: if false; // edge function via admin SDK
+}
+```
 
-- Create: `src/pages/TutorProfilePage.tsx`
-- Edit: `src/App.tsx` (add route)
-- Edit: `src/pages/FindTutors.tsx` (dialog → link)
+## 8. SEO
+- Update `<html lang>` dynamically per selected language.
+- Add `hreflang` alternate links to `index.html` (`en`, `ar`, `es`, `x-default`) all pointing at the same URL (SPA — same URL serves all).
+- Keep canonical unchanged.
 
-No backend, no schema, no new fields.
+## 9. Out of scope (call out to user)
+- Per-language URLs (`/es/tutors`) — would require route restructuring.
+- Translating admin dashboard, emails, chatbot responses.
+- Translating user-submitted reviews (kept in original language).
+
+## Technical notes
+- Bundle size: locale JSONs lazy-loaded per language.
+- Cost control: dynamic translation cached in Firestore forever; only first viewer of a given bio/post in a given language triggers a Lovable AI call (~$0.0001 per 1k chars on Gemini Flash).
+- No breaking changes — English users see identical experience since `t('key')` returns EN by default.
+
+## Deliverables
+- Language switcher live in navbar (desktop + mobile).
+- EN/AR/ES for all public marketing pages, auth, and tutor profile chrome.
+- Arabic renders RTL.
+- Tutor bios and blog posts auto-translate to the selected language, cached after first translation.
+- Updated Firestore rules doc.

@@ -1,27 +1,6 @@
 import { Link } from "react-router-dom";
-import { GraduationCap, Facebook, Twitter, Linkedin, Instagram } from "lucide-react";
-
-const footerLinks = {
-  platform: [
-    { label: "Find Tutors", href: "/tutors" },
-    { label: "Become a Tutor", href: "/register?role=tutor" },
-    { label: "Subjects", href: "/subjects" },
-    { label: "Reviews", href: "/reviews" },
-  ],
-  company: [
-    { label: "About Us", href: "/about" },
-    { label: "Contact", href: "/contact" },
-    { label: "Careers", href: "/careers" },
-    { label: "Blog", href: "/blog" },
-  ],
-  support: [
-    { label: "Help Center", href: "/help" },
-    { label: "Terms of Service", href: "/terms" },
-    { label: "Privacy Policy", href: "/privacy" },
-    { label: "Disclaimer", href: "/disclaimer" },
-    { label: "FAQ", href: "/faq" },
-  ],
-};
+import { Facebook, Twitter, Linkedin, Instagram } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const socialLinks = [
   { icon: Facebook, href: "https://www.facebook.com/tutorspoolglobal", label: "Facebook" },
@@ -31,23 +10,41 @@ const socialLinks = [
 ];
 
 export function Footer() {
+  const { t } = useTranslation();
+
+  const footerLinks = {
+    platform: [
+      { label: t("footer.findTutors"), href: "/tutors" },
+      { label: t("footer.becomeTutor"), href: "/register?role=tutor" },
+      { label: t("footer.subjects"), href: "/subjects" },
+      { label: t("footer.reviews"), href: "/reviews" },
+    ],
+    company: [
+      { label: t("footer.about"), href: "/about" },
+      { label: t("footer.contact"), href: "/contact" },
+      { label: t("footer.careers"), href: "/careers" },
+      { label: t("footer.blog"), href: "/blog" },
+    ],
+    support: [
+      { label: t("footer.help"), href: "/help" },
+      { label: t("footer.terms"), href: "/terms" },
+      { label: t("footer.privacy"), href: "/privacy" },
+      { label: t("footer.disclaimer"), href: "/disclaimer" },
+      { label: t("footer.faq"), href: "/faq" },
+    ],
+  };
+
   return (
     <footer className="bg-secondary text-secondary-foreground">
       <div className="container py-12 lg:py-16">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 lg:gap-12">
-          {/* Brand */}
           <div className="col-span-2 md:col-span-1">
             <Link to="/" className="flex items-center gap-2 mb-4">
-            <div className="flex items-center justify-center rounded-lg">
-          <img src="/logo.png" alt="TutorsPool Logo" className="h-12 w-auto" />
-          </div>
-              {/* <span className="font-display text-xl font-bold text-secondary-foreground">
-                TutorsPool
-              </span> */}
+              <div className="flex items-center justify-center rounded-lg">
+                <img src="/logo.png" alt="TutorsPool Logo" className="h-12 w-auto" />
+              </div>
             </Link>
-            <p className="text-secondary-foreground/70 text-sm mb-4">
-              Connect with world-class tutors for personalized 1-on-1 sessions.
-            </p>
+            <p className="text-secondary-foreground/70 text-sm mb-4">{t("footer.tagline")}</p>
             <div className="flex gap-3">
               {socialLinks.map((social) => (
                 <a
@@ -64,16 +61,12 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Platform Links */}
           <div>
-            <h4 className="font-display font-semibold mb-4">Platform</h4>
+            <h4 className="font-display font-semibold mb-4">{t("footer.platform")}</h4>
             <ul className="space-y-2">
               {footerLinks.platform.map((link) => (
                 <li key={link.href}>
-                  <Link
-                    to={link.href}
-                    className="text-secondary-foreground/70 hover:text-primary transition-colors text-sm"
-                  >
+                  <Link to={link.href} className="text-secondary-foreground/70 hover:text-primary transition-colors text-sm">
                     {link.label}
                   </Link>
                 </li>
@@ -81,16 +74,12 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Company Links */}
           <div>
-            <h4 className="font-display font-semibold mb-4">Company</h4>
+            <h4 className="font-display font-semibold mb-4">{t("footer.company")}</h4>
             <ul className="space-y-2">
               {footerLinks.company.map((link) => (
                 <li key={link.href}>
-                  <Link
-                    to={link.href}
-                    className="text-secondary-foreground/70 hover:text-primary transition-colors text-sm"
-                  >
+                  <Link to={link.href} className="text-secondary-foreground/70 hover:text-primary transition-colors text-sm">
                     {link.label}
                   </Link>
                 </li>
@@ -98,16 +87,12 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Support Links */}
           <div>
-            <h4 className="font-display font-semibold mb-4">Support</h4>
+            <h4 className="font-display font-semibold mb-4">{t("footer.support")}</h4>
             <ul className="space-y-2">
               {footerLinks.support.map((link) => (
                 <li key={link.href}>
-                  <Link
-                    to={link.href}
-                    className="text-secondary-foreground/70 hover:text-primary transition-colors text-sm"
-                  >
+                  <Link to={link.href} className="text-secondary-foreground/70 hover:text-primary transition-colors text-sm">
                     {link.label}
                   </Link>
                 </li>
@@ -119,8 +104,8 @@ export function Footer() {
         <hr className="my-8 border-secondary-foreground/10" />
 
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-secondary-foreground/60">
-          <p>© {new Date().getFullYear()} TutorsPool. All rights reserved.</p>
-          <p>Made with ❤️ for learners worldwide</p>
+          <p>© {new Date().getFullYear()} TutorsPool. {t("footer.rights")}</p>
+          <p>{t("footer.madeWith")}</p>
         </div>
       </div>
     </footer>

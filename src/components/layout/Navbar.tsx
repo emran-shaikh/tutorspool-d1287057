@@ -1,22 +1,29 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Users, BookOpen, Star, Mail, Info, GraduationCap, Globe, Menu, X, FileText, User, LogOut, LayoutDashboard } from "lucide-react";
+import { Users, BookOpen, Star, Mail, Info, GraduationCap, Menu, X, FileText, User, LogOut, LayoutDashboard } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/contexts/AuthContext";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
-const navLinks = [
-  { label: "Subjects", href: "/subjects", icon: BookOpen },
-  { label: "Find Tutors", href: "/tutors", icon: Users },
-  { label: "Reviews", href: "/reviews", icon: Star },
-  { label: "Blog", href: "/blog", icon: FileText },
-  { label: "About", href: "/about", icon: Info },
-  { label: "Contact", href: "/contact", icon: Mail },
-  { label: "Become a Tutor", href: "/register?role=tutor", icon: GraduationCap },
-];
+function useNavLinks() {
+  const { t } = useTranslation();
+  return [
+    { label: t("nav.subjects"), href: "/subjects", icon: BookOpen },
+    { label: t("nav.findTutors"), href: "/tutors", icon: Users },
+    { label: t("nav.reviews"), href: "/reviews", icon: Star },
+    { label: t("nav.blog"), href: "/blog", icon: FileText },
+    { label: t("nav.about"), href: "/about", icon: Info },
+    { label: t("nav.contact"), href: "/contact", icon: Mail },
+    { label: t("nav.becomeTutor"), href: "/register?role=tutor", icon: GraduationCap },
+  ];
+}
 
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, userProfile, logout } = useAuth();
+  const { t } = useTranslation();
+  const navLinks = useNavLinks();
   const navigate = useNavigate();
   const isLoggedIn = !!user && !!userProfile;
   const dashboardHref = userProfile ? `/${userProfile.role}/dashboard` : '/';
@@ -55,11 +62,10 @@ export function Navbar() {
 
         {/* Right Side Actions */}
         <div className="flex items-center gap-2 sm:gap-3">
-          <Button variant="ghost" size="sm" className="hidden sm:flex items-center gap-1">
-            <Globe className="h-4 w-4" />
-            <span>Global</span>
-          </Button>
-          
+          <div className="hidden sm:flex">
+            <LanguageSwitcher />
+          </div>
+
           {isLoggedIn ? (
             <>
               <Link to={dashboardHref} className="hidden sm:block">
@@ -75,16 +81,16 @@ export function Navbar() {
                 onClick={handleLogout}
               >
                 <LogOut className="h-4 w-4" />
-                Logout
+                {t("common.logout")}
               </Button>
             </>
           ) : (
             <>
               <Link to="/login" className="hidden sm:block">
-                <Button variant="ghost" size="sm">Sign In</Button>
+                <Button variant="ghost" size="sm">{t("common.signIn")}</Button>
               </Link>
               <Link to="/register" className="hidden sm:block">
-                <Button variant="hero" size="sm">Get Started</Button>
+                <Button variant="hero" size="sm">{t("common.getStarted")}</Button>
               </Link>
             </>
           )}
@@ -118,26 +124,27 @@ export function Navbar() {
               </Link>
             ))}
             <hr className="my-2 border-border" />
+            <LanguageSwitcher variant="mobile" />
             {isLoggedIn ? (
               <>
                 <Link to={dashboardHref} onClick={() => setMobileMenuOpen(false)}>
                   <Button variant="outline" className="w-full gap-2">
                     <LayoutDashboard className="h-4 w-4" />
-                    {firstName} — Dashboard
+                    {firstName} — {t("common.dashboard")}
                   </Button>
                 </Link>
                 <Button variant="hero" className="w-full gap-2" onClick={handleLogout}>
                   <LogOut className="h-4 w-4" />
-                  Logout
+                  {t("common.logout")}
                 </Button>
               </>
             ) : (
               <>
                 <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="outline" className="w-full">Sign In</Button>
+                  <Button variant="outline" className="w-full">{t("common.signIn")}</Button>
                 </Link>
                 <Link to="/register" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="hero" className="w-full">Get Started</Button>
+                  <Button variant="hero" className="w-full">{t("common.getStarted")}</Button>
                 </Link>
               </>
             )}
