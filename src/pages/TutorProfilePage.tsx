@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
+import { useTranslation } from "react-i18next";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
@@ -22,13 +23,18 @@ import {
 } from "lucide-react";
 import { getTutorProfile, getAllReviews, TutorProfile, Review } from "@/lib/firestore";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTranslatedText } from "@/hooks/useTranslatedText";
 
 export default function TutorProfilePage() {
   const { uid } = useParams<{ uid: string }>();
   const { user, userProfile } = useAuth();
+  const { t, i18n } = useTranslation();
   const [tutor, setTutor] = useState<TutorProfile | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const translatedBio = useTranslatedText(tutor?.bio, `tutor:${uid}:bio`);
+  const translatedStyle = useTranslatedText(tutor?.teachingStyle, `tutor:${uid}:style`);
 
   useEffect(() => {
     if (!uid) return;
@@ -54,7 +60,7 @@ export default function TutorProfilePage() {
       : 0;
 
   const memberSince = tutor?.createdAt
-    ? new Date(tutor.createdAt).toLocaleDateString("en-US", { month: "long", year: "numeric" })
+    ? new Date(tutor.createdAt).toLocaleDateString(i18n.language, { month: "long", year: "numeric" })
     : null;
 
   const renderStars = (rating: number, size = "h-3.5 w-3.5") =>
@@ -86,10 +92,10 @@ export default function TutorProfilePage() {
           </div>
         ) : !tutor ? (
           <div className="max-w-3xl mx-auto py-24 text-center px-4">
-            <h1 className="text-2xl font-display font-bold mb-2">Tutor not found</h1>
-            <p className="text-muted-foreground mb-6">This tutor profile is unavailable.</p>
+            <h1 className="text-2xl font-display font-bold mb-2">{t("tutorProfile.notFound")}</h1>
+            <p className="text-muted-foreground mb-6">{t("tutorProfile.notFoundDesc")}</p>
             <Link to="/tutors">
-              <Button>Browse Tutors</Button>
+              <Button>{t("tutorProfile.browseTutors")}</Button>
             </Link>
           </div>
         ) : (
@@ -102,7 +108,7 @@ export default function TutorProfilePage() {
                 to="/tutors"
                 className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-5"
               >
-                <ArrowLeft className="h-4 w-4 mr-1" /> Back to Tutors
+                <ArrowLeft className="h-4 w-4 mr-1 rtl:rotate-180" /> {t("tutorProfile.backToTutors")}
               </Link>
 
               <div className="grid lg:grid-cols-[1fr_320px] gap-6 items-start">
@@ -132,13 +138,13 @@ export default function TutorProfilePage() {
                       )}
                       {reviews.length === 0 && (
                         <Badge className="bg-primary/15 text-primary hover:bg-primary/20 border-0">
-                          New Tutor
+                          {t("tutorProfile.newTutor")}
                         </Badge>
                       )}
                     </div>
 
                     {memberSince && (
-                      <p className="mt-2 text-sm text-muted-foreground">Member since {memberSince}</p>
+                      <p className="mt-2 text-sm text-muted-foreground">{t("tutorProfile.memberSince", { date: memberSince })}</p>
                     )}
 
                     {/* Stats */}
@@ -148,7 +154,7 @@ export default function TutorProfilePage() {
                           <Star className="h-5 w-5 text-warning fill-warning" />
                         </div>
                         <div>
-                          <p className="text-xs text-muted-foreground leading-none">Rating</p>
+                          <p className="text-xs text-muted-foreground leading-none">{t("tutorProfile.rating")}</p>
                           <p className="font-bold text-lg leading-tight">
                             {avgRating.toFixed(1)}{" "}
                             <span className="text-xs font-normal text-muted-foreground">
@@ -167,13 +173,13 @@ export default function TutorProfilePage() {
                     <div>
                       <p className="text-3xl font-bold text-primary">
                         ${tutor.hourlyRate || 0}
-                        <span className="text-base font-medium text-muted-foreground">/hr</span>
+                        <span className="text-base font-medium text-muted-foreground">{t("tutorProfile.perHour")}</span>
                       </p>
-                      <p className="text-sm text-muted-foreground">Session Rate</p>
+                      <p className="text-sm text-muted-foreground">{t("tutorProfile.sessionRate")}</p>
                     </div>
                     <Link to={bookHref} className="block">
                       <Button size="lg" className="w-full shadow-lg shadow-primary/20">
-                        Book a Session <ChevronRight className="h-4 w-4 ml-1" />
+                        {t("common.bookSession")} <ChevronRight className="h-4 w-4 ml-1 rtl:rotate-180" />
                       </Button>
                     </Link>
                   </CardContent>
@@ -189,10 +195,10 @@ export default function TutorProfilePage() {
                   <Card>
                     <CardContent className="p-5 sm:p-6">
                       <h2 className="flex items-center gap-2 font-display text-lg font-bold mb-3">
-                        <User className="h-5 w-5 text-primary" /> About Me
+                        <User className="h-5 w-5 text-primary" /> {t("tutorProfile.aboutMe")}
                       </h2>
                       <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
-                        {tutor.bio}
+                        {translatedBio}
                       </p>
                     </CardContent>
                   </Card>
@@ -202,7 +208,7 @@ export default function TutorProfilePage() {
                   <Card>
                     <CardContent className="p-5 sm:p-6">
                       <h2 className="flex items-center gap-2 font-display text-lg font-bold mb-4">
-                        <BookOpen className="h-5 w-5 text-primary" /> Subjects I Teach
+                        <BookOpen className="h-5 w-5 text-primary" /> {t("tutorProfile.subjectsITeach")}
                       </h2>
                       <div className="flex flex-wrap gap-2">
                         {tutor.subjects.map((s) => (
@@ -222,7 +228,7 @@ export default function TutorProfilePage() {
                   <Card>
                     <CardContent className="p-5 sm:p-6">
                       <h2 className="flex items-center gap-2 font-display text-lg font-bold mb-3">
-                        <Award className="h-5 w-5 text-primary" /> Qualification
+                        <Award className="h-5 w-5 text-primary" /> {t("tutorProfile.qualification")}
                       </h2>
                       <p className="font-medium">{tutor.qualifications}</p>
                       {tutor.degreeLevel && (
@@ -236,7 +242,7 @@ export default function TutorProfilePage() {
                   <Card>
                     <CardContent className="p-5 sm:p-6">
                       <h2 className="flex items-center gap-2 font-display text-lg font-bold mb-3">
-                        <GraduationCap className="h-5 w-5 text-primary" /> Teaching Experience
+                        <GraduationCap className="h-5 w-5 text-primary" /> {t("tutorProfile.teachingExperience")}
                       </h2>
                       <p className="font-semibold text-lg">{tutor.experience}</p>
                     </CardContent>
@@ -247,10 +253,10 @@ export default function TutorProfilePage() {
                   <Card>
                     <CardContent className="p-5 sm:p-6">
                       <h2 className="flex items-center gap-2 font-display text-lg font-bold mb-3">
-                        <Sparkles className="h-5 w-5 text-primary" /> Teaching Style
+                        <Sparkles className="h-5 w-5 text-primary" /> {t("tutorProfile.teachingStyle")}
                       </h2>
                       <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
-                        {tutor.teachingStyle}
+                        {translatedStyle}
                       </p>
                     </CardContent>
                   </Card>
@@ -260,13 +266,13 @@ export default function TutorProfilePage() {
                 <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary/15 via-orange-100/60 to-primary/5 border border-primary/15 p-5 sm:p-6">
                   <div className="flex items-center justify-between gap-4 flex-wrap">
                     <div className="min-w-0">
-                      <h3 className="font-display text-xl font-bold">Ready to achieve your academic goals?</h3>
+                      <h3 className="font-display text-xl font-bold">{t("tutorProfile.readyHeading")}</h3>
                       <p className="text-sm text-muted-foreground mt-1">
-                        Book a session with {tutor.fullName} now and start learning!
+                        {t("tutorProfile.readySubtitle", { name: tutor.fullName })}
                       </p>
                       <Link to={bookHref} className="inline-block mt-4">
                         <Button className="shadow-lg shadow-primary/20">
-                          Book a Session Now <ArrowRight className="h-4 w-4 ml-1" />
+                          {t("common.bookSessionNow")} <ArrowRight className="h-4 w-4 ml-1 rtl:rotate-180" />
                         </Button>
                       </Link>
                     </div>
@@ -284,14 +290,14 @@ export default function TutorProfilePage() {
                     <CardContent className="p-5 sm:p-6">
                       <div className="flex items-center justify-between mb-4">
                         <h2 className="flex items-center gap-2 font-display text-lg font-bold">
-                          <Star className="h-5 w-5 text-warning fill-warning" /> Student Reviews
+                          <Star className="h-5 w-5 text-warning fill-warning" /> {t("tutorProfile.studentReviews")}
                         </h2>
                       </div>
                       <div className="flex items-center gap-2 mb-5 pb-4 border-b">
                         <div className="flex gap-0.5">{renderStars(avgRating)}</div>
                         <span className="font-semibold">{avgRating.toFixed(1)}</span>
                         <span className="text-sm text-muted-foreground">
-                          ({reviews.length} {reviews.length === 1 ? "review" : "reviews"})
+                          ({reviews.length} {reviews.length === 1 ? t("tutorProfile.review") : t("tutorProfile.reviews")})
                         </span>
                       </div>
 
@@ -325,17 +331,17 @@ export default function TutorProfilePage() {
                 <Card className="border-destructive/20">
                   <CardContent className="p-5 sm:p-6">
                     <h2 className="flex items-center gap-2 font-display text-lg font-bold mb-2">
-                      <AlertTriangle className="h-5 w-5 text-primary" /> Report Tutor
+                      <AlertTriangle className="h-5 w-5 text-primary" /> {t("tutorProfile.reportTutor")}
                     </h2>
-                    <p className="text-sm font-medium">Found something inappropriate?</p>
+                    <p className="text-sm font-medium">{t("tutorProfile.reportQuestion")}</p>
                     <p className="text-sm text-muted-foreground mt-1">
-                      Report this tutor to our support team.
+                      {t("tutorProfile.reportSubtitle")}
                     </p>
                     <Link
                       to="/contact"
                       className="inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline mt-3"
                     >
-                      Report Now <ArrowRight className="h-4 w-4" />
+                      {t("common.reportNow")} <ArrowRight className="h-4 w-4 rtl:rotate-180" />
                     </Link>
                   </CardContent>
                 </Card>
