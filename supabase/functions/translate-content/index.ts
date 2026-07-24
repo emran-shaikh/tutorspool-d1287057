@@ -1,6 +1,6 @@
 // Translate arbitrary user-generated text via Lovable AI, cached in Firestore.
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
-import { firestoreGet, firestoreSet } from "../_shared/firestore.ts";
+import { getDoc, patchDoc } from "../_shared/firestore.ts";
 
 const LANG_NAMES: Record<string, string> = {
   en: "English",
@@ -44,10 +44,10 @@ Deno.serve(async (req) => {
 
     // 1. Firestore cache lookup
     try {
-      const existing = await firestoreGet(`translations/${docId}`);
-      if (existing?.fields?.text?.stringValue) {
+      const existing = await getDoc(`translations/${docId}`);
+      if (existing?.data?.text) {
         return new Response(
-          JSON.stringify({ translated: existing.fields.text.stringValue, cached: true }),
+          JSON.stringify({ translated: existing.data.text, cached: true }),
           { headers: { ...corsHeaders, "Content-Type": "application/json" } },
         );
       }
@@ -108,7 +108,7 @@ Deno.serve(async (req) => {
 
     // 3. Cache in Firestore (best-effort)
     try {
-      await firestoreSet(`translations/${docId}`, {
+      await patchDoc(`translations/${docId}`, {
         text: translated,
         lang,
         cacheKey: keyBase,
