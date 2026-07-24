@@ -124,26 +124,27 @@ export function Navbar() {
               </Link>
             ))}
             <hr className="my-2 border-border" />
+            <LanguageSwitcher variant="mobile" />
             {isLoggedIn ? (
               <>
                 <Link to={dashboardHref} onClick={() => setMobileMenuOpen(false)}>
                   <Button variant="outline" className="w-full gap-2">
                     <LayoutDashboard className="h-4 w-4" />
-                    {firstName} — Dashboard
+                    {firstName} — {t("common.dashboard")}
                   </Button>
                 </Link>
                 <Button variant="hero" className="w-full gap-2" onClick={handleLogout}>
                   <LogOut className="h-4 w-4" />
-                  Logout
+                  {t("common.logout")}
                 </Button>
               </>
             ) : (
               <>
                 <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="outline" className="w-full">Sign In</Button>
+                  <Button variant="outline" className="w-full">{t("common.signIn")}</Button>
                 </Link>
                 <Link to="/register" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="hero" className="w-full">Get Started</Button>
+                  <Button variant="hero" className="w-full">{t("common.getStarted")}</Button>
                 </Link>
               </>
             )}
