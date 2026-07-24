@@ -1,16 +1,18 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Users, Clock, TrendingUp, Star, Radio, BookOpen, Loader2 } from "lucide-react";
+import { ArrowRight, Users, Clock, TrendingUp, Star, Radio } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import heroImage from "@/assets/hero-tutoring.webp";
 import { usePlatformStats } from "@/hooks/usePlatformStats";
 
 export function HeroSection() {
   const { tutorCount, studentCount, subjectCount, avgRating, loading } = usePlatformStats();
+  const { t } = useTranslation();
 
   const stats = [
-    { icon: Users, label: `${tutorCount}+ Expert Tutors` },
-    { icon: Clock, label: "12/7 Available" },
-    { icon: TrendingUp, label: "92% Success Rate" },
+    { icon: Users, label: t("hero.expertTutors", { count: tutorCount }) },
+    { icon: Clock, label: t("hero.available") },
+    { icon: TrendingUp, label: t("hero.successRate") },
   ];
 
   const avatars = ["S1", "S2", "S3", "S4", "S5"];
@@ -25,22 +27,22 @@ export function HeroSection() {
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-border bg-background shadow-sm animate-fade-in">
               <span className="flex h-2 w-2 rounded-full bg-success animate-pulse" />
               <span className="text-sm font-medium">
-                Trusted by {loading ? "..." : `${studentCount}+`} students worldwide
+                {loading ? t("common.loading") : t("hero.trustBadge", { count: studentCount })}
               </span>
             </div>
 
             {/* Heading */}
             <div className="space-y-2 animate-fade-in" style={{ animationDelay: "0.1s" }}>
               <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight">
-                Transform Your
+                {t("hero.headingLine1")}
                 <br />
-                <span className="text-gradient">Learning Journey</span>
+                <span className="text-gradient">{t("hero.headingLine2")}</span>
               </h1>
             </div>
 
             {/* Description */}
             <p className="text-lg text-muted-foreground max-w-lg animate-fade-in" style={{ animationDelay: "0.2s" }}>
-              Connect with world-class tutors for personalized 1-on-1 sessions. Master any subject with expert guidance and flexible scheduling.
+              {t("hero.description")}
             </p>
 
             {/* Feature Pills */}
@@ -60,7 +62,7 @@ export function HeroSection() {
             <div className="flex flex-col sm:flex-row gap-4 animate-fade-in" style={{ animationDelay: "0.4s" }}>
               <Link to="/register">
                 <Button variant="hero" size="xl" className="group">
-                  Start Learning Today
+                  {t("hero.ctaStart")}
                   <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
                 </Button>
               </Link>
@@ -80,7 +82,7 @@ export function HeroSection() {
                 ))}
               </div>
               <span className="text-sm text-muted-foreground">
-                <strong className="text-foreground">20+</strong> students joined this week
+                <strong className="text-foreground">20+</strong> {t("hero.joinedThisWeek")}
               </span>
             </div>
           </div>
@@ -103,8 +105,8 @@ export function HeroSection() {
                 <div className="flex items-center gap-2">
                   <Radio className="h-4 w-4 text-success" />
                   <div>
-                    <p className="text-xs font-semibold">Live Session</p>
-                    <p className="text-[10px] text-muted-foreground">2:00 PM - Active now</p>
+                    <p className="text-xs font-semibold">{t("hero.liveSession")}</p>
+                    <p className="text-[10px] text-muted-foreground">{t("hero.liveActive")}</p>
                   </div>
                 </div>
               </div>
@@ -113,7 +115,7 @@ export function HeroSection() {
                 <div className="flex items-center gap-2">
                   <Star className="h-4 w-4 text-warning fill-warning" />
                   <span className="text-sm font-semibold">
-                    {loading ? "..." : `${avgRating}/5`} Rating
+                    {loading ? "..." : `${avgRating}/5`} {t("hero.rating")}
                   </span>
                 </div>
               </div>
@@ -121,8 +123,8 @@ export function HeroSection() {
               <div className="absolute bottom-4 right-4 bg-background rounded-lg px-3 py-2 shadow-card">
                 <div className="text-center">
                   <p className="text-lg font-bold text-success">92%</p>
-                  <p className="text-[10px] text-muted-foreground">Success Rate</p>
-                  <p className="text-[10px] text-muted-foreground">Student Satisfaction</p>
+                  <p className="text-[10px] text-muted-foreground">{t("hero.successRateLabel")}</p>
+                  <p className="text-[10px] text-muted-foreground">{t("hero.satisfaction")}</p>
                 </div>
               </div>
             </div>
@@ -133,10 +135,10 @@ export function HeroSection() {
         <div className="mt-16 pt-12 border-t border-border">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {[
-              { value: loading ? "..." : `${studentCount}+`, label: "Happy Students" },
-              { value: loading ? "..." : `${tutorCount}+`, label: "Expert Tutors" },
-              { value: loading ? "..." : `${subjectCount}+`, label: "Subjects" },
-              { value: "92%", label: "Success Rate" },
+              { value: loading ? "..." : `${studentCount}+`, label: t("hero.happyStudents") },
+              { value: loading ? "..." : `${tutorCount}+`, label: t("nav.findTutors") },
+              { value: loading ? "..." : `${subjectCount}+`, label: t("hero.subjectsLabel") },
+              { value: "92%", label: t("hero.successRateLabel") },
             ].map((stat, i) => (
               <div
                 key={stat.label}
