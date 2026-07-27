@@ -88,7 +88,8 @@
     "metaTitle": "من نحن - TutorsPool | مهمتنا وفريقنا",
     "badge": "عن TutorsPool",
     "hero": {
-      "heading": "تمكين الطلاب من النجاح",
+      "heading": "تمكين الطلاب من",
+      "headingAccent": "النجاح",
       "description": "يربط TutorsPool الطلاب بمعلمين خبراء لتجارب تعلم مخصصة. مهمتنا هي جعل التعليم الجيد متاحاً للجميع، في كل مكان."
     },
     "mission": {
@@ -119,7 +120,12 @@
     },
     "team": {
       "title": "فريق القيادة",
-      "subtitle": "تعرف على الأشخاص الملهمين وراء TutorsPool"
+      "subtitle": "تعرف على الأشخاص الملهمين وراء TutorsPool",
+      "roles": {
+        "founder": "المؤسس",
+        "coFounder": "المؤسس المشارك",
+        "cto": " chief technology officer" 
+      }
     },
     "achievements": [
       "5,000+ طالب ساعدناهم في تحقيق أهدافهم الأكاديمية",

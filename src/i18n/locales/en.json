@@ -88,7 +88,8 @@
     "metaTitle": "About Us - TutorsPool | Our Mission & Team",
     "badge": "About TutorsPool",
     "hero": {
-      "heading": "Empowering Students to Succeed",
+      "heading": "Empowering Students to",
+      "headingAccent": "Succeed",
       "description": "TutorsPool connects students with expert tutors for personalized learning experiences. Our mission is to make quality education accessible to everyone, everywhere."
     },
     "mission": {
@@ -119,7 +120,12 @@
     },
     "team": {
       "title": "Leadership Team",
-      "subtitle": "Meet the passionate people behind TutorsPool"
+      "subtitle": "Meet the passionate people behind TutorsPool",
+      "roles": {
+        "founder": "Founder",
+        "coFounder": "Co-Founder",
+        "cto": "Chief Technology Officer"
+      }
     },
     "achievements": [
       "5,000+ students helped achieve their academic goals",
@@ -262,6 +268,16 @@
     "heading": "Explore Our Subjects",
     "subtitle": "From mathematics to music, find expert tutors in any subject. Our verified educators are ready to help you achieve your learning goals.",
     "cardDescription": "Expert tutors available for all levels",
+    "categories": {
+      "mathematics": "Mathematics",
+      "sciences": "Sciences",
+      "languages": "Languages",
+      "humanities": "Humanities",
+      "programming": "Programming",
+      "arts": "Arts",
+      "music": "Music",
+      "testPrep": "Test Prep"
+    },
     "tutorsCount": "{{count}} tutors",
     "moreSubjects": "+{{count}} more",
     "findTutors": "Find Tutors",
