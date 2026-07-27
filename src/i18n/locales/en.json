@@ -10,7 +10,30 @@
     "loading": "Loading...",
     "readMore": "Read more",
     "reportNow": "Report Now",
-    "backTo": "Back to"
+    "backTo": "Back to",
+    "search": "Search",
+    "clearFilters": "Clear Filters",
+    "viewProfile": "View Profile",
+    "findTutor": "Find a Tutor",
+    "becomeTutor": "Become a Tutor",
+    "startLearning": "Start Learning",
+    "send": "Send",
+    "sending": "Sending...",
+    "submitting": "Submitting...",
+    "cancel": "Cancel",
+    "close": "Close",
+    "open": "Open",
+    "learnMore": "Learn More",
+    "contactUs": "Contact Us",
+    "createAccount": "Create account",
+    "forgotPassword": "Forgot password?",
+    "noResults": "No results",
+    "viewAll": "View All",
+    "manage": "Manage",
+    "edit": "Edit",
+    "save": "Save",
+    "success": "Success",
+    "error": "Error"
   },
   "nav": {
     "subjects": "Subjects",
@@ -60,6 +83,418 @@
     "faq": "FAQ",
     "rights": "All rights reserved.",
     "madeWith": "Made with ❤️ for learners worldwide"
+  },
+  "about": {
+    "metaTitle": "About Us - TutorsPool | Our Mission & Team",
+    "badge": "About TutorsPool",
+    "hero": {
+      "heading": "Empowering Students to",
+      "headingAccent": "Succeed",
+      "description": "TutorsPool connects students with expert tutors for personalized learning experiences. Our mission is to make quality education accessible to everyone, everywhere."
+    },
+    "mission": {
+      "title": "Our Mission",
+      "p1": "We believe that every student deserves access to quality education and personalized support. TutorsPool was founded with a simple yet powerful idea: connect passionate educators with motivated learners to create meaningful educational experiences.",
+      "p2": "Through our platform, we've helped thousands of students improve their grades, build confidence, and develop a genuine love for learning. Our verified tutors bring expertise, patience, and dedication to every session.",
+      "cta": "Join Our Community"
+    },
+    "values": {
+      "title": "Our Values",
+      "subtitle": "These core values guide everything we do at TutorsPool",
+      "excellence": {
+        "title": "Excellence",
+        "description": "We strive for excellence in education, ensuring every student receives the highest quality tutoring experience."
+      },
+      "passion": {
+        "title": "Passion",
+        "description": "Our tutors are passionate educators who genuinely care about student success and growth."
+      },
+      "accessibility": {
+        "title": "Accessibility",
+        "description": "Quality education should be accessible to everyone, regardless of location or background."
+      },
+      "community": {
+        "title": "Community",
+        "description": "We foster a supportive learning community where students and tutors thrive together."
+      }
+    },
+    "team": {
+      "title": "Leadership Team",
+      "subtitle": "Meet the passionate people behind TutorsPool",
+      "roles": {
+        "founder": "Founder",
+        "coFounder": "Co-Founder",
+        "cto": "Chief Technology Officer"
+      }
+    },
+    "achievements": [
+      "5,000+ students helped achieve their academic goals",
+      "200+ verified expert tutors across 50+ subjects",
+      "98% student satisfaction rate",
+      "Available in 25+ countries worldwide",
+      "Partnership with leading educational institutions",
+      "Award-winning online learning platform"
+    ],
+    "cta": {
+      "title": "Ready to Transform Your Learning?",
+      "subtitle": "Join thousands of students who have achieved their academic goals with TutorsPool.",
+      "findTutor": "Find a Tutor",
+      "becomeTutor": "Become a Tutor"
+    }
+  },
+  "contact": {
+    "metaTitle": "Contact Us - TutorsPool | Get In Touch",
+    "badge": "Get In Touch",
+    "heading": "Contact Us",
+    "subtitle": "Have questions or need help? We're here for you. Reach out and our team will get back to you as soon as possible.",
+    "info": {
+      "emailUs": "Email Us",
+      "callUs": "Call Us",
+      "visitUs": "Visit Us",
+      "businessHours": "Business Hours",
+      "response24h": "We'll respond within 24 hours",
+      "weekendSupport": "Weekend support available"
+    },
+    "form": {
+      "title": "Send Us a Message",
+      "subtitle": "Fill out the form below and we'll get back to you shortly",
+      "name": "Name",
+      "email": "Email",
+      "subject": "Subject",
+      "message": "Message",
+      "namePlaceholder": "Your name",
+      "emailPlaceholder": "your@email.com",
+      "subjectPlaceholder": "What's this about?",
+      "messagePlaceholder": "Tell us more...",
+      "send": "Send Message",
+      "sending": "Sending..."
+    },
+    "toast": {
+      "fillAll": "Please fill in all fields",
+      "sentTitle": "Message Sent!",
+      "sentDesc": "We'll get back to you within 24 hours.",
+      "failedTitle": "Failed to send message",
+      "failedDesc": "Please try again or email us directly at support@tutorspool.com"
+    },
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "items": [
+        {
+          "question": "How do I find a tutor?",
+          "answer": "Browse our tutor directory, filter by subject or expertise, view profiles, and book a session directly through our platform."
+        },
+        {
+          "question": "What payment methods do you accept?",
+          "answer": "We accept all major credit cards, PayPal, and bank transfers. Payment is processed securely through our platform."
+        },
+        {
+          "question": "Can I become a tutor?",
+          "answer": "Yes! If you have expertise in a subject and passion for teaching, apply through our 'Become a Tutor' page. We'll review your application within 48 hours."
+        },
+        {
+          "question": "How do online sessions work?",
+          "answer": "Sessions are conducted via Zoom video conferencing. Once a tutor accepts your booking, you'll receive a meeting link to join at the scheduled time."
+        }
+      ]
+    },
+    "help": {
+      "title": "Need More Help?",
+      "subtitle": "Our support team is available 24/7 to assist you",
+      "liveChat": "Start Live Chat"
+    }
+  },
+  "faq": {
+    "metaTitle": "FAQ - TutorsPool | Frequently Asked Questions",
+    "badge": "FAQ",
+    "heading": "Frequently Asked Questions",
+    "subtitle": "Quick answers to the most common questions from students and tutors.",
+    "groups": {
+      "gettingStarted": "Getting Started",
+      "sessions": "Sessions & Scheduling",
+      "forTutors": "For Tutors",
+      "security": "Security & Payments"
+    },
+    "groupDescription": "Answers related to {title} on TutorsPool.",
+    "items": [
+      {
+        "group": "gettingStarted",
+        "question": "How do I create a student account?",
+        "answer": "Click on Get Started, choose the student option, and complete the short sign-up form with your basic details."
+      },
+      {
+        "group": "gettingStarted",
+        "question": "How do I find the right tutor?",
+        "answer": "Use filters on the Find Tutors page to narrow by subject, level, price, and availability, then review tutor profiles and reviews."
+      },
+      {
+        "group": "sessions",
+        "question": "How are sessions conducted?",
+        "answer": "Sessions are held online using Zoom. Once a tutor accepts your request, you'll receive a meeting link with the date and time."
+      },
+      {
+        "group": "sessions",
+        "question": "Can I reschedule or cancel a session?",
+        "answer": "Yes. You can manage upcoming sessions from your dashboard. Please review your tutor's cancellation policy before making changes."
+      },
+      {
+        "group": "forTutors",
+        "question": "How do I become a tutor?",
+        "answer": "Apply through the Become a Tutor option during registration. We review your experience, subjects, and profile before approval."
+      },
+      {
+        "group": "forTutors",
+        "question": "How do I get more students?",
+        "answer": "Keep your profile complete, maintain high review scores, and set clear availability so students can easily book with you."
+      },
+      {
+        "group": "security",
+        "question": "Is my payment information secure?",
+        "answer": "Yes. We work with trusted payment providers and never store full card details on our servers."
+      },
+      {
+        "group": "security",
+        "question": "How is my data protected?",
+        "answer": "We follow industry best practices for data protection. Learn more in our Privacy Policy."
+      }
+    ],
+    "stillQuestions": {
+      "title": "Still have questions?",
+      "desc": "If you can't find the answer you're looking for, our support team is here to help. Visit our Help Center or contact us directly."
+    }
+  },
+  "subjects": {
+    "metaTitle": "Subjects - TutorsPool | 50+ Subjects Available",
+    "badge": "50+ Subjects Available",
+    "heading": "Explore Our Subjects",
+    "subtitle": "From mathematics to music, find expert tutors in any subject. Our verified educators are ready to help you achieve your learning goals.",
+    "cardDescription": "Expert tutors available for all levels",
+    "categories": {
+      "mathematics": "Mathematics",
+      "sciences": "Sciences",
+      "languages": "Languages",
+      "humanities": "Humanities",
+      "programming": "Programming",
+      "arts": "Arts",
+      "music": "Music",
+      "testPrep": "Test Prep"
+    },
+    "tutorsCount": "{{count}} tutors",
+    "moreSubjects": "+{{count}} more",
+    "findTutors": "Find Tutors",
+    "cta": {
+      "title": "Can't find your subject?",
+      "subtitle": "We're always adding new subjects and tutors. Let us know what you're looking for!",
+      "contactUs": "Contact Us"
+    }
+  },
+  "reviews": {
+    "metaTitle": "Student Reviews - TutorsPool | Real Testimonials",
+    "badge": {
+      "rating": "{{rating}} Average Rating",
+      "reviews": "Student Reviews"
+    },
+    "heading": "What Our Students Say",
+    "subtitle": "Read real reviews from students who have transformed their learning journey with our expert tutors.",
+    "stats": {
+      "happyStudents": "Happy Students",
+      "fiveStarReviews": "5-Star Reviews",
+      "expertTutors": "Expert Tutors",
+      "satisfactionRate": "Satisfaction Rate"
+    },
+    "noReviews": {
+      "title": "No Reviews Yet",
+      "desc": "Be the first to leave a review after completing a session with one of our tutors!"
+    },
+    "review": {
+      "with": "with"
+    },
+    "cta": {
+      "title": "Ready to Start Your Learning Journey?",
+      "subtitle": "Join hundreds of students who have improved their grades and achieved their goals.",
+      "findTutor": "Find a Tutor",
+      "getStarted": "Get Started"
+    },
+    "time": {
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "daysAgo": "{{count}} days ago",
+      "weekAgo": "{{count}} week ago",
+      "weeksAgo": "{{count}} weeks ago",
+      "monthAgo": "{{count}} month ago",
+      "monthsAgo": "{{count}} months ago",
+      "yearAgo": "{{count}} year ago",
+      "yearsAgo": "{{count}} years ago"
+    }
+  },
+  "findTutors": {
+    "metaTitle": "Find Tutors - TutorsPool | Browse Expert Tutors",
+    "heading": "Find Your Perfect Tutor",
+    "subtitle": "Browse our community of expert tutors and find the perfect match for your learning journey.",
+    "badge": "{{count}}+ Verified Tutors",
+    "searchPlaceholder": "Search by name or subject...",
+    "filterPlaceholder": "All Subjects",
+    "allSubjects": "All Subjects",
+    "resultsCount": "Showing {{count}} tutor",
+    "resultsCountPlural": "Showing {{count}} tutors",
+    "noResults": {
+      "title": "No tutors found",
+      "desc": "Try adjusting your search or filters"
+    },
+    "clearFilters": "Clear Filters",
+    "newTutor": "New Tutor",
+    "experience": "{{years}}+ yrs",
+    "experienceFallback": "2+ yrs",
+    "perHour": "/hr",
+    "viewProfile": "View Profile",
+    "bookSession": "Book Session",
+    "loginToBook": "Login to Book"
+  },
+  "features": {
+    "title": "Why Choose TutorsPool?",
+    "subtitle": "Everything you need to accelerate your learning journey in one platform.",
+    "expertTutors": {
+      "title": "Expert Tutors",
+      "description": "Learn from verified professionals with proven track records in their subjects."
+    },
+    "liveSessions": {
+      "title": "Live Sessions",
+      "description": "Interactive 1-on-1 video sessions via Zoom for personalized learning experience."
+    },
+    "aiCareer": {
+      "title": "AI Career Guidance",
+      "description": "Get personalized career suggestions based on your skills and learning goals."
+    },
+    "flexibleScheduling": {
+      "title": "Flexible Scheduling",
+      "description": "Book sessions at your convenience with tutors across different time zones."
+    },
+    "subjects25": {
+      "title": "25+ Subjects",
+      "description": "From mathematics to languages, find tutors for virtually any subject."
+    },
+    "trackProgress": {
+      "title": "Track Progress",
+      "description": "Monitor your learning journey with detailed progress tracking and analytics."
+    }
+  },
+  "cta": {
+    "student": {
+      "title": "Ready to Learn?",
+      "subtitle": "Join thousands of students already learning with expert tutors. Start your journey today.",
+      "button": "Start Learning"
+    },
+    "tutor": {
+      "title": "Share Your Expertise",
+      "subtitle": "Become a tutor and help students achieve their goals while earning on your schedule.",
+      "button": "Become a Tutor"
+    }
+  },
+  "featuredTutors": {
+    "badge": "Top Rated Tutors",
+    "title": "Meet Our Expert Tutors",
+    "subtitle": "Learn from the best. Our verified tutors are here to help you succeed.",
+    "review": "review",
+    "reviews": "reviews",
+    "newTutor": "New tutor",
+    "viewProfile": "View Profile",
+    "viewAll": "View All Tutors"
+  },
+  "auth": {
+    "login": {
+      "title": "Welcome back",
+      "subtitle": "Sign in to continue your learning journey",
+      "email": "Email",
+      "password": "Password",
+      "forgotPassword": "Forgot password?",
+      "signIn": "Sign In",
+      "signingIn": "Signing in...",
+      "noAccount": "Don't have an account?",
+      "createAccount": "Create account",
+      "welcomeRight": "Continue Your Learning Journey",
+      "welcomeRightDesc": "Access your personalized dashboard, track progress, and connect with expert tutors."
+    },
+    "register": {
+      "title": "Create your account",
+      "subtitle": "Choose your role and get started",
+      "fullName": "Full Name",
+      "confirmPassword": "Confirm Password",
+      "adminKey": "Admin Security Key",
+      "adminKeyHint": "Contact an existing administrator to obtain the security key.",
+      "createAccount": "Create {role} Account",
+      "creating": "Creating account...",
+      "hasAccount": "Already have an account?",
+      "signIn": "Sign in",
+      "termsAgree": "By creating an account, you agree to our",
+      "terms": "Terms of Service",
+      "privacy": "Privacy Policy",
+      "roles": {
+        "student": "Student",
+        "studentDesc": "Learn from expert tutors",
+        "tutor": "Tutor",
+        "tutorDesc": "Share your expertise",
+        "parent": "Parent",
+        "parentDesc": "Monitor your child's progress",
+        "admin": "Admin",
+        "adminDesc": "Manage the platform"
+      }
+    },
+    "validation": {
+      "emailInvalid": "Invalid email address",
+      "passwordRequired": "Password is required",
+      "nameMin": "Name must be at least 2 characters",
+      "passwordMin": "Password must be at least 8 characters",
+      "passwordMatch": "Passwords don't match"
+    },
+    "toast": {
+      "validationError": "Validation Error",
+      "securityKeyRequired": "Security Key Required",
+      "securityKeyRequiredDesc": "Please enter the admin security key to register as an admin.",
+      "invalidKey": "Invalid Security Key",
+      "invalidKeyDesc": "The admin security key is incorrect. Please contact an existing admin for the correct key.",
+      "verificationFailed": "Verification Failed",
+      "verificationFailedDesc": "Could not verify admin key. Please try again.",
+      "welcomeBack": "Welcome back!",
+      "signInSuccess": "You have been signed in successfully.",
+      "signInFailed": "Sign in failed",
+      "verificationEmailSent": "Verification email sent!",
+      "verifyBeforeSignIn": "Please check your email and verify your account before signing in.",
+      "registrationFailed": "Registration failed"
+    },
+    "errors": {
+      "invalidCredential": "Invalid email or password. Please try again.",
+      "tooManyRequests": "Too many failed attempts. Please try again later.",
+      "userDisabled": "This account has been disabled. Please contact support.",
+      "emailNotVerified": "Please verify your email before signing in. Check your inbox for the verification link.",
+      "profileMissing": "Your account data was removed. Your account has been cleaned up — please register again with the same email.",
+      "emailInUse": "This email is already registered. Try signing in, or use 'Forgot password?' on the login page to recover your account.",
+      "weakPassword": "Password is too weak. Please use a stronger password.",
+      "invalidEmail": "Invalid email address.",
+      "networkFailed": "Network error. Please check your internet connection.",
+      "operationNotAllowed": "Email/password accounts are not enabled. Please contact support.",
+      "defaultRegister": "Failed to create account. Please try again.",
+      "defaultSignIn": "Failed to sign in. Please try again."
+    }
+  },
+  "dashboard": {
+    "welcome": "Welcome back, {name}!",
+    "studentPortal": "Student Portal",
+    "tutorPortal": "Tutor Portal",
+    "parentPortal": "Parent Dashboard",
+    "adminPortal": "Admin Dashboard",
+    "tagline": {
+      "student": "Track your progress and continue your learning journey.",
+      "tutor": "Manage your sessions and connect with students.",
+      "parent": "Monitor your child's learning progress",
+      "admin": "Manage users, sessions, and platform settings."
+    },
+    "roles": {
+      "student": "Student",
+      "tutor": "Tutor",
+      "parent": "Parent",
+      "admin": "Admin"
+    },
+    "profile": "Profile",
+    "logout": "Logout"
   },
   "tutorProfile": {
     "notFound": "Tutor not found",
