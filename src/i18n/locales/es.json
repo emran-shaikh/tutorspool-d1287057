@@ -5,84 +5,503 @@
     "logout": "Cerrar sesión",
     "dashboard": "Panel",
     "book": "Reservar",
-    "bookSession": "Reservar sesión",
-    "bookSessionNow": "Reservar sesión ahora",
+    "bookSession": "Reservar una sesión",
+    "bookSessionNow": "Reserva una sesión ahora",
     "loading": "Cargando...",
     "readMore": "Leer más",
     "reportNow": "Reportar ahora",
-    "backTo": "Volver a"
+    "backTo": "Volver a",
+    "search": "Buscar",
+    "clearFilters": "Limpiar filtros",
+    "viewProfile": "Ver perfil",
+    "findTutor": "Buscar tutor",
+    "becomeTutor": "Conviértete en tutor",
+    "startLearning": "Empieza a aprender",
+    "send": "Enviar",
+    "sending": "Enviando...",
+    "submitting": "Enviando...",
+    "cancel": "Cancelar",
+    "close": "Cerrar",
+    "open": "Abrir",
+    "learnMore": "Saber más",
+    "contactUs": "Contáctanos",
+    "createAccount": "Crear cuenta",
+    "forgotPassword": "¿Olvidaste tu contraseña?",
+    "noResults": "Sin resultados",
+    "viewAll": "Ver todo",
+    "manage": "Gestionar",
+    "edit": "Editar",
+    "save": "Guardar",
+    "success": "Éxito",
+    "error": "Error"
   },
   "nav": {
     "subjects": "Materias",
     "findTutors": "Buscar tutores",
     "reviews": "Reseñas",
     "blog": "Blog",
-    "about": "Acerca de",
+    "about": "Sobre nosotros",
     "contact": "Contacto",
-    "becomeTutor": "Sé tutor",
+    "becomeTutor": "Conviértete en tutor",
     "language": "Idioma"
   },
   "hero": {
-    "trustBadge": "Con la confianza de más de {{count}} estudiantes en todo el mundo",
+    "trustBadge": "Confiado por más de {{count}}+ estudiantes en todo el mundo",
     "headingLine1": "Transforma tu",
-    "headingLine2": "Viaje de aprendizaje",
-    "description": "Conecta con tutores de clase mundial para sesiones 1 a 1 personalizadas. Domina cualquier materia con orientación experta y horarios flexibles.",
+    "headingLine2": "viaje de aprendizaje",
+    "description": "Conecta con tutores de clase mundial para sesiones personalizadas uno a uno. Domina cualquier materia con orientación experta y horarios flexibles.",
     "ctaStart": "Empieza a aprender hoy",
-    "expertTutors": "{{count}}+ Tutores expertos",
+    "expertTutors": "{{count}}+ tutores expertos",
     "available": "Disponible 12/7",
-    "successRate": "92% de éxito",
+    "successRate": "92% tasa de éxito",
     "joinedThisWeek": "estudiantes se unieron esta semana",
     "liveSession": "Sesión en vivo",
-    "liveActive": "2:00 PM - Activa ahora",
+    "liveActive": "2:00 p. m. - Activo ahora",
     "rating": "Calificación",
     "happyStudents": "Estudiantes felices",
     "subjectsLabel": "Materias",
     "successRateLabel": "Tasa de éxito",
-    "satisfaction": "Satisfacción del estudiante"
+    "satisfaction": "Satisfacción estudiantil"
   },
   "footer": {
-    "tagline": "Conecta con tutores de clase mundial para sesiones 1 a 1 personalizadas.",
+    "tagline": "Conecta con tutores de clase mundial para sesiones personalizadas uno a uno.",
     "platform": "Plataforma",
     "company": "Empresa",
     "support": "Soporte",
     "findTutors": "Buscar tutores",
-    "becomeTutor": "Sé tutor",
+    "becomeTutor": "Conviértete en tutor",
     "subjects": "Materias",
     "reviews": "Reseñas",
     "about": "Sobre nosotros",
     "contact": "Contacto",
-    "careers": "Empleo",
+    "careers": "Carreras",
     "blog": "Blog",
     "help": "Centro de ayuda",
-    "terms": "Términos del servicio",
+    "terms": "Términos de servicio",
     "privacy": "Política de privacidad",
-    "disclaimer": "Aviso legal",
+    "disclaimer": "Descargo de responsabilidad",
     "faq": "Preguntas frecuentes",
     "rights": "Todos los derechos reservados.",
     "madeWith": "Hecho con ❤️ para estudiantes de todo el mundo"
   },
+  "about": {
+    "metaTitle": "Sobre nosotros - TutorsPool | Nuestra misión y equipo",
+    "badge": "Sobre TutorsPool",
+    "hero": {
+      "heading": "Empoderando a los estudiantes para tener éxito",
+      "description": "TutorsPool conecta a estudiantes con tutores expertos para experiencias de aprendizaje personalizadas. Nuestra misión es hacer que la educación de calidad sea accesible para todos, en todas partes."
+    },
+    "mission": {
+      "title": "Nuestra misión",
+      "p1": "Creemos que cada estudiante merece acceso a educación de calidad y apoyo personalizado. TutorsPool se fundó con una idea simple pero poderosa: conectar educadores apasionados con estudiantes motivados para crear experiencias educativas significativas.",
+      "p2": "A través de nuestra plataforma, hemos ayudado a miles de estudiantes a mejorar sus calificaciones, ganar confianza y desarrollar un amor genuino por el aprendizaje. Nuestros tutores verificados aportan experiencia, paciencia y dedicación a cada sesión.",
+      "cta": "Únete a nuestra comunidad"
+    },
+    "values": {
+      "title": "Nuestros valores",
+      "subtitle": "Estos valores fundamentales guían todo lo que hacemos en TutorsPool",
+      "excellence": {
+        "title": "Excelencia",
+        "description": "Nos esforzamos por la excelencia en la educación, asegurando que cada estudiante reciba la mejor experiencia de tutoría."
+      },
+      "passion": {
+        "title": "Pasión",
+        "description": "Nuestros tutores son educadores apasionados que realmente se preocupan por el éxito y crecimiento de los estudiantes."
+      },
+      "accessibility": {
+        "title": "Accesibilidad",
+        "description": "La educación de calidad debe ser accesible para todos, independientemente de su ubicación o trasfondo."
+      },
+      "community": {
+        "title": "Comunidad",
+        "description": "Fomentamos una comunidad de aprendizaje solidaria donde estudiantes y tutores prosperan juntos."
+      }
+    },
+    "team": {
+      "title": "Equipo directivo",
+      "subtitle": "Conoce a las personas apasionadas detrás de TutorsPool"
+    },
+    "achievements": [
+      "5,000+ estudiantes ayudados a alcanzar sus metas académicas",
+      "200+ tutores expertos verificados en más de 50 materias",
+      "98% tasa de satisfacción estudiantil",
+      "Disponible en más de 25 países",
+      "Alianza con instituciones educativas líderes",
+      "Plataforma de aprendizaje en línea galardonada"
+    ],
+    "cta": {
+      "title": "¿Listo para transformar tu aprendizaje?",
+      "subtitle": "Únete a miles de estudiantes que han alcanzado sus metas académicas con TutorsPool.",
+      "findTutor": "Buscar tutor",
+      "becomeTutor": "Conviértete en tutor"
+    }
+  },
+  "contact": {
+    "metaTitle": "Contáctanos - TutorsPool | Ponte en contacto",
+    "badge": "Ponte en contacto",
+    "heading": "Contáctanos",
+    "subtitle": "¿Tienes preguntas o necesitas ayuda? Estamos aquí para ti. Escríbenos y nuestro equipo te responderá lo antes posible.",
+    "info": {
+      "emailUs": "Escríbenos",
+      "callUs": "Llámanos",
+      "visitUs": "Visítanos",
+      "businessHours": "Horario de atención",
+      "response24h": "Respondemos en 24 horas",
+      "weekendSupport": "Soporte disponible los fines de semana"
+    },
+    "form": {
+      "title": "Envíanos un mensaje",
+      "subtitle": "Completa el formulario a continuación y te responderemos pronto",
+      "name": "Nombre",
+      "email": "Correo electrónico",
+      "subject": "Asunto",
+      "message": "Mensaje",
+      "namePlaceholder": "Tu nombre",
+      "emailPlaceholder": "tu@email.com",
+      "subjectPlaceholder": "¿De qué se trata?",
+      "messagePlaceholder": "Cuéntanos más...",
+      "send": "Enviar mensaje",
+      "sending": "Enviando..."
+    },
+    "toast": {
+      "fillAll": "Por favor completa todos los campos",
+      "sentTitle": "¡Mensaje enviado!",
+      "sentDesc": "Te responderemos en 24 horas.",
+      "failedTitle": "No se pudo enviar el mensaje",
+      "failedDesc": "Inténtalo de nuevo o escríbenos directamente a support@tutorspool.com"
+    },
+    "faq": {
+      "title": "Preguntas frecuentes",
+      "items": [
+        {
+          "question": "¿Cómo encuentro un tutor?",
+          "answer": "Navega nuestro directorio de tutores, filtra por materia o experiencia, revisa perfiles y reserva una sesión directamente desde la plataforma."
+        },
+        {
+          "question": "¿Qué métodos de pago aceptan?",
+          "answer": "Aceptamos las principales tarjetas de crédito, PayPal y transferencias bancarias. El pago se procesa de forma segura a través de nuestra plataforma."
+        },
+        {
+          "question": "¿Puedo ser tutor?",
+          "answer": "¡Sí! Si tienes experiencia en una materia y pasión por la enseñanza, aplica a través de la opción 'Conviértete en tutor'. Revisamos tu solicitud en 48 horas."
+        },
+        {
+          "question": "¿Cómo funcionan las sesiones en línea?",
+          "answer": "Las sesiones se realizan por videollamada de Zoom. Una vez que el tutor acepta tu reserva, recibirás un enlace para unirte a la hora programada."
+        }
+      ]
+    },
+    "help": {
+      "title": "¿Necesitas más ayuda?",
+      "subtitle": "Nuestro equipo de soporte está disponible 24/7 para ayudarte",
+      "liveChat": "Iniciar chat en vivo"
+    }
+  },
+  "faq": {
+    "metaTitle": "Preguntas frecuentes - TutorsPool",
+    "badge": "FAQ",
+    "heading": "Preguntas frecuentes",
+    "subtitle": "Respuestas rápidas a las preguntas más comunes de estudiantes y tutores.",
+    "groups": {
+      "gettingStarted": "Primeros pasos",
+      "sessions": "Sesiones y programación",
+      "forTutors": "Para tutores",
+      "security": "Seguridad y pagos"
+    },
+    "groupDescription": "Respuestas relacionadas con {title} en TutorsPool.",
+    "items": [
+      {
+        "group": "gettingStarted",
+        "question": "¿Cómo creo una cuenta de estudiante?",
+        "answer": "Haz clic en 'Empezar', elige la opción de estudiante y completa el breve formulario de registro con tus datos básicos."
+      },
+      {
+        "group": "gettingStarted",
+        "question": "¿Cómo encuentro el tutor adecuado?",
+        "answer": "Usa los filtros en la página 'Buscar tutores' para filtrar por materia, nivel, precio y disponibilidad, luego revisa perfiles y reseñas."
+      },
+      {
+        "group": "sessions",
+        "question": "¿Cómo se realizan las sesiones?",
+        "answer": "Las sesiones son en línea mediante Zoom. Una vez que el tutor acepta tu solicitud, recibirás un enlace con la fecha y hora."
+      },
+      {
+        "group": "sessions",
+        "question": "¿Puedo reprogramar o cancelar una sesión?",
+        "answer": "Sí. Puedes gestionar las sesiones próximas desde tu panel. Revisa la política de cancelación del tutor antes de hacer cambios."
+      },
+      {
+        "group": "forTutors",
+        "question": "¿Cómo me convierto en tutor?",
+        "answer": "Aplica a través de la opción 'Conviértete en tutor' durante el registro. Revisamos tu experiencia, materias y perfil antes de aprobarte."
+      },
+      {
+        "group": "forTutors",
+        "question": "¿Cómo consigo más estudiantes?",
+        "answer": "Mantén tu perfil completo, mantén altas calificaciones y define tu disponibilidad claramente para que los estudiantes puedan reservar fácilmente."
+      },
+      {
+        "group": "security",
+        "question": "¿Mi información de pago es segura?",
+        "answer": "Sí. Trabajamos con proveedores de pago confiables y nunca almacenamos los datos completos de la tarjeta en nuestros servidores."
+      },
+      {
+        "group": "security",
+        "question": "¿Cómo se protegen mis datos?",
+        "answer": "Seguimos las mejores prácticas de la industria para la protección de datos. Aprende más en nuestra Política de privacidad."
+      }
+    ],
+    "stillQuestions": {
+      "title": "¿Sigues con dudas?",
+      "desc": "Si no encuentras la respuesta que buscas, nuestro equipo de soporte está aquí para ayudarte. Visita nuestro Centro de ayuda o contáctanos directamente."
+    }
+  },
+  "subjects": {
+    "metaTitle": "Materias - TutorsPool | Más de 50 materias disponibles",
+    "badge": "Más de 50 materias disponibles",
+    "heading": "Explora nuestras materias",
+    "subtitle": "Desde matemáticas hasta música, encuentra tutores expertos en cualquier materia. Nuestros educadores verificados están listos para ayudarte a alcanzar tus metas de aprendizaje.",
+    "cardDescription": "Tutores expertos disponibles para todos los niveles",
+    "tutorsCount": "{{count}} tutores",
+    "moreSubjects": "+{{count}} más",
+    "findTutors": "Buscar tutores",
+    "cta": {
+      "title": "¿No encuentras tu materia?",
+      "subtitle": "Siempre estamos añadiendo nuevas materias y tutores. ¡Cuéntanos qué buscas!",
+      "contactUs": "Contáctanos"
+    }
+  },
+  "reviews": {
+    "metaTitle": "Reseñas de estudiantes - TutorsPool | Testimonios reales",
+    "badge": {
+      "rating": "Calificación promedio {{rating}}",
+      "reviews": "Reseñas de estudiantes"
+    },
+    "heading": "Lo que dicen nuestros estudiantes",
+    "subtitle": "Lee reseñas reales de estudiantes que han transformado su trayectoria de aprendizaje con nuestros tutores expertos.",
+    "stats": {
+      "happyStudents": "Estudiantes felices",
+      "fiveStarReviews": "Reseñas de 5 estrellas",
+      "expertTutors": "Tutores expertos",
+      "satisfactionRate": "Tasa de satisfacción"
+    },
+    "noReviews": {
+      "title": "Aún no hay reseñas",
+      "desc": "¡Sé el primero en dejar una reseña después de completar una sesión con uno de nuestros tutores!"
+    },
+    "review": {
+      "with": "con"
+    },
+    "cta": {
+      "title": "¿Listo para comenzar tu trayectoria de aprendizaje?",
+      "subtitle": "Únete a cientos de estudiantes que han mejorado sus calificaciones y alcanzado sus metas.",
+      "findTutor": "Buscar tutor",
+      "getStarted": "Empezar"
+    },
+    "time": {
+      "today": "Hoy",
+      "yesterday": "Ayer",
+      "daysAgo": "Hace {{count}} días",
+      "weekAgo": "Hace {{count}} semana",
+      "weeksAgo": "Hace {{count}} semanas",
+      "monthAgo": "Hace {{count}} mes",
+      "monthsAgo": "Hace {{count}} meses",
+      "yearAgo": "Hace {{count}} año",
+      "yearsAgo": "Hace {{count}} años"
+    }
+  },
+  "findTutors": {
+    "metaTitle": "Buscar tutores - TutorsPool | Explora tutores expertos",
+    "heading": "Encuentra tu tutor ideal",
+    "subtitle": "Explora nuestra comunidad de tutores expertos y encuentra la mejor opción para tu trayectoria de aprendizaje.",
+    "badge": "{{count}}+ tutores verificados",
+    "searchPlaceholder": "Buscar por nombre o materia...",
+    "filterPlaceholder": "Todas las materias",
+    "allSubjects": "Todas las materias",
+    "resultsCount": "Mostrando {{count}} tutor",
+    "resultsCountPlural": "Mostrando {{count}} tutores",
+    "noResults": {
+      "title": "No se encontraron tutores",
+      "desc": "Intenta ajustar tu búsqueda o filtros"
+    },
+    "clearFilters": "Limpiar filtros",
+    "newTutor": "Nuevo tutor",
+    "experience": "{{years}}+ años",
+    "experienceFallback": "2+ años",
+    "perHour": "/h",
+    "viewProfile": "Ver perfil",
+    "bookSession": "Reservar sesión",
+    "loginToBook": "Inicia sesión para reservar"
+  },
+  "features": {
+    "title": "¿Por qué elegir TutorsPool?",
+    "subtitle": "Todo lo que necesitas para acelerar tu trayectoria de aprendizaje en una sola plataforma.",
+    "expertTutors": {
+      "title": "Tutores expertos",
+      "description": "Aprende de profesionales verificados con historial comprobado en sus materias."
+    },
+    "liveSessions": {
+      "title": "Sesiones en vivo",
+      "description": "Sesiones de video interactivas uno a uno a través de Zoom para una experiencia personalizada."
+    },
+    "aiCareer": {
+      "title": "Orientación profesional con IA",
+      "description": "Obtén sugerencias profesionales personalizadas según tus habilidades y metas de aprendizaje."
+    },
+    "flexibleScheduling": {
+      "title": "Horarios flexibles",
+      "description": "Reserva sesiones a tu conveniencia con tutores en diferentes zonas horarias."
+    },
+    "subjects25": {
+      "title": "Más de 25 materias",
+      "description": "Desde matemáticas hasta idiomas, encuentra tutores para casi cualquier materia."
+    },
+    "trackProgress": {
+      "title": "Seguimiento de progreso",
+      "description": "Monitorea tu trayectoria de aprendizaje con seguimiento detallado y análisis."
+    }
+  },
+  "cta": {
+    "student": {
+      "title": "¿Listo para aprender?",
+      "subtitle": "Únete a miles de estudiantes que ya están aprendiendo con tutores expertos. Comienza tu viaje hoy.",
+      "button": "Empieza a aprender"
+    },
+    "tutor": {
+      "title": "Comparte tu experiencia",
+      "subtitle": "Conviértete en tutor y ayuda a estudiantes a alcanzar sus metas mientras ganas dinero según tu horario.",
+      "button": "Conviértete en tutor"
+    }
+  },
+  "featuredTutors": {
+    "badge": "Tutores mejor calificados",
+    "title": "Conoce a nuestros tutores expertos",
+    "subtitle": "Aprende de los mejores. Nuestros tutores verificados están aquí para ayudarte a tener éxito.",
+    "review": "reseña",
+    "reviews": "reseñas",
+    "newTutor": "Nuevo tutor",
+    "viewProfile": "Ver perfil",
+    "viewAll": "Ver todos los tutores"
+  },
+  "auth": {
+    "login": {
+      "title": "Bienvenido de nuevo",
+      "subtitle": "Inicia sesión para continuar tu trayectoria de aprendizaje",
+      "email": "Correo electrónico",
+      "password": "Contraseña",
+      "forgotPassword": "¿Olvidaste tu contraseña?",
+      "signIn": "Iniciar sesión",
+      "signingIn": "Iniciando sesión...",
+      "noAccount": "¿No tienes una cuenta?",
+      "createAccount": "Crear cuenta",
+      "welcomeRight": "Continúa tu trayectoria de aprendizaje",
+      "welcomeRightDesc": "Accede a tu panel personalizado, haz seguimiento de tu progreso y conecta con tutores expertos."
+    },
+    "register": {
+      "title": "Crea tu cuenta",
+      "subtitle": "Elige tu rol y comienza",
+      "fullName": "Nombre completo",
+      "confirmPassword": "Confirmar contraseña",
+      "adminKey": "Clave de seguridad de administrador",
+      "adminKeyHint": "Contacta a un administrador existente para obtener la clave de seguridad.",
+      "createAccount": "Crear cuenta de {role}",
+      "creating": "Creando cuenta...",
+      "hasAccount": "¿Ya tienes una cuenta?",
+      "signIn": "Iniciar sesión",
+      "termsAgree": "Al crear una cuenta, aceptas nuestros",
+      "terms": "Términos de servicio",
+      "privacy": "Política de privacidad",
+      "roles": {
+        "student": "Estudiante",
+        "studentDesc": "Aprende de tutores expertos",
+        "tutor": "Tutor",
+        "tutorDesc": "Comparte tu experiencia",
+        "parent": "Padre/Madre",
+        "parentDesc": "Monitorea el progreso de tu hijo",
+        "admin": "Administrador",
+        "adminDesc": "Gestiona la plataforma"
+      }
+    },
+    "validation": {
+      "emailInvalid": "Dirección de correo no válida",
+      "passwordRequired": "La contraseña es obligatoria",
+      "nameMin": "El nombre debe tener al menos 2 caracteres",
+      "passwordMin": "La contraseña debe tener al menos 8 caracteres",
+      "passwordMatch": "Las contraseñas no coinciden"
+    },
+    "toast": {
+      "validationError": "Error de validación",
+      "securityKeyRequired": "Clave de seguridad requerida",
+      "securityKeyRequiredDesc": "Ingresa la clave de seguridad de administrador para registrarte como administrador.",
+      "invalidKey": "Clave de seguridad no válida",
+      "invalidKeyDesc": "La clave de seguridad de administrador es incorrecta. Contacta a un administrador existente para obtener la clave correcta.",
+      "verificationFailed": "Error de verificación",
+      "verificationFailedDesc": "No se pudo verificar la clave de administrador. Inténtalo de nuevo.",
+      "welcomeBack": "¡Bienvenido de nuevo!",
+      "signInSuccess": "Has iniciado sesión correctamente.",
+      "signInFailed": "Error al iniciar sesión",
+      "verificationEmailSent": "¡Correo de verificación enviado!",
+      "verifyBeforeSignIn": "Por favor revisa tu correo y verifica tu cuenta antes de iniciar sesión.",
+      "registrationFailed": "Error al crear la cuenta"
+    },
+    "errors": {
+      "invalidCredential": "Correo o contraseña incorrectos. Inténtalo de nuevo.",
+      "tooManyRequests": "Demasiados intentos fallidos. Inténtalo más tarde.",
+      "userDisabled": "Esta cuenta ha sido deshabilitada. Contacta al soporte.",
+      "emailNotVerified": "Por favor verifica tu correo electrónico antes de iniciar sesión. Revisa tu bandeja de entrada para el enlace de verificación.",
+      "profileMissing": "Los datos de tu cuenta fueron eliminados. Tu cuenta ha sido limpiada; vuelve a registrarte con el mismo correo.",
+      "emailInUse": "Este correo ya está registrado. Intenta iniciar sesión, o usa '¿Olvidaste tu contraseña?' en la página de inicio de sesión para recuperar tu cuenta.",
+      "weakPassword": "La contraseña es demasiado débil. Usa una contraseña más segura.",
+      "invalidEmail": "Dirección de correo no válida.",
+      "networkFailed": "Error de red. Verifica tu conexión a internet.",
+      "operationNotAllowed": "Las cuentas de correo/contraseña no están habilitadas. Contacta al soporte.",
+      "defaultRegister": "No se pudo crear la cuenta. Inténtalo de nuevo.",
+      "defaultSignIn": "Error al iniciar sesión. Inténtalo de nuevo."
+    }
+  },
+  "dashboard": {
+    "welcome": "¡Bienvenido de nuevo, {name}!",
+    "studentPortal": "Portal del estudiante",
+    "tutorPortal": "Portal del tutor",
+    "parentPortal": "Panel del padre/madre",
+    "adminPortal": "Panel del administrador",
+    "tagline": {
+      "student": "Haz seguimiento de tu progreso y continúa tu trayectoria de aprendizaje.",
+      "tutor": "Gestiona tus sesiones y conecta con estudiantes.",
+      "parent": "Monitorea el progreso de aprendizaje de tu hijo.",
+      "admin": "Gestiona usuarios, sesiones y configuraciones de la plataforma."
+    },
+    "roles": {
+      "student": "Estudiante",
+      "tutor": "Tutor",
+      "parent": "Padre/Madre",
+      "admin": "Administrador"
+    },
+    "profile": "Perfil",
+    "logout": "Cerrar sesión"
+  },
   "tutorProfile": {
     "notFound": "Tutor no encontrado",
     "notFoundDesc": "Este perfil de tutor no está disponible.",
-    "browseTutors": "Ver tutores",
+    "browseTutors": "Explorar tutores",
     "backToTutors": "Volver a tutores",
     "memberSince": "Miembro desde {{date}}",
     "newTutor": "Nuevo tutor",
     "rating": "Calificación",
     "sessionRate": "Tarifa por sesión",
-    "perHour": "/hr",
+    "perHour": "/h",
     "aboutMe": "Sobre mí",
     "subjectsITeach": "Materias que enseño",
-    "qualification": "Titulación",
+    "qualification": "Calificación",
     "teachingExperience": "Experiencia docente",
     "teachingStyle": "Estilo de enseñanza",
     "studentReviews": "Reseñas de estudiantes",
     "review": "reseña",
     "reviews": "reseñas",
-    "readyHeading": "¿Listo para lograr tus metas académicas?",
-    "readySubtitle": "¡Reserva una sesión con {{name}} ahora y empieza a aprender!",
+    "readyHeading": "¿Listo para alcanzar tus metas académicas?",
+    "readySubtitle": "Reserva una sesión con {{name}} ahora y empieza a aprender.",
     "reportTutor": "Reportar tutor",
     "reportQuestion": "¿Encontraste algo inapropiado?",
-    "reportSubtitle": "Reporta este tutor a nuestro equipo de soporte."
+    "reportSubtitle": "Reporta a este tutor a nuestro equipo de soporte."
   }
 }
