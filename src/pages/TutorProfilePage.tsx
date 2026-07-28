@@ -172,7 +172,7 @@ export default function TutorProfilePage() {
                   <CardContent className="p-5 space-y-4">
                     <div>
                       <p className="text-3xl font-bold text-primary">
-                        ${tutor.hourlyRate || 0}
+                        <Price usd={tutor.hourlyRate || 0} />
                         <span className="text-base font-medium text-muted-foreground">{t("tutorProfile.perHour")}</span>
                       </p>
                       <p className="text-sm text-muted-foreground">{t("tutorProfile.sessionRate")}</p>
