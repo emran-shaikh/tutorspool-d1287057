@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Star, ArrowRight, GraduationCap, Clock, DollarSign, Sparkles } from "lucide-react";
 import { getTutors, TutorProfile, getAllReviews } from "@/lib/firestore";
+import { Price } from "@/components/Price";
 
 interface TutorWithRating extends TutorProfile {
   avgRating: number;
@@ -147,8 +148,7 @@ export function FeaturedTutors() {
                     {tutor.experience || "2+ yrs"}
                   </span>
                   <span className="flex items-center gap-0.5 font-bold text-primary text-base">
-                    <DollarSign className="h-4 w-4" />
-                    {tutor.hourlyRate || 30}/hr
+                    <Price usd={tutor.hourlyRate || 30} suffix="/hr" />
                   </span>
                 </div>
 

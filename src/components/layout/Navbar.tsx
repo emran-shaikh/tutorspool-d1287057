@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/contexts/AuthContext";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { CurrencySwitcher } from "@/components/CurrencySwitcher";
 
 function useNavLinks() {
   const { t } = useTranslation();
@@ -62,7 +63,8 @@ export function Navbar() {
 
         {/* Right Side Actions */}
         <div className="flex items-center gap-2 sm:gap-3">
-          <div className="hidden sm:flex">
+          <div className="hidden sm:flex items-center">
+            <CurrencySwitcher />
             <LanguageSwitcher />
           </div>
 
@@ -125,6 +127,7 @@ export function Navbar() {
             ))}
             <hr className="my-2 border-border" />
             <LanguageSwitcher variant="mobile" />
+            <CurrencySwitcher variant="mobile" />
             {isLoggedIn ? (
               <>
                 <Link to={dashboardHref} onClick={() => setMobileMenuOpen(false)}>
