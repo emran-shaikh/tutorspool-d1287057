@@ -13,6 +13,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { notifyParentsOfSessionBooked } from "@/lib/parentNotifications";
+import { Price } from "@/components/Price";
 
 const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -207,7 +208,7 @@ export default function BookSession() {
                 </span>
               ))}
             </div>
-            <p className="font-semibold text-blue-600 dark:text-blue-400">${tutor.hourlyRate}/hour</p>
+            <p className="font-semibold text-blue-600 dark:text-blue-400"><Price usd={tutor.hourlyRate || 0} suffix="/hour" /></p>
           </CardContent>
         </Card>
 

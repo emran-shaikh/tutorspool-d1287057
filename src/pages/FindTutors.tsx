@@ -12,6 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Search, Star, Clock, DollarSign, GraduationCap, Users, Filter, ChevronRight, Award, ArrowRight, MapPin, Sparkles } from "lucide-react";
 import { getTutors, TutorProfile, getAllReviews, Review } from "@/lib/firestore";
 import { useAuth } from "@/contexts/AuthContext";
+import { Price } from "@/components/Price";
 
 // Subject filters are now derived dynamically from tutor data
 
@@ -283,8 +284,7 @@ export default function FindTutors() {
                           )}
                         </div>
                         <span className="flex items-center font-bold text-primary text-lg">
-                          <DollarSign className="h-4 w-4" />
-                          {tutor.hourlyRate || 30}
+                          <Price usd={tutor.hourlyRate || 30} />
                           <span className="text-xs font-normal text-muted-foreground ml-0.5">/hr</span>
                         </span>
                       </div>

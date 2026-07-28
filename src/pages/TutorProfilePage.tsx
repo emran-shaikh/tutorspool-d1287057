@@ -24,6 +24,7 @@ import {
 import { getTutorProfile, getAllReviews, TutorProfile, Review } from "@/lib/firestore";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTranslatedText } from "@/hooks/useTranslatedText";
+import { Price } from "@/components/Price";
 
 export default function TutorProfilePage() {
   const { uid } = useParams<{ uid: string }>();
