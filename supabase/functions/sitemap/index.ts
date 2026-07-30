@@ -72,21 +72,21 @@ async function fetchPublishedBlogPosts() {
 
 serve(async () => {
   const blogPosts = await fetchPublishedBlogPosts();
-  const today = new Date().toISOString().split("T")[0];
 
   let xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
 `;
 
   for (const route of staticRoutes) {
     xml += `  <url>
     <loc>${SITE_URL}${route.path}</loc>
-    <lastmod>${today}</lastmod>
+${altLinks(route.path)}
     <changefreq>${route.changefreq}</changefreq>
     <priority>${route.priority}</priority>
   </url>
 `;
   }
+
 
   for (const post of blogPosts) {
     if (post.slug) {
