@@ -38,7 +38,7 @@ const roles = [
 ];
 
 export default function Careers() {
-  const canonicalUrl = `${window.location.origin}/careers`;
+  const canonicalUrl = `https://tutorspool.com/careers`;
 
   return (
     <>

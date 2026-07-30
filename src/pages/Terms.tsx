@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Helmet } from "react-helmet-async";
 
 export default function Terms() {
-  const canonicalUrl = `${window.location.origin}/terms`;
+  const canonicalUrl = `https://tutorspool.com/terms`;
 
   return (
     <>

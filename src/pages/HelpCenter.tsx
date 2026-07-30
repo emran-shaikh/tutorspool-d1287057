@@ -51,7 +51,7 @@ const helpCategories = [
 ];
 
 export default function HelpCenter() {
-  const canonicalUrl = `${window.location.origin}/help`;
+  const canonicalUrl = `https://tutorspool.com/help`;
 
   return (
     <>

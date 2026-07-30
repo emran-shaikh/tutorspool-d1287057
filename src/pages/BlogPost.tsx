@@ -83,12 +83,12 @@ export default function BlogPost() {
       "name": "TutorsPool",
       "logo": {
         "@type": "ImageObject",
-        "url": `${window.location.origin}/favicon.ico`
+        "url": `https://tutorspool.com/favicon.ico`
       }
     },
     "mainEntityOfPage": {
       "@type": "WebPage",
-      "@id": `${window.location.origin}/blog/${post.slug}`
+      "@id": `https://tutorspool.com/blog/${post.slug}`
     }
   };
 
@@ -98,14 +98,14 @@ export default function BlogPost() {
         <title>{post.metaTitle || post.title} | TutorsPool Blog</title>
         <meta name="description" content={post.metaDescription || post.excerpt} />
         <meta name="keywords" content={post.tags.join(', ')} />
-        <link rel="canonical" href={`${window.location.origin}/blog/${post.slug}`} />
+        <link rel="canonical" href={`https://tutorspool.com/blog/${post.slug}`} />
         
         {/* Open Graph */}
         <meta property="og:type" content="article" />
         <meta property="og:title" content={post.metaTitle || post.title} />
         <meta property="og:description" content={post.metaDescription || post.excerpt} />
         {post.coverImage && <meta property="og:image" content={post.coverImage} />}
-        <meta property="og:url" content={`${window.location.origin}/blog/${post.slug}`} />
+        <meta property="og:url" content={`https://tutorspool.com/blog/${post.slug}`} />
         
         {/* Twitter Card */}
         <meta name="twitter:card" content="summary_large_image" />

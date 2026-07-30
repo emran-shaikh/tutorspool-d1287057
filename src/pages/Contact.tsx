@@ -123,11 +123,11 @@ export default function Contact() {
       <Helmet>
         <title>Contact Us - TutorsPool | Get In Touch</title>
         <meta name="description" content="Contact TutorsPool for questions about tutoring, sessions, or partnerships. Reach our support team via email, phone, or our contact form." />
-        <link rel="canonical" href={`${window.location.origin}/contact`} />
+        <link rel="canonical" href={`https://tutorspool.com/contact`} />
         <meta property="og:type" content="website" />
         <meta property="og:title" content="Contact Us - TutorsPool | Get In Touch" />
         <meta property="og:description" content="Contact TutorsPool for questions about tutoring, sessions, or partnerships. Reach our support team via email, phone, or our contact form." />
-        <meta property="og:url" content={`${window.location.origin}/contact`} />
+        <meta property="og:url" content={`https://tutorspool.com/contact`} />
         <meta name="twitter:title" content="Contact Us - TutorsPool | Get In Touch" />
         <meta name="twitter:description" content="Contact TutorsPool for questions about tutoring, sessions, or partnerships. Reach our support team via email, phone, or our contact form." />
       </Helmet>

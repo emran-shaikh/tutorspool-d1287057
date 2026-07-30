@@ -73,7 +73,7 @@ const faqGroups = [
 ];
 
 export default function FAQ() {
-  const canonicalUrl = `${window.location.origin}/faq`;
+  const canonicalUrl = `https://tutorspool.com/faq`;
 
   return (
     <>
