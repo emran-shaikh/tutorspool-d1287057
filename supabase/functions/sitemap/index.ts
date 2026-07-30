@@ -3,6 +3,8 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 const SITE_URL = "https://tutorspool.com";
 const FIREBASE_PROJECT_ID = "tutorspooldb";
 
+const LANGS = ["en", "ar", "es"];
+
 const staticRoutes = [
   { path: "/", priority: "1.0", changefreq: "weekly" },
   { path: "/subjects", priority: "0.9", changefreq: "weekly" },
@@ -14,11 +16,20 @@ const staticRoutes = [
   { path: "/help", priority: "0.5", changefreq: "monthly" },
   { path: "/faq", priority: "0.6", changefreq: "monthly" },
   { path: "/careers", priority: "0.5", changefreq: "monthly" },
+  { path: "/disclaimer", priority: "0.3", changefreq: "yearly" },
   { path: "/terms", priority: "0.3", changefreq: "yearly" },
   { path: "/privacy", priority: "0.3", changefreq: "yearly" },
-  { path: "/login", priority: "0.4", changefreq: "monthly" },
-  { path: "/register", priority: "0.4", changefreq: "monthly" },
 ];
+
+function altLinks(path: string) {
+  return (
+    LANGS.map(
+      (l) =>
+        `    <xhtml:link rel="alternate" hreflang="${l}" href="${SITE_URL}${path}${l === "en" ? "" : `?lng=${l}`}"/>`,
+    ).join("\n") +
+    `\n    <xhtml:link rel="alternate" hreflang="x-default" href="${SITE_URL}${path}"/>`
+  );
+}
 
 async function fetchPublishedBlogPosts() {
   try {
