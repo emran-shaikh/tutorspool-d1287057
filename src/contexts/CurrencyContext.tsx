@@ -50,6 +50,34 @@ const LANG_TO_CURRENCY: Record<string, CurrencyCode> = {
   es: "EUR",
 };
 
+// Currency → its home locale, so formatting matches local convention
+// (symbol placement, separators, spacing) when the UI language has no region.
+const CURRENCY_LOCALE: Record<CurrencyCode, string> = {
+  USD: "en-US", GBP: "en-GB", EUR: "de-DE", PKR: "en-PK", INR: "en-IN",
+  SAR: "ar-SA", AED: "ar-AE", CAD: "en-CA", AUD: "en-AU", EGP: "ar-EG", MXN: "es-MX",
+};
+
+// Minor-unit precision per currency (all supported ones use 2 today, but
+// large/low-value currencies read better without decimals).
+const CURRENCY_DECIMALS: Partial<Record<CurrencyCode, number>> = {
+  USD: 2, GBP: 2, EUR: 2, INR: 2, SAR: 2, AED: 2, CAD: 2, AUD: 2, MXN: 2,
+  PKR: 0, EGP: 0,
+};
+
+const RTL_LANGS = new Set(["ar", "he", "fa", "ur"]);
+
+/** Prefer the UI language, but keep the currency's regional conventions. */
+function resolveLocale(lang: string, currency: CurrencyCode): string {
+  const home = CURRENCY_LOCALE[currency] || "en-US";
+  const region = home.split("-")[1];
+  const candidate = region ? `${lang}-${region}` : lang;
+  try {
+    const [resolved] = Intl.NumberFormat.supportedLocalesOf([candidate]);
+    if (resolved) return resolved;
+  } catch { /* ignore */ }
+  return home;
+}
+
 interface FxCache {
   base: "USD";
   rates: Partial<Record<CurrencyCode, number>>;
@@ -164,24 +192,51 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
     const meta = SUPPORTED_CURRENCIES.find((c) => c.code === code) || SUPPORTED_CURRENCIES[0];
     const rate = rates[code] ?? 1;
     const convert = (usd: number) => usd * rate;
+
+    const lang = (i18n.language || "en").slice(0, 2);
+    const locale = resolveLocale(lang, code);
+    const decimals = CURRENCY_DECIMALS[code] ?? 2;
+    const isRtl = RTL_LANGS.has(lang);
+
+    const makeFormatter = (min: number, max: number, display: "narrowSymbol" | "symbol") =>
+      new Intl.NumberFormat(locale, {
+        style: "currency",
+        currency: code,
+        currencyDisplay: display,
+        minimumFractionDigits: min,
+        maximumFractionDigits: max,
+      });
+
     const format = (usd: number, opts?: { withCurrency?: boolean }) => {
       const amount = convert(usd || 0);
-      // Round: no decimals for large numbers, 2 for small
-      const rounded = amount >= 100 ? Math.round(amount) : Math.round(amount * 100) / 100;
+      // Whole units for large amounts / zero-decimal currencies, otherwise the
+      // currency's natural precision.
+      const useDecimals = decimals > 0 && Math.abs(amount) < 1000;
+      const min = useDecimals ? decimals : 0;
+      const max = useDecimals ? decimals : 0;
+
+      let out: string;
       try {
-        const nf = new Intl.NumberFormat(i18n.language || "en", {
-          style: "currency",
-          currency: code,
-          maximumFractionDigits: amount >= 100 ? 0 : 2,
-          minimumFractionDigits: 0,
-        });
-        return nf.format(rounded);
+        out = makeFormatter(min, max, "narrowSymbol").format(amount);
       } catch {
-        return `${meta.symbol}${rounded.toLocaleString()}${opts?.withCurrency ? ` ${code}` : ""}`;
+        try {
+          out = makeFormatter(min, max, "symbol").format(amount);
+        } catch {
+          const rounded = useDecimals
+            ? amount.toFixed(decimals)
+            : Math.round(amount).toLocaleString(locale);
+          out = `${meta.symbol}${rounded}`;
+        }
       }
+
+      if (opts?.withCurrency && !out.includes(code)) out = `${out} ${code}`;
+      // Isolate the money run so a LTR-shaped amount doesn't reorder inside RTL text.
+      return isRtl ? `\u2068${out}\u2069` : out;
     };
+
     return { code, meta, setCurrency, convert, format, ready };
   }, [code, rates, ready, i18n.language]);
+
 
   return <CurrencyContext.Provider value={value}>{children}</CurrencyContext.Provider>;
 }
