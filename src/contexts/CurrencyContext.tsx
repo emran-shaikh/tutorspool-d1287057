@@ -50,6 +50,34 @@ const LANG_TO_CURRENCY: Record<string, CurrencyCode> = {
   es: "EUR",
 };
 
+// Currency → its home locale, so formatting matches local convention
+// (symbol placement, separators, spacing) when the UI language has no region.
+const CURRENCY_LOCALE: Record<CurrencyCode, string> = {
+  USD: "en-US", GBP: "en-GB", EUR: "de-DE", PKR: "en-PK", INR: "en-IN",
+  SAR: "ar-SA", AED: "ar-AE", CAD: "en-CA", AUD: "en-AU", EGP: "ar-EG", MXN: "es-MX",
+};
+
+// Minor-unit precision per currency (all supported ones use 2 today, but
+// large/low-value currencies read better without decimals).
+const CURRENCY_DECIMALS: Partial<Record<CurrencyCode, number>> = {
+  USD: 2, GBP: 2, EUR: 2, INR: 2, SAR: 2, AED: 2, CAD: 2, AUD: 2, MXN: 2,
+  PKR: 0, EGP: 0,
+};
+
+const RTL_LANGS = new Set(["ar", "he", "fa", "ur"]);
+
+/** Prefer the UI language, but keep the currency's regional conventions. */
+function resolveLocale(lang: string, currency: CurrencyCode): string {
+  const home = CURRENCY_LOCALE[currency] || "en-US";
+  const region = home.split("-")[1];
+  const candidate = region ? `${lang}-${region}` : lang;
+  try {
+    const [resolved] = Intl.NumberFormat.supportedLocalesOf([candidate]);
+    if (resolved) return resolved;
+  } catch { /* ignore */ }
+  return home;
+}
+
 interface FxCache {
   base: "USD";
   rates: Partial<Record<CurrencyCode, number>>;
