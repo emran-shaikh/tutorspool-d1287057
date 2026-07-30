@@ -84,7 +84,7 @@ export default function Subjects() {
       <Helmet>
         <title>Subjects - TutorsPool | 50+ Subjects Available</title>
         <meta name="description" content="Browse 50+ subjects on TutorsPool — math, science, languages, programming, music, arts, test prep, and more. Find expert tutors in any subject." />
-        <link rel="canonical" href={`${window.location.origin}/subjects`} />
+        <link rel="canonical" href={`https://tutorspool.com/subjects`} />
       </Helmet>
       <div className="min-h-screen flex flex-col">
       <Navbar />

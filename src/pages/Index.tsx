@@ -9,7 +9,7 @@ import { AnnouncementBanner } from "@/components/AnnouncementBanner";
 import { Helmet } from "react-helmet-async";
 
 const Index = () => {
-  const siteUrl = typeof window !== "undefined" ? window.location.origin : "";
+  const siteUrl = "https://tutorspool.com";
   const title = "TutorsPool | Personalized Online Tutoring";
   const description = "Connect with expert tutors for 1-on-1 online sessions in math, science, languages, test prep, and more.";
   const imageUrl = `${siteUrl}/hero-tutoring.jpg`;

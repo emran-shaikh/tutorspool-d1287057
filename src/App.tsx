@@ -11,6 +11,7 @@ import Index from "./pages/Index";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { CookieConsent } from "@/components/CookieConsent";
 import { AnalyticsTracker } from "@/components/AnalyticsTracker";
+import { SeoLocale } from "@/components/SeoLocale";
 
 // Lazy-loaded routes — keeps initial JS bundle small (better LCP/INP)
 const Login = lazy(() => import("./pages/Login"));
@@ -127,6 +128,8 @@ const App = () => (
         <AuthProvider>
           <ErrorBoundary>
             <AnalyticsTracker />
+            <SeoLocale />
+
             <Suspense fallback={<RouteFallback />}>
               <Routes>
                 <Route path="/" element={<Index />} />

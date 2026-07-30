@@ -3,6 +3,8 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 const SITE_URL = "https://tutorspool.com";
 const FIREBASE_PROJECT_ID = "tutorspooldb";
 
+const LANGS = ["en", "ar", "es"];
+
 const staticRoutes = [
   { path: "/", priority: "1.0", changefreq: "weekly" },
   { path: "/subjects", priority: "0.9", changefreq: "weekly" },
@@ -14,11 +16,20 @@ const staticRoutes = [
   { path: "/help", priority: "0.5", changefreq: "monthly" },
   { path: "/faq", priority: "0.6", changefreq: "monthly" },
   { path: "/careers", priority: "0.5", changefreq: "monthly" },
+  { path: "/disclaimer", priority: "0.3", changefreq: "yearly" },
   { path: "/terms", priority: "0.3", changefreq: "yearly" },
   { path: "/privacy", priority: "0.3", changefreq: "yearly" },
-  { path: "/login", priority: "0.4", changefreq: "monthly" },
-  { path: "/register", priority: "0.4", changefreq: "monthly" },
 ];
+
+function altLinks(path: string) {
+  return (
+    LANGS.map(
+      (l) =>
+        `    <xhtml:link rel="alternate" hreflang="${l}" href="${SITE_URL}${path}${l === "en" ? "" : `?lng=${l}`}"/>`,
+    ).join("\n") +
+    `\n    <xhtml:link rel="alternate" hreflang="x-default" href="${SITE_URL}${path}"/>`
+  );
+}
 
 async function fetchPublishedBlogPosts() {
   try {
@@ -61,21 +72,21 @@ async function fetchPublishedBlogPosts() {
 
 serve(async () => {
   const blogPosts = await fetchPublishedBlogPosts();
-  const today = new Date().toISOString().split("T")[0];
 
   let xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
 `;
 
   for (const route of staticRoutes) {
     xml += `  <url>
     <loc>${SITE_URL}${route.path}</loc>
-    <lastmod>${today}</lastmod>
+${altLinks(route.path)}
     <changefreq>${route.changefreq}</changefreq>
     <priority>${route.priority}</priority>
   </url>
 `;
   }
+
 
   for (const post of blogPosts) {
     if (post.slug) {

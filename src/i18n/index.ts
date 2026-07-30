@@ -25,7 +25,8 @@ i18n
     fallbackLng: "en",
     supportedLngs: SUPPORTED_LANGS.map((l) => l.code),
     detection: {
-      order: ["localStorage", "navigator", "htmlTag"],
+      order: ["querystring", "localStorage", "navigator", "htmlTag"],
+      lookupQuerystring: "lng",
       lookupLocalStorage: "tp_lang",
       caches: ["localStorage"],
     },

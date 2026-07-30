@@ -12,5 +12,11 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /student
+Disallow: /parent
+Disallow: /tutor/
+Disallow: /results/
+Disallow: /forgot-password
 
 Sitemap: https://tutorspool.com/sitemap.xml

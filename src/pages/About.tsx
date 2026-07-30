@@ -79,7 +79,7 @@ function TeamMember({ member }: { member: typeof team[number] }) {
 
 export default function About() {
   const { t } = useTranslation();
-  const siteUrl = typeof window !== "undefined" ? window.location.origin : "https://tutorspool.com";
+  const siteUrl = "https://tutorspool.com";
 
   return (
     <>

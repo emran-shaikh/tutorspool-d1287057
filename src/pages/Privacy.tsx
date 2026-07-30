@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Helmet } from "react-helmet-async";
 
 export default function Privacy() {
-  const canonicalUrl = `${window.location.origin}/privacy`;
+  const canonicalUrl = `https://tutorspool.com/privacy`;
 
   return (
     <>

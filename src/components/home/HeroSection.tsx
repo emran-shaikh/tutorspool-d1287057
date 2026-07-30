@@ -96,7 +96,7 @@ export function HeroSection() {
                 className="w-full h-auto aspect-[4/3] object-cover"
                 width={800}
                 height={600}
-                fetchPriority="high"
+                {...({ fetchpriority: "high" } as Record<string, string>)}
                 decoding="async"
               />
 

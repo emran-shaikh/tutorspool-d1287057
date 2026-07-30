@@ -28,11 +28,11 @@ export default function Blog() {
         <title>Blog - TutorsPool | Educational Insights & Learning Tips</title>
         <meta name="description" content="Explore our blog for expert educational insights, learning tips, study strategies, and career guidance from TutorsPool's experienced tutors." />
         <meta name="keywords" content="tutoring blog, education tips, learning strategies, study guides, career advice" />
-        <link rel="canonical" href={`${window.location.origin}/blog`} />
+        <link rel="canonical" href={`https://tutorspool.com/blog`} />
         <meta property="og:type" content="website" />
         <meta property="og:title" content="Blog - TutorsPool | Educational Insights & Learning Tips" />
         <meta property="og:description" content="Explore our blog for expert educational insights, learning tips, study strategies, and career guidance from TutorsPool's experienced tutors." />
-        <meta property="og:url" content={`${window.location.origin}/blog`} />
+        <meta property="og:url" content={`https://tutorspool.com/blog`} />
         <meta name="twitter:title" content="Blog - TutorsPool | Educational Insights & Learning Tips" />
         <meta name="twitter:description" content="Explore our blog for expert educational insights, learning tips, study strategies, and career guidance from TutorsPool's experienced tutors." />
       </Helmet>

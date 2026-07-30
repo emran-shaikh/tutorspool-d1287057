@@ -74,7 +74,7 @@ export default function Reviews() {
       <Helmet>
         <title>Student Reviews - TutorsPool | Real Testimonials</title>
         <meta name="description" content="Read real reviews from students who improved their grades with TutorsPool. See ratings, testimonials, and success stories from our tutoring community." />
-        <link rel="canonical" href={`${window.location.origin}/reviews`} />
+        <link rel="canonical" href={`https://tutorspool.com/reviews`} />
       </Helmet>
       <div className="min-h-screen flex flex-col">
       <Navbar />

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Helmet } from "react-helmet-async";
@@ -23,9 +23,10 @@ interface TutorWithRating extends TutorProfile {
 
 export default function FindTutors() {
   const { user, userProfile } = useAuth();
+  const [searchParams] = useSearchParams();
   const [tutors, setTutors] = useState<TutorWithRating[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
   const [subjectFilter, setSubjectFilter] = useState("All Subjects");
   
 
@@ -105,7 +106,7 @@ export default function FindTutors() {
       <Helmet>
         <title>Find Tutors - TutorsPool | Browse Expert Tutors</title>
         <meta name="description" content="Browse verified expert tutors on TutorsPool. Filter by subject, read reviews, compare rates, and book personalized 1-on-1 sessions." />
-        <link rel="canonical" href={`${window.location.origin}/tutors`} />
+        <link rel="canonical" href={`https://tutorspool.com/tutors`} />
       </Helmet>
       <div className="min-h-screen flex flex-col">
       <Navbar />

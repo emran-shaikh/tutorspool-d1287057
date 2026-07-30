@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Helmet } from "react-helmet-async";
 
 export default function Disclaimer() {
-  const canonicalUrl = `${window.location.origin}/disclaimer`;
+  const canonicalUrl = `https://tutorspool.com/disclaimer`;
 
   return (
     <>
