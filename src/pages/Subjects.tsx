@@ -85,7 +85,22 @@ export default function Subjects() {
         <title>Subjects - TutorsPool | 50+ Subjects Available</title>
         <meta name="description" content="Browse 50+ subjects on TutorsPool — math, science, languages, programming, music, arts, test prep, and more. Find expert tutors in any subject." />
         <link rel="canonical" href={`https://tutorspool.com/subjects`} />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="Subjects - TutorsPool | 50+ Subjects Available" />
+        <meta property="og:description" content="Browse 50+ subjects on TutorsPool — math, science, languages, programming, music, arts, test prep, and more." />
+        <meta property="og:url" content={`https://tutorspool.com/subjects`} />
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "CollectionPage",
+            name: "Subjects offered on TutorsPool",
+            description: "Browse subjects available for online tutoring on TutorsPool.",
+            url: "https://tutorspool.com/subjects",
+            isPartOf: { "@type": "WebSite", name: "TutorsPool", url: "https://tutorspool.com" },
+          })}
+        </script>
       </Helmet>
+
       <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-1">
