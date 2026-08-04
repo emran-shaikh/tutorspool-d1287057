@@ -189,14 +189,17 @@ export default function FindTutors() {
                 <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-muted mb-4">
                   <GraduationCap className="h-8 w-8 text-muted-foreground" />
                 </div>
-                <h3 className="text-xl font-semibold mb-2">No tutors found</h3>
+                <h2 className="text-xl font-semibold mb-2">No tutors found</h2>
                 <p className="text-muted-foreground mb-4">Try adjusting your search or filters</p>
                 <Button variant="outline" onClick={() => { setSearchQuery(""); setSubjectFilter("All Subjects"); }}>
                   Clear Filters
                 </Button>
               </div>
             ) : (
+              <>
+              <h2 className="sr-only">Available tutors</h2>
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+
                 {filteredTutors.map((tutor) => (
                   <div
                     key={tutor.uid}
