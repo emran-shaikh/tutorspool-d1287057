@@ -3,6 +3,7 @@ import { Footer } from "@/components/layout/Footer";
 import { HeroSection } from "@/components/home/HeroSection";
 import { FeaturesSection } from "@/components/home/FeaturesSection";
 import { FeaturedTutors } from "@/components/home/FeaturedTutors";
+import { FaqSection } from "@/components/home/FaqSection";
 import { CTASection } from "@/components/home/CTASection";
 import { ExitIntentPopup } from "@/components/ExitIntentPopup";
 import { AnnouncementBanner } from "@/components/AnnouncementBanner";
@@ -10,9 +11,11 @@ import { Helmet } from "react-helmet-async";
 
 const Index = () => {
   const siteUrl = "https://tutorspool.com";
-  const title = "TutorsPool | Personalized Online Tutoring";
-  const description = "Connect with expert tutors for 1-on-1 online sessions in math, science, languages, test prep, and more.";
+  const title = "TutorsPool | Online Tutors for Math, Science & Test Prep";
+  const description =
+    "Find verified expert tutors for personalized 1-on-1 online sessions in math, science, languages and test prep. Compare rates, read reviews and book a tutor today.";
   const imageUrl = `${siteUrl}/hero-tutoring.jpg`;
+
 
   return (
     <>
