@@ -83,7 +83,52 @@ export default function TutorProfilePage() {
           name="description"
           content={tutor?.bio?.slice(0, 155) || "View tutor profile, subjects, experience, and reviews on TutorsPool."}
         />
+        <link rel="canonical" href={`https://tutorspool.com/tutors/${uid}`} />
+        <meta property="og:type" content="profile" />
+        <meta
+          property="og:title"
+          content={tutor ? `${tutor.fullName} — Tutor Profile | TutorsPool` : "Tutor Profile | TutorsPool"}
+        />
+        <meta
+          property="og:description"
+          content={tutor?.bio?.slice(0, 155) || "View tutor profile, subjects, experience, and reviews on TutorsPool."}
+        />
+        <meta property="og:url" content={`https://tutorspool.com/tutors/${uid}`} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta
+          name="twitter:title"
+          content={tutor ? `${tutor.fullName} — Tutor Profile | TutorsPool` : "Tutor Profile | TutorsPool"}
+        />
+        <meta
+          name="twitter:description"
+          content={tutor?.bio?.slice(0, 155) || "View tutor profile, subjects, experience, and reviews on TutorsPool."}
+        />
+        {tutor && (
+          <script type="application/ld+json">
+            {JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Person",
+              name: tutor.fullName,
+              description: tutor.bio || undefined,
+              image: tutor.photoURL || undefined,
+              url: `https://tutorspool.com/tutors/${uid}`,
+              jobTitle: "Tutor",
+              knowsAbout: tutor.subjects || undefined,
+              worksFor: { "@type": "EducationalOrganization", name: "TutorsPool", url: "https://tutorspool.com" },
+              ...(reviews.length > 0
+                ? {
+                    aggregateRating: {
+                      "@type": "AggregateRating",
+                      ratingValue: avgRating,
+                      reviewCount: reviews.length,
+                    },
+                  }
+                : {}),
+            })}
+          </script>
+        )}
       </Helmet>
+
       <Navbar />
 
       <main className="flex-1">
