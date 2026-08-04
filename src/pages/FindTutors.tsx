@@ -310,6 +310,7 @@ export default function FindTutors() {
                   </div>
                 ))}
               </div>
+              </>
             )}
           </div>
         </section>
