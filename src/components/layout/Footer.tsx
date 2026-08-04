@@ -1,13 +1,14 @@
 import { Link } from "react-router-dom";
-import { Facebook, Twitter, Linkedin, Instagram } from "lucide-react";
+import { Facebook, Twitter, Linkedin, Instagram, Phone, Mail } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 const socialLinks = [
   { icon: Facebook, href: "https://www.facebook.com/tutorspoolglobal", label: "Facebook" },
   { icon: Twitter, href: "https://x.com/tutorspool", label: "X (Twitter)" },
-  { icon: Linkedin, href: "#", label: "LinkedIn" },
+  { icon: Linkedin, href: "https://www.linkedin.com/company/tutorspool", label: "LinkedIn" },
   { icon: Instagram, href: "https://instagram.com/tutors_pool", label: "Instagram" },
 ];
+
 
 export function Footer() {
   const { t } = useTranslation();
