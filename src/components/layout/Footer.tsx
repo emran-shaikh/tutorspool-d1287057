@@ -114,8 +114,8 @@ export function Footer() {
           </a>
         </address>
 
+        <div className="mt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-secondary-foreground/60">
 
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-secondary-foreground/60">
           <p>© {new Date().getFullYear()} TutorsPool. {t("footer.rights")}</p>
           <p>{t("footer.madeWith")}</p>
         </div>
