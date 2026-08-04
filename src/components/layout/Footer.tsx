@@ -1,13 +1,14 @@
 import { Link } from "react-router-dom";
-import { Facebook, Twitter, Linkedin, Instagram } from "lucide-react";
+import { Facebook, Twitter, Linkedin, Instagram, Phone, Mail } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 const socialLinks = [
   { icon: Facebook, href: "https://www.facebook.com/tutorspoolglobal", label: "Facebook" },
   { icon: Twitter, href: "https://x.com/tutorspool", label: "X (Twitter)" },
-  { icon: Linkedin, href: "#", label: "LinkedIn" },
+  { icon: Linkedin, href: "https://www.linkedin.com/company/tutorspool", label: "LinkedIn" },
   { icon: Instagram, href: "https://instagram.com/tutors_pool", label: "Instagram" },
 ];
+
 
 export function Footer() {
   const { t } = useTranslation();
@@ -103,7 +104,18 @@ export function Footer() {
 
         <hr className="my-8 border-secondary-foreground/10" />
 
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-secondary-foreground/60">
+        <address className="not-italic text-sm text-secondary-foreground/70 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6">
+          <span className="font-medium text-secondary-foreground">TutorsPool</span>
+          <a href="tel:+923453284284" className="flex items-center gap-2 hover:text-primary transition-colors">
+            <Phone className="h-4 w-4" /> +92 345 3284284
+          </a>
+          <a href="mailto:support@tutorspool.com" className="flex items-center gap-2 hover:text-primary transition-colors">
+            <Mail className="h-4 w-4" /> support@tutorspool.com
+          </a>
+        </address>
+
+        <div className="mt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-secondary-foreground/60">
+
           <p>© {new Date().getFullYear()} TutorsPool. {t("footer.rights")}</p>
           <p>{t("footer.madeWith")}</p>
         </div>
