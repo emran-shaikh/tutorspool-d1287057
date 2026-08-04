@@ -130,7 +130,25 @@ export default function Contact() {
         <meta property="og:url" content={`https://tutorspool.com/contact`} />
         <meta name="twitter:title" content="Contact Us - TutorsPool | Get In Touch" />
         <meta name="twitter:description" content="Contact TutorsPool for questions about tutoring, sessions, or partnerships. Reach our support team via email, phone, or our contact form." />
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "EducationalOrganization",
+            name: "TutorsPool",
+            url: "https://tutorspool.com",
+            contactPoint: [
+              {
+                "@type": "ContactPoint",
+                contactType: "customer support",
+                telephone: "+92-345-3284284",
+                email: "support@tutorspool.com",
+                availableLanguage: ["English", "Arabic", "Spanish", "Urdu"],
+              },
+            ],
+          })}
+        </script>
       </Helmet>
+
       <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-1">
