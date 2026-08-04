@@ -61,7 +61,9 @@ const Index = () => {
           <HeroSection />
           <FeaturedTutors />
           <FeaturesSection />
+          <FaqSection />
           <CTASection />
+
         </main>
         <Footer />
       </div>
