@@ -78,7 +78,7 @@ export default function ForgotPassword() {
       <div className="min-h-screen flex items-center justify-center p-8 bg-gradient-to-br from-background via-background to-primary/5">
         <div className="w-full max-w-md space-y-8 text-center">
           <Link to="/" className="flex items-center gap-2 justify-center">
-            <img src="/logo.png" alt="TutorsPool Logo" className="h-12 w-auto" />
+            <img src="/logo.webp" alt="TutorsPool Logo" className="h-12 w-auto" width={480} height={116} decoding="async" />
           </Link>
           
           <div className="bg-card border rounded-2xl p-8 shadow-lg space-y-6">
@@ -126,7 +126,7 @@ export default function ForgotPassword() {
         <div className="w-full max-w-md space-y-8">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 justify-center">
-            <img src="/logo.png" alt="TutorsPool Logo" className="h-12 w-auto" />
+            <img src="/logo.webp" alt="TutorsPool Logo" className="h-12 w-auto" width={480} height={116} decoding="async" />
           </Link>
 
           {/* Header */}
