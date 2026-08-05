@@ -106,6 +106,8 @@ export function Footer() {
 
         <address className="not-italic text-sm text-secondary-foreground/70 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6">
           <span className="font-medium text-secondary-foreground">TutorsPool</span>
+          <span>Karachi, Pakistan</span>
+
           <a href="tel:+923453284284" className="flex items-center gap-2 hover:text-primary transition-colors">
             <Phone className="h-4 w-4" /> +92 345 3284284
           </a>
