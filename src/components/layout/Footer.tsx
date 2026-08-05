@@ -42,7 +42,7 @@ export function Footer() {
           <div className="col-span-2 md:col-span-1">
             <Link to="/" className="flex items-center gap-2 mb-4">
               <div className="flex items-center justify-center rounded-lg">
-                <img src="/logo.png" alt="TutorsPool Logo" className="h-12 w-auto" />
+                <img src="/logo.webp" alt="TutorsPool Logo" className="h-12 w-auto" width={480} height={116} loading="lazy" decoding="async" />
               </div>
             </Link>
             <p className="text-secondary-foreground/70 text-sm mb-4">{t("footer.tagline")}</p>

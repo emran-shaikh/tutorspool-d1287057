@@ -17,9 +17,9 @@ import {
   CheckCircle,
   ArrowRight 
 } from "lucide-react";
-import uzairImage from "@/assets/team-uzair.jpg";
-import bilalImage from "@/assets/team-bilal.jpg";
-import imranImage from "@/assets/team-imran.jpg";
+import uzairImage from "@/assets/team-uzair.webp";
+import bilalImage from "@/assets/team-bilal.webp";
+import imranImage from "@/assets/team-imran.webp";
 
 const values = [
   { key: "excellence", icon: Target },

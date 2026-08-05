@@ -14,7 +14,7 @@ const Index = () => {
   const title = "TutorsPool | Online Tutors for Math, Science & Test Prep";
   const description =
     "Find verified expert tutors for personalized 1-on-1 online sessions in math, science, languages and test prep. Compare rates, read reviews and book a tutor today.";
-  const imageUrl = `${siteUrl}/hero-tutoring.jpg`;
+  const imageUrl = `${siteUrl}/logo.png`;
 
 
   return (

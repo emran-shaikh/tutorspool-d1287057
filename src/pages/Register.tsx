@@ -192,7 +192,7 @@ export default function Register() {
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 justify-center">
           <div className="flex items-center justify-center rounded-lg">
-          <img src="/logo.png" alt="TutorsPool Logo" className="h-12 w-auto" />
+          <img src="/logo.webp" alt="TutorsPool Logo" className="h-12 w-auto" width={480} height={116} decoding="async" />
           </div>
             {/* <span className="font-display text-xl font-bold">
               <span className="text-secondary">Tutors</span>

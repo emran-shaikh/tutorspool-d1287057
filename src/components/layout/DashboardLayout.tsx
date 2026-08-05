@@ -86,7 +86,7 @@ export default function DashboardLayout({ children, role }: DashboardLayoutProps
         <div className="container flex flex-wrap items-center justify-between gap-3 py-3">
           <Link to="/" className="flex items-center gap-2 min-w-0">
             <div className="flex items-center justify-center rounded-lg">
-              <img src="/logo.png" alt="TutorsPool dashboard logo" className="h-9 w-auto sm:h-10" />
+              <img src="/logo.webp" alt="TutorsPool dashboard logo" className="h-9 w-auto sm:h-10" width={480} height={116} decoding="async" />
             </div>
             {/* <span className="font-display text-lg font-bold">
               <span className="text-secondary">Tutors</span>
