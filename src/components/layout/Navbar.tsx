@@ -46,7 +46,7 @@ export function Navbar() {
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2 min-w-0">
           <div className="flex items-center justify-center rounded-lg">
-            <img src="/logo.png" alt="TutorsPool logo" className="h-8 w-auto sm:h-10" />
+            <img src="/logo.webp" alt="TutorsPool logo" className="h-8 w-auto sm:h-10" width={480} height={116} decoding="async" {...({ fetchpriority: "high" } as Record<string, string>)} />
           </div>
         </Link>
 
