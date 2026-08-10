@@ -1,50 +1,46 @@
-# Multi-currency Display Plan
+# Group Tuition Subscription Packages
 
-Your prices today are stored in one base currency (PKR, shown as `Rs`/`/hr` on tutor cards and booking). Goal: show each visitor a price in their local currency automatically, based on region + language.
+Add group classes to TutorsPool: tutors propose group packages, admin approves them, students browse and subscribe, and admin activates a subscription once payment is confirmed offline. Enrolled students get scheduled group sessions with Zoom links plus quizzes and resources assigned to the whole batch.
 
-## Complexity: Low → Medium
+## How it works
 
-- **Display-only conversion** (recommended first step): ~Low. No payment changes, no tutor-side changes.
-- **Charging in local currency**: Medium — requires Stripe multi-currency, payout logic, and tutor payout FX handling. Skip for now unless you ask.
+**Tutor**
+- New "Group Classes" page: create a group package with title, subject, level, description, seat limit, weekly schedule (days + time), monthly price (USD), and type:
+  - Fixed batch — set start and end dates, enrollment closes when full or when it starts.
+  - Ongoing cohort — always-on, students can join any month.
+- Package is submitted as `pending`; only approved packages appear publicly.
+- For an approved package the tutor sees the roster, can generate a Zoom link per group session, and can assign a quiz/task/resource to every enrolled student at once.
 
-This plan covers **display-only**.
+**Admin**
+- New "Group Packages" page: review pending packages (approve / reject with a note), edit price or seats, pause or archive a package.
+- New "Group Subscriptions" tab: see every subscription request, mark it `active` after offline payment (WhatsApp/bank), set the paid-through date, and cancel or renew. Marking active is what grants the student access.
 
-## How it will work
+**Student**
+- Public `/group-classes` page listing approved packages with filters by subject and level, prices shown via the existing local-currency `Price` component.
+- Package detail page with tutor info, schedule, seats left, and a "Request to Join" button that creates a `pending` subscription and pings admin (existing admin notification + WhatsApp fallback).
+- Dashboard section "My Group Classes" showing active subscriptions, upcoming group sessions with Zoom links, and assigned group work.
 
-1. **Detect region** on first visit:
-   - Primary: Cloudflare `CF-IPCountry` header (free, already in front of the site) OR a lightweight geo API (`ipapi.co` / `ip-api.com`) called once from an Edge Function.
-   - Fallback: browser locale (`navigator.language`) → country guess.
-   - Combined with the current i18n language (EN/AR/ES) to pick a sensible default:
-     - AR → SAR / AED / EGP (by country)
-     - ES → EUR / MXN / ARS (by country)
-     - EN → USD / GBP / INR / PKR (by country)
-2. **Fetch FX rates** daily from a free provider (`exchangerate.host` or `open.er-api.com` — no key). Cache in Firestore `fxRates/{date}` doc; refresh via existing hourly cron.
-3. **Currency context** (`src/contexts/CurrencyContext.tsx`) exposes `{ code, symbol, convert(pkr) }`.
-4. **Manual override**: currency dropdown next to the language switcher in the Navbar. Persist in `localStorage` (`tp_currency`).
-5. **Format prices** via a `<Price amount={pkrValue} />` component wherever `/hr` or booking totals are rendered (tutor cards, tutor profile page, booking page, invoices/emails).
-6. **Disclosure**: small "~approx, charged in PKR" tooltip near converted prices to stay honest and avoid chargebacks.
+**Parent** — active group subscriptions and upcoming group sessions appear in the existing read-only child progress view.
 
-## Scope of file changes
+## Technical notes
 
-- New: `src/contexts/CurrencyContext.tsx`, `src/components/CurrencySwitcher.tsx`, `src/components/Price.tsx`
-- New Edge Function: `supabase/functions/fx-rates/index.ts` (daily fetch + cache)
-- Edit: `src/components/layout/Navbar.tsx` (add switcher next to LanguageSwitcher)
-- Edit: price render sites — `FindTutors.tsx`, `TutorProfilePage.tsx`, `FeaturedTutors.tsx`, `BookSession.tsx`, booking confirmation email template
-- Edit: `src/main.tsx` to wrap app in `CurrencyProvider`
-- i18n keys: add `common.approxCharged` string to en/ar/es JSON
+Firestore (matching existing patterns and rules style):
+- `groupPackages` — tutorId, tutorName, title, subject, level, description, type (`batch` | `cohort`), seatLimit, enrolledCount, priceUsd, billingPeriod (`monthly`), schedule[], startDate/endDate (batch only), status (`pending` | `approved` | `rejected` | `paused` | `archived`), rejectionNote, createdAt.
+- `groupSubscriptions` — packageId, studentId, studentName/email, tutorId, status (`pending` | `active` | `expired` | `cancelled`), paidThrough, activatedBy, createdAt.
+- `groupSessions` — packageId, tutorId, scheduledAt, durationMinutes, zoomJoinUrl, status. Reuses the existing `create-zoom-meeting` edge function.
+- Group work reuses `tutorAssignments` and `quizAssignments` by fanning out one doc per enrolled student, with an added `groupPackageId` field so it can be listed as group work.
 
-## What we're NOT doing (unless you say so)
+Security rules (added to `FIRESTORE_SECURITY_RULES.md`):
+- `groupPackages`: public read only where `status == "approved"`; tutor can create/update own while pending; admin full access.
+- `groupSubscriptions`: student reads own, tutor reads by `tutorId`, only admin may set `status` to `active`.
+- `groupSessions`: readable by the owning tutor, admin, and students with an active subscription; queries use `where` clauses matching the rules exactly, with sorting done client-side.
 
-- Not changing Stripe/Paddle currency — checkout still processes PKR.
-- Not converting tutor-entered hourly rate at save time (stored as PKR).
-- Not adding per-country pricing tiers (that's a separate product decision).
+Other:
+- Pricing displayed through `Price` so local currency conversion works; payment still stated as USD, settled offline.
+- Nav links: "Group Classes" in the public navbar and in the student/tutor/admin dashboard sidebars.
+- SEO: `/group-classes` gets Helmet meta, canonical, and `Course` JSON-LD per package; both routes added to the dynamic sitemap.
+- Reuses the existing email system to notify tutor on approval and student on activation.
 
-## Effort estimate
+## Out of scope for this phase
 
-~1 build turn to ship end-to-end. Ongoing: none (rates auto-refresh; adding a new currency = one line).
-
-## Open questions before build
-
-1. Confirm base currency is **PKR** (that's what tutor rates appear to be in) — or is it USD?
-2. Should the currency switcher be **auto-only** (locked to detected region) or **user-changeable** via a dropdown? I'd recommend user-changeable.
-3. Initial supported list — propose: **USD, GBP, EUR, PKR, INR, SAR, AED, CAD, AUD**. Add/remove?
+Online recurring checkout. Everything is structured so a Stripe/Paddle subscription can later drive the same `status`/`paidThrough` fields without reworking the UI.
