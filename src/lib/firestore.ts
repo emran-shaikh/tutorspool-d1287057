@@ -2134,6 +2134,8 @@ export const getConnectionsForStudent = async (studentId: string): Promise<Stude
 export interface TutorAssignment {
   id?: string;
   connectionId: string;
+  /** Set when this assignment was sent to a whole group class batch. */
+  groupPackageId?: string;
   tutorId: string;
   tutorName?: string;
   studentId: string;
