@@ -12,6 +12,7 @@ function useNavLinks() {
   return [
     { label: t("nav.subjects"), href: "/subjects", icon: BookOpen },
     { label: t("nav.findTutors"), href: "/tutors", icon: Users },
+    { label: "Group Classes", href: "/group-classes", icon: Users },
     { label: t("nav.reviews"), href: "/reviews", icon: Star },
     { label: t("nav.blog"), href: "/blog", icon: FileText },
     { label: t("nav.about"), href: "/about", icon: Info },

@@ -471,7 +471,7 @@ export const deleteUser = async (uid: string, role: string): Promise<void> => {
 // Admin Notification Types and Functions
 export interface AdminNotification {
   id?: string;
-  type: 'new_student' | 'new_tutor' | 'session_booked' | 'session_completed' | 'tutor_approved' | 'new_review';
+  type: 'new_student' | 'new_tutor' | 'session_booked' | 'session_completed' | 'tutor_approved' | 'new_review' | 'group_join_request';
   title: string;
   message: string;
   isRead: boolean;
@@ -2134,6 +2134,8 @@ export const getConnectionsForStudent = async (studentId: string): Promise<Stude
 export interface TutorAssignment {
   id?: string;
   connectionId: string;
+  /** Set when this assignment was sent to a whole group class batch. */
+  groupPackageId?: string;
   tutorId: string;
   tutorName?: string;
   studentId: string;

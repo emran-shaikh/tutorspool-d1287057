@@ -9,6 +9,7 @@ const staticRoutes = [
   { path: "/", priority: "1.0", changefreq: "weekly" },
   { path: "/subjects", priority: "0.9", changefreq: "weekly" },
   { path: "/tutors", priority: "0.9", changefreq: "weekly" },
+  { path: "/group-classes", priority: "0.9", changefreq: "weekly" },
   { path: "/reviews", priority: "0.8", changefreq: "weekly" },
   { path: "/about", priority: "0.7", changefreq: "monthly" },
   { path: "/contact", priority: "0.7", changefreq: "monthly" },

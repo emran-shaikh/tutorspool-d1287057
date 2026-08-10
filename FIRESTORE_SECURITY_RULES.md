@@ -430,6 +430,52 @@ service cloud.firestore {
       allow create: if isAuthenticated();
     }
 
+    // Group Classes — packages proposed by tutors, approved by admin
+    match /groupPackages/{packageId} {
+      // Public can only see approved packages (queries must filter status == 'approved')
+      allow read: if resource.data.status == 'approved'
+        || isAdmin()
+        || (isAuthenticated() && resource.data.tutorId == request.auth.uid);
+      allow create: if isAuthenticated() && isTutor()
+        && request.resource.data.tutorId == request.auth.uid
+        && request.resource.data.status == 'pending';
+      // Tutor may edit only while still pending; admin can change anything (incl. status)
+      allow update: if isAdmin()
+        || (isAuthenticated() && isTutor()
+            && resource.data.tutorId == request.auth.uid
+            && resource.data.status == 'pending'
+            && request.resource.data.status == 'pending');
+      allow delete: if isAdmin()
+        || (isAuthenticated() && isTutor() && resource.data.tutorId == request.auth.uid
+            && resource.data.status in ['pending', 'rejected']);
+    }
+
+    // Group Subscriptions — student requests, admin activates after offline payment
+    match /groupSubscriptions/{subscriptionId} {
+      allow read: if isAuthenticated() && (
+        resource.data.studentId == request.auth.uid ||
+        resource.data.tutorId == request.auth.uid ||
+        isAdmin() ||
+        isLinkedParent(resource.data.studentId)
+      );
+      allow create: if isAuthenticated() && isStudent()
+        && request.resource.data.studentId == request.auth.uid
+        && request.resource.data.status == 'pending';
+      // Only admin may activate/renew/cancel; students may cancel their own request
+      allow update: if isAdmin()
+        || (isAuthenticated() && resource.data.studentId == request.auth.uid
+            && request.resource.data.status == 'cancelled');
+      allow delete: if isAdmin();
+    }
+
+    // Group Sessions — live Zoom sessions for a group package
+    match /groupSessions/{sessionId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isAdmin()
+        || (isAuthenticated() && isTutor() && request.resource.data.tutorId == request.auth.uid)
+        || (isAuthenticated() && isTutor() && resource.data.tutorId == request.auth.uid);
+    }
+
     // Parent Notifications (history of quiz/session/milestone alerts)
     match /parentNotifications/{notificationId} {
       // Parent can read only their own notifications
