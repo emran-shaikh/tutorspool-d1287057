@@ -274,6 +274,21 @@ export default function AdminDashboard() {
             </Button>
           </CardContent>
         </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-primary" />
+              Group Classes
+            </CardTitle>
+            <CardDescription>Approve packages & activate paid seats</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Button variant="default" className="w-full justify-start" asChild>
+              <Link to="/admin/group-classes"><Users className="h-4 w-4 mr-2" /> Manage Group Classes</Link>
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     </DashboardLayout>
   );

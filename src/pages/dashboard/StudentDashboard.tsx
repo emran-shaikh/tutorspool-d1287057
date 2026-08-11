@@ -399,6 +399,28 @@ export default function StudentDashboard() {
           </CardContent>
         </Card>
 
+        <Card className="border-indigo-100 dark:border-indigo-900 bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-950/50 dark:to-blue-950/50">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <div className="p-1.5 rounded-md bg-gradient-to-br from-indigo-500 to-blue-500">
+                <Users className="h-4 w-4 text-white" />
+              </div>
+              Group Classes
+            </CardTitle>
+            <CardDescription>Your batches, live sessions and group work</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-sm text-muted-foreground">Track your subscriptions or join a new group class.</p>
+            <Button className="w-full bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 shadow-lg shadow-indigo-500/25" asChild>
+              <Link to="/student/group-classes">My Group Classes</Link>
+            </Button>
+            <Button variant="outline" className="w-full" asChild>
+              <Link to="/group-classes">Browse Group Classes <ArrowRight className="h-4 w-4 ml-2" /></Link>
+            </Button>
+          </CardContent>
+        </Card>
+
+
         {/* Leaderboard */}
         <Leaderboard />
       </div>
