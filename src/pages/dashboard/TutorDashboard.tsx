@@ -265,6 +265,24 @@ export default function TutorDashboard() {
             </Button>
           </CardContent>
         </Card>
+
+        <Card className="border-emerald-100 dark:border-emerald-900 bg-gradient-to-br from-teal-50 to-emerald-50 dark:from-teal-950/50 dark:to-emerald-950/50">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <div className="p-1.5 rounded-md bg-gradient-to-br from-teal-500 to-emerald-500">
+                <Users className="h-4 w-4 text-white" />
+              </div>
+              Group Classes
+            </CardTitle>
+            <CardDescription>Propose batches, schedule sessions & assign group work</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground mb-4">Manage your subscription-based group tuition packages.</p>
+            <Button className="w-full bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 shadow-lg shadow-teal-500/25" asChild>
+              <Link to="/tutor/group-classes">Manage Group Classes</Link>
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     </DashboardLayout>
   );
