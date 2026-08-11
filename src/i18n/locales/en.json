@@ -38,12 +38,18 @@
   "nav": {
     "subjects": "Subjects",
     "findTutors": "Find Tutors",
+    "groupClasses": "Group Classes",
     "reviews": "Reviews",
     "blog": "Blog",
     "about": "About",
     "contact": "Contact",
     "becomeTutor": "Become a Tutor",
-    "language": "Language"
+    "language": "Language",
+    "categories": {
+      "learn": "Learn",
+      "company": "Company",
+      "teach": "Teach"
+    }
   },
   "hero": {
     "trustBadge": "Trusted by {{count}}+ students worldwide",

@@ -38,12 +38,18 @@
   "nav": {
     "subjects": "Materias",
     "findTutors": "Buscar tutores",
+    "groupClasses": "Clases grupales",
     "reviews": "Reseñas",
     "blog": "Blog",
     "about": "Sobre nosotros",
     "contact": "Contacto",
     "becomeTutor": "Conviértete en tutor",
-    "language": "Idioma"
+    "language": "Idioma",
+    "categories": {
+      "learn": "Aprender",
+      "company": "Empresa",
+      "teach": "Enseñar"
+    }
   },
   "hero": {
     "trustBadge": "Confiado por más de {{count}}+ estudiantes en todo el mundo",

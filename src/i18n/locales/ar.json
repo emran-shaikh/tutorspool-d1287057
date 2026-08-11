@@ -38,12 +38,18 @@
   "nav": {
     "subjects": "المواد",
     "findTutors": "ابحث عن معلم",
+    "groupClasses": "الفصول الجماعية",
     "reviews": "التقييمات",
     "blog": "المدونة",
     "about": "من نحن",
     "contact": "اتصل بنا",
     "becomeTutor": "كن معلماً",
-    "language": "اللغة"
+    "language": "اللغة",
+    "categories": {
+      "learn": "تعلم",
+      "company": "الشركة",
+      "teach": "علّم"
+    }
   },
   "hero": {
     "trustBadge": "موثوق به من أكثر من {{count}}+ طالب حول العالم",
