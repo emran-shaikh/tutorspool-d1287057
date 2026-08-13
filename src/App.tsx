@@ -75,6 +75,7 @@ const ManageConnections = lazy(() => import("./pages/admin/ManageConnections"));
 const MyStudents = lazy(() => import("./pages/tutor/MyStudents"));
 const MyTutors = lazy(() => import("./pages/student/MyTutors"));
 const EmailAnalytics = lazy(() => import("./pages/admin/EmailAnalytics"));
+const Classroom = lazy(() => import("./pages/Classroom"));
 
 const RouteFallback = () => (
   <div className="min-h-screen flex items-center justify-center">
