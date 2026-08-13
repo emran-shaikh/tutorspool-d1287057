@@ -36,6 +36,7 @@ export default function TutorSessions() {
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
   const [zoomLink, setZoomLink] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [attendanceRoom, setAttendanceRoom] = useState<string | null>(null);
 
   useEffect(() => {
     fetchSessions();
