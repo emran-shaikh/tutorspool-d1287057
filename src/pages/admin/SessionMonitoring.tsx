@@ -18,6 +18,7 @@ const statusColors: Record<Session['status'], string> = {
 export default function SessionMonitoring() {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
+  const [attendanceRoom, setAttendanceRoom] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchSessions = async () => {
