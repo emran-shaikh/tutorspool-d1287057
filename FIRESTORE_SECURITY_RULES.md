@@ -476,6 +476,39 @@ service cloud.firestore {
         || (isAuthenticated() && isTutor() && resource.data.tutorId == request.auth.uid);
     }
 
+    // ===== TutorsPool Classroom (in-house live class) =====
+    match /classrooms/{roomId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAdmin()
+        || (isAuthenticated() && resource.data.tutorId == request.auth.uid);
+      allow delete: if isAdmin();
+    }
+
+    // Attendance log — participants write their own row, tutor/admin can read the room
+    match /classroomParticipants/{docId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.resource.data.uid == request.auth.uid;
+      allow update: if isAuthenticated() && resource.data.uid == request.auth.uid;
+      allow delete: if isAdmin();
+    }
+
+    // In-class chat
+    match /classroomMessages/{messageId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.resource.data.uid == request.auth.uid;
+      allow update: if false;
+      allow delete: if isAdmin();
+    }
+
+    // Whiteboard strokes
+    match /classroomWhiteboard/{strokeId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.resource.data.uid == request.auth.uid;
+      allow update: if false;
+      allow delete: if isAuthenticated();
+    }
+
     // Parent Notifications (history of quiz/session/milestone alerts)
     match /parentNotifications/{notificationId} {
       // Parent can read only their own notifications
