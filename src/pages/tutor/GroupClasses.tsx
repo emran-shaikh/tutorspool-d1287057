@@ -508,14 +508,17 @@ export default function TutorGroupClasses() {
                                 </p>
                               </div>
                               <div className="flex items-center gap-2">
-                                {s.zoomJoinUrl ? (
+                                <Button asChild size="sm">
+                                  <Link to={`/classroom/${roomIdForGroupSession(s.id!)}`}>
+                                    <Video className="h-4 w-4 mr-2" /> Classroom
+                                  </Link>
+                                </Button>
+                                {s.zoomJoinUrl && (
                                   <Button asChild size="sm" variant="outline">
                                     <a href={s.zoomJoinUrl} target="_blank" rel="noopener noreferrer">
-                                      <Video className="h-4 w-4 mr-2" /> Join
+                                      Zoom
                                     </a>
                                   </Button>
-                                ) : (
-                                  <Badge variant="outline">No Zoom link</Badge>
                                 )}
                                 <Button size="icon" variant="ghost" onClick={() => handleDeleteSession(s.id!)}>
                                   <Trash2 className="h-4 w-4" />
