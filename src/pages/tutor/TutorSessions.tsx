@@ -476,6 +476,7 @@ export default function TutorSessions() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <AttendanceDialog roomId={attendanceRoom} onOpenChange={open => !open && setAttendanceRoom(null)} />
     </DashboardLayout>
   );
 }
