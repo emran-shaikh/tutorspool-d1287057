@@ -101,13 +101,23 @@ export default function SessionMonitoring() {
                         {session.status}
                       </Badge>
                     </div>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                    <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                       <span className="flex items-center gap-1">
                         <Calendar className="h-3 w-3" /> {session.date}
                       </span>
                       <span className="flex items-center gap-1">
                         <Clock className="h-3 w-3" /> {session.time}
                       </span>
+                      {session.id && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-7"
+                          onClick={() => setAttendanceRoom(roomIdForSession(session.id!))}
+                        >
+                          View attendance
+                        </Button>
+                      )}
                     </div>
                   </div>
                 ))}
