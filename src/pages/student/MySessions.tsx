@@ -9,6 +9,7 @@ import DashboardLayout from "@/components/layout/DashboardLayout";
 import { getStudentSessions, getSessionReview, Session } from "@/lib/firestore";
 import { useAuth } from "@/contexts/AuthContext";
 import ReviewDialog from "@/components/ReviewDialog";
+import { roomIdForSession } from "@/lib/classroom";
 
 const statusColors: Record<Session['status'], string> = {
   pending: "bg-warning/10 text-warning border-warning/20",
