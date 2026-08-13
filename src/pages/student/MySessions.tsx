@@ -89,10 +89,17 @@ export default function MySessions() {
             <Clock className="h-3 w-3" /> {session.time}
           </span>
         </div>
-        {session.status === 'accepted' && session.zoomLink && (
+        {session.status === 'accepted' && session.id && (
           <Button size="sm" className="w-full" asChild>
+            <Link to={`/classroom/${roomIdForSession(session.id)}`}>
+              <Video className="h-4 w-4 mr-2" /> Join Classroom
+            </Link>
+          </Button>
+        )}
+        {session.status === 'accepted' && session.zoomLink && (
+          <Button size="sm" variant="outline" className="w-full" asChild>
             <a href={session.zoomLink} target="_blank" rel="noopener noreferrer">
-              <Video className="h-4 w-4 mr-2" /> Join Session
+              <Video className="h-4 w-4 mr-2" /> Join via Zoom
               <ExternalLink className="h-3 w-3 ml-2" />
             </a>
           </Button>
