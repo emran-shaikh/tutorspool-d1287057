@@ -279,18 +279,27 @@ export default function TutorSessions() {
         </div>
       )}
       {session.status === 'accepted' && (
-        <div className="flex gap-2">
-          {session.zoomLink && (
-            <Button size="sm" variant="outline" className="flex-1" asChild>
-              <a href={session.zoomLink} target="_blank" rel="noopener noreferrer">
-                <Video className="h-4 w-4 mr-2" /> Start Session
-                <ExternalLink className="h-3 w-3 ml-2" />
-              </a>
+        <div className="space-y-2">
+          {session.id && (
+            <Button size="sm" className="w-full" asChild>
+              <Link to={`/classroom/${roomIdForSession(session.id)}`}>
+                <Video className="h-4 w-4 mr-2" /> Start TutorsPool Classroom
+              </Link>
             </Button>
           )}
-          <Button size="sm" className="flex-1" onClick={() => session.id && handleComplete(session.id)}>
-            <CheckCircle className="h-4 w-4 mr-1" /> Complete
-          </Button>
+          <div className="flex gap-2">
+            {session.zoomLink && (
+              <Button size="sm" variant="outline" className="flex-1" asChild>
+                <a href={session.zoomLink} target="_blank" rel="noopener noreferrer">
+                  <Video className="h-4 w-4 mr-2" /> Zoom
+                  <ExternalLink className="h-3 w-3 ml-2" />
+                </a>
+              </Button>
+            )}
+            <Button size="sm" variant="secondary" className="flex-1" onClick={() => session.id && handleComplete(session.id)}>
+              <CheckCircle className="h-4 w-4 mr-1" /> Complete
+            </Button>
+          </div>
         </div>
       )}
     </div>
