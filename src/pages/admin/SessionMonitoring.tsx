@@ -6,6 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Video, Calendar, Clock, User } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { getAllSessions, Session } from "@/lib/firestore";
+import { roomIdForSession } from "@/lib/classroom";
+import { AttendanceDialog } from "@/components/classroom/AttendanceDialog";
 
 const statusColors: Record<Session['status'], string> = {
   pending: "bg-warning/10 text-warning border-warning/20",
