@@ -75,6 +75,7 @@ const ManageConnections = lazy(() => import("./pages/admin/ManageConnections"));
 const MyStudents = lazy(() => import("./pages/tutor/MyStudents"));
 const MyTutors = lazy(() => import("./pages/student/MyTutors"));
 const EmailAnalytics = lazy(() => import("./pages/admin/EmailAnalytics"));
+const Classroom = lazy(() => import("./pages/Classroom"));
 
 const RouteFallback = () => (
   <div className="min-h-screen flex items-center justify-center">
@@ -172,6 +173,9 @@ const App = () => (
                 <Route path="/student/achievements" element={<ProtectedRoute allowedRoles={['student']}><Achievements /></ProtectedRoute>} />
                 <Route path="/student/group-classes" element={<ProtectedRoute allowedRoles={['student']}><MyGroupClasses /></ProtectedRoute>} />
                 <Route path="/student/tutors-connected" element={<ProtectedRoute allowedRoles={['student']}><MyTutors /></ProtectedRoute>} />
+
+                {/* Live classroom (in-house) */}
+                <Route path="/classroom/:roomId" element={<ProtectedRoute allowedRoles={['student', 'tutor', 'admin']}><Classroom /></ProtectedRoute>} />
 
                 {/* Tutor Routes */}
                 <Route path="/tutor/dashboard" element={<ProtectedRoute allowedRoles={['tutor']}><TutorDashboard /></ProtectedRoute>} />

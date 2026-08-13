@@ -13,6 +13,7 @@ import {
   GroupSession,
   GroupSubscription,
 } from "@/lib/groupClasses";
+import { roomIdForGroupSession } from "@/lib/classroom";
 
 const statusStyles: Record<string, string> = {
   pending: "bg-amber-100 text-amber-800",
@@ -147,15 +148,20 @@ export default function MyGroupClasses() {
                           {new Date(s.scheduledAt).toLocaleString()} · {s.durationMinutes} min
                         </p>
                       </div>
-                      {s.zoomJoinUrl ? (
+                      <div className="flex items-center gap-2">
                         <Button asChild size="sm">
-                          <a href={s.zoomJoinUrl} target="_blank" rel="noopener noreferrer">
-                            <Video className="h-4 w-4 mr-2" /> Join
-                          </a>
+                          <Link to={`/classroom/${roomIdForGroupSession(s.id!)}`}>
+                            <Video className="h-4 w-4 mr-2" /> Join Classroom
+                          </Link>
                         </Button>
-                      ) : (
-                        <Badge variant="outline">Link coming soon</Badge>
-                      )}
+                        {s.zoomJoinUrl && (
+                          <Button asChild size="sm" variant="outline">
+                            <a href={s.zoomJoinUrl} target="_blank" rel="noopener noreferrer">
+                              Zoom
+                            </a>
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>

@@ -17,6 +17,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { awardXP } from "@/lib/gamification";
 import { showXPNotification, showLevelUpNotification, showBadgeNotification } from "@/components/gamification/XPNotification";
 import { notifyParentsOfSessionStatus } from "@/lib/parentNotifications";
+import { roomIdForSession } from "@/lib/classroom";
+import { AttendanceDialog } from "@/components/classroom/AttendanceDialog";
 
 const statusColors: Record<Session['status'], string> = {
   pending: "bg-warning/10 text-warning border-warning/20",
@@ -35,6 +37,7 @@ export default function TutorSessions() {
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
   const [zoomLink, setZoomLink] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [attendanceRoom, setAttendanceRoom] = useState<string | null>(null);
 
   useEffect(() => {
     fetchSessions();
@@ -279,19 +282,38 @@ export default function TutorSessions() {
         </div>
       )}
       {session.status === 'accepted' && (
-        <div className="flex gap-2">
-          {session.zoomLink && (
-            <Button size="sm" variant="outline" className="flex-1" asChild>
-              <a href={session.zoomLink} target="_blank" rel="noopener noreferrer">
-                <Video className="h-4 w-4 mr-2" /> Start Session
-                <ExternalLink className="h-3 w-3 ml-2" />
-              </a>
+        <div className="space-y-2">
+          {session.id && (
+            <Button size="sm" className="w-full" asChild>
+              <Link to={`/classroom/${roomIdForSession(session.id)}`}>
+                <Video className="h-4 w-4 mr-2" /> Start TutorsPool Classroom
+              </Link>
             </Button>
           )}
-          <Button size="sm" className="flex-1" onClick={() => session.id && handleComplete(session.id)}>
-            <CheckCircle className="h-4 w-4 mr-1" /> Complete
-          </Button>
+          <div className="flex gap-2">
+            {session.zoomLink && (
+              <Button size="sm" variant="outline" className="flex-1" asChild>
+                <a href={session.zoomLink} target="_blank" rel="noopener noreferrer">
+                  <Video className="h-4 w-4 mr-2" /> Zoom
+                  <ExternalLink className="h-3 w-3 ml-2" />
+                </a>
+              </Button>
+            )}
+            <Button size="sm" variant="secondary" className="flex-1" onClick={() => session.id && handleComplete(session.id)}>
+              <CheckCircle className="h-4 w-4 mr-1" /> Complete
+            </Button>
+          </div>
         </div>
+      )}
+      {(session.status === 'accepted' || session.status === 'completed') && session.id && (
+        <Button
+          size="sm"
+          variant="ghost"
+          className="w-full"
+          onClick={() => setAttendanceRoom(roomIdForSession(session.id!))}
+        >
+          View attendance
+        </Button>
       )}
     </div>
   );
@@ -455,6 +477,7 @@ export default function TutorSessions() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <AttendanceDialog roomId={attendanceRoom} onOpenChange={open => !open && setAttendanceRoom(null)} />
     </DashboardLayout>
   );
 }

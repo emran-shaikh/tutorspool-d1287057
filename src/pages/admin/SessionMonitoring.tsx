@@ -6,6 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Video, Calendar, Clock, User } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { getAllSessions, Session } from "@/lib/firestore";
+import { roomIdForSession } from "@/lib/classroom";
+import { AttendanceDialog } from "@/components/classroom/AttendanceDialog";
 
 const statusColors: Record<Session['status'], string> = {
   pending: "bg-warning/10 text-warning border-warning/20",
@@ -18,6 +20,7 @@ const statusColors: Record<Session['status'], string> = {
 export default function SessionMonitoring() {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
+  const [attendanceRoom, setAttendanceRoom] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchSessions = async () => {
@@ -101,13 +104,23 @@ export default function SessionMonitoring() {
                         {session.status}
                       </Badge>
                     </div>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                    <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                       <span className="flex items-center gap-1">
                         <Calendar className="h-3 w-3" /> {session.date}
                       </span>
                       <span className="flex items-center gap-1">
                         <Clock className="h-3 w-3" /> {session.time}
                       </span>
+                      {session.id && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-7"
+                          onClick={() => setAttendanceRoom(roomIdForSession(session.id!))}
+                        >
+                          View attendance
+                        </Button>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -116,6 +129,8 @@ export default function SessionMonitoring() {
           </CardContent>
         </Card>
       )}
+
+      <AttendanceDialog roomId={attendanceRoom} onOpenChange={open => !open && setAttendanceRoom(null)} />
     </DashboardLayout>
   );
 }
