@@ -174,6 +174,9 @@ const App = () => (
                 <Route path="/student/group-classes" element={<ProtectedRoute allowedRoles={['student']}><MyGroupClasses /></ProtectedRoute>} />
                 <Route path="/student/tutors-connected" element={<ProtectedRoute allowedRoles={['student']}><MyTutors /></ProtectedRoute>} />
 
+                {/* Live classroom (in-house) */}
+                <Route path="/classroom/:roomId" element={<ProtectedRoute allowedRoles={['student', 'tutor', 'admin']}><Classroom /></ProtectedRoute>} />
+
                 {/* Tutor Routes */}
                 <Route path="/tutor/dashboard" element={<ProtectedRoute allowedRoles={['tutor']}><TutorDashboard /></ProtectedRoute>} />
                 <Route path="/tutor/sessions" element={<ProtectedRoute allowedRoles={['tutor']}><TutorSessions /></ProtectedRoute>} />
