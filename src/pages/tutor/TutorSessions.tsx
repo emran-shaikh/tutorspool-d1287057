@@ -304,6 +304,16 @@ export default function TutorSessions() {
           </div>
         </div>
       )}
+      {(session.status === 'accepted' || session.status === 'completed') && session.id && (
+        <Button
+          size="sm"
+          variant="ghost"
+          className="w-full"
+          onClick={() => setAttendanceRoom(roomIdForSession(session.id!))}
+        >
+          View attendance
+        </Button>
+      )}
     </div>
   );
 
