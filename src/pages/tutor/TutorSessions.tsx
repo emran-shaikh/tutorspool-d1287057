@@ -17,6 +17,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { awardXP } from "@/lib/gamification";
 import { showXPNotification, showLevelUpNotification, showBadgeNotification } from "@/components/gamification/XPNotification";
 import { notifyParentsOfSessionStatus } from "@/lib/parentNotifications";
+import { roomIdForSession } from "@/lib/classroom";
 
 const statusColors: Record<Session['status'], string> = {
   pending: "bg-warning/10 text-warning border-warning/20",
