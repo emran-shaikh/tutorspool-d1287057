@@ -48,6 +48,8 @@ import {
   GroupSession,
   GroupSubscription,
 } from "@/lib/groupClasses";
+import { Link } from "react-router-dom";
+import { roomIdForGroupSession } from "@/lib/classroom";
 
 const statusStyles: Record<string, string> = {
   pending: "bg-amber-100 text-amber-800",
