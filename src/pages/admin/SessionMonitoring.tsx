@@ -129,6 +129,8 @@ export default function SessionMonitoring() {
           </CardContent>
         </Card>
       )}
+
+      <AttendanceDialog roomId={attendanceRoom} onOpenChange={open => !open && setAttendanceRoom(null)} />
     </DashboardLayout>
   );
 }
