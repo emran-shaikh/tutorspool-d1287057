@@ -374,16 +374,28 @@ export default function Classroom() {
                     camOn={p.camOn}
                     className="aspect-video w-full"
                   />
-                  {isHost && p.micOn && (
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="h-7 w-full text-xs text-slate-400"
-                      onClick={() => room.broadcast("force-mute", { uid: p.uid })}
-                    >
-                      Mute {p.name.split(" ")[0]}
-                    </Button>
+                  {isHost && (
+                    <div className="flex gap-1">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        disabled={!p.micOn}
+                        className="h-7 flex-1 text-xs text-slate-400"
+                        onClick={() => muteParticipant(p.uid, p.name)}
+                      >
+                        {p.micOn ? `Mute ${p.name.split(" ")[0]}` : "Muted"}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-7 flex-1 text-xs text-destructive hover:text-destructive"
+                        onClick={() => removeParticipant(p.uid, p.name)}
+                      >
+                        Remove
+                      </Button>
+                    </div>
                   )}
+
                 </div>
               ))}
               {room.peers.length === 0 && (
