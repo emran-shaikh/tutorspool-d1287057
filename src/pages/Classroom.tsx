@@ -290,9 +290,16 @@ export default function Classroom() {
         </div>
       </header>
 
+      {!room.connected && (
+        <p className="bg-amber-500/15 px-4 py-1.5 text-xs text-amber-300">
+          Connection lost — reconnecting you to the class. Your attendance and whiteboard will resume automatically.
+        </p>
+      )}
+
       {room.mediaError && (
         <p className="bg-amber-500/15 px-4 py-1.5 text-xs text-amber-300">{room.mediaError}</p>
       )}
+
 
       {/* Body */}
       <div className="flex min-h-0 flex-1 flex-col lg:flex-row gap-3 p-3">
