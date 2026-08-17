@@ -67,15 +67,15 @@ export default function Classroom() {
           tutorId: result.tutorId,
           title: result.title,
         }).catch(() => undefined);
-        const [msgs, board, attendanceId] = await Promise.all([
+        const [msgs, board, attendance] = await Promise.all([
           getMessages(roomId).catch(() => []),
           getStrokes(roomId).catch(() => []),
-          recordJoin({ roomId, uid, name, role }).catch(() => ""),
+          joinAttendance({ roomId, uid, name, role }).catch(() => null),
         ]);
         if (cancelled) return;
         setMessages(msgs);
         setStrokes(board);
-        if (attendanceId) attendanceRef.current = { id: attendanceId, joinedAt: new Date().toISOString() };
+        if (attendance) attendanceRef.current = attendance;
       }
       setLoading(false);
     })();
@@ -112,14 +112,22 @@ export default function Classroom() {
         setStrokes([]);
       } else if (e.type === "end") {
         toast({ title: "Class ended", description: "The tutor ended this class." });
-        navigate(-1);
+        void leaveRef.current?.();
       } else if (e.type === "force-mute" && e.payload?.uid === uid) {
         forceMuteSelfRef.current?.();
         toast({ title: "You were muted by the tutor" });
+      } else if (e.type === "remove" && e.payload?.uid === uid) {
+        toast({
+          title: "Removed from class",
+          description: "The tutor removed you from this classroom.",
+          variant: "destructive",
+        });
+        void leaveRef.current?.();
       }
     },
-    [navigate, toast, uid]
+    [toast, uid]
   );
+
 
   const isHost = !!access?.isHost;
   const canPublishVideo = access?.canPublishVideo ?? false;
