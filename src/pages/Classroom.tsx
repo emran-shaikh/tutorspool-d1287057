@@ -20,9 +20,10 @@ import {
   ensureRoom,
   getMessages,
   getStrokes,
+  joinAttendance,
   parseRoomId,
-  recordJoin,
   recordLeave,
+
   resolveRoomAccess,
   saveMessage,
   saveStroke,
