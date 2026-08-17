@@ -171,18 +171,59 @@ export default function Classroom() {
     void clearBoard(roomId).catch(() => undefined);
   };
 
-  const leave = async () => {
+  const leave = useCallback(async () => {
     const a = attendanceRef.current;
     attendanceRef.current = null;
     if (a) await recordLeave(a.id, a.joinedAt).catch(() => undefined);
     navigate(-1);
-  };
+  }, [navigate]);
+
+  const leaveRef = useRef<() => Promise<void>>();
+  leaveRef.current = leave;
 
   const endForAll = async () => {
     room.broadcast("end", {});
     await endRoom(roomId).catch(() => undefined);
     await leave();
   };
+
+  const muteParticipant = (peerUid: string, peerName: string) => {
+    room.broadcast("force-mute", { uid: peerUid });
+    toast({ title: `${peerName.split(" ")[0]} was muted` });
+  };
+
+  const removeParticipant = (peerUid: string, peerName: string) => {
+    room.broadcast("remove", { uid: peerUid });
+    room.blockPeer(peerUid);
+    toast({ title: `${peerName.split(" ")[0]} was removed from the class` });
+  };
+
+  // ---- resync after a reconnect: pull the board and chat we may have missed ----
+  const lastNonce = useRef(0);
+  useEffect(() => {
+    if (!access?.allowed) return;
+    if (room.reconnectNonce <= 1) {
+      lastNonce.current = room.reconnectNonce;
+      return;
+    }
+    if (room.reconnectNonce === lastNonce.current) return;
+    lastNonce.current = room.reconnectNonce;
+    let cancelled = false;
+    (async () => {
+      const [msgs, board] = await Promise.all([
+        getMessages(roomId).catch(() => null),
+        getStrokes(roomId).catch(() => null),
+      ]);
+      if (cancelled) return;
+      if (msgs) setMessages(msgs);
+      if (board) setStrokes(board);
+      toast({ title: "Reconnected", description: "Chat and whiteboard are back in sync." });
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [room.reconnectNonce, access?.allowed, roomId, toast]);
+
 
   const hostStream = useMemo(() => {
     if (isHost) return room.screenStream || room.localStream;
