@@ -12,7 +12,7 @@ export interface RoomPeer {
 }
 
 export interface RoomEvent {
-  type: "chat" | "stroke" | "clear" | "end" | "force-mute";
+  type: "chat" | "stroke" | "clear" | "end" | "force-mute" | "remove";
   payload: any;
   from: string;
 }
@@ -26,19 +26,32 @@ interface Options {
   onEvent?: (e: RoomEvent) => void;
 }
 
-const ICE_SERVERS: RTCIceServer[] = [
-  { urls: ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302"] },
-];
+// Optional TURN relay for strict/corporate networks.
+// VITE_TURN_URL may hold one or more comma-separated URLs.
+const buildIceServers = (): RTCIceServer[] => {
+  const servers: RTCIceServer[] = [
+    { urls: ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302"] },
+  ];
+  const raw = (import.meta.env.VITE_TURN_URL as string | undefined)?.trim();
+  if (raw) {
+    const urls = raw
+      .split(",")
+      .map(u => u.trim())
+      .filter(Boolean);
+    if (urls.length) {
+      servers.push({
+        urls,
+        username: import.meta.env.VITE_TURN_USERNAME as string | undefined,
+        credential: import.meta.env.VITE_TURN_CREDENTIAL as string | undefined,
+      });
+    }
+  }
+  return servers;
+};
 
-// Enable a TURN relay later by setting these Vite env vars.
-const turnUrl = import.meta.env.VITE_TURN_URL as string | undefined;
-if (turnUrl) {
-  ICE_SERVERS.push({
-    urls: turnUrl,
-    username: import.meta.env.VITE_TURN_USERNAME as string | undefined,
-    credential: import.meta.env.VITE_TURN_CREDENTIAL as string | undefined,
-  });
-}
+const ICE_SERVERS = buildIceServers();
+export const hasTurn = ICE_SERVERS.length > 1;
+
 
 export function useWebRTCRoom({ roomId, uid, name, role, publishVideo, onEvent }: Options) {
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
