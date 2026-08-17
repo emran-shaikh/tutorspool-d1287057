@@ -164,6 +164,8 @@ export function useWebRTCRoom({ roomId, uid, name, role, publishVideo, onEvent }
       pcsRef.current[peerId] = pc;
 
       localRef.current?.getTracks().forEach(t => pc.addTrack(t, localRef.current!));
+      prioritiseAudio(pc);
+
 
       pc.onicecandidate = e => {
         if (e.candidate) {
