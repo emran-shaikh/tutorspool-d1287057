@@ -12,7 +12,7 @@ export interface RoomPeer {
 }
 
 export interface RoomEvent {
-  type: "chat" | "stroke" | "clear" | "end" | "force-mute";
+  type: "chat" | "stroke" | "clear" | "end" | "force-mute" | "remove";
   payload: any;
   from: string;
 }
@@ -26,19 +26,32 @@ interface Options {
   onEvent?: (e: RoomEvent) => void;
 }
 
-const ICE_SERVERS: RTCIceServer[] = [
-  { urls: ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302"] },
-];
+// Optional TURN relay for strict/corporate networks.
+// VITE_TURN_URL may hold one or more comma-separated URLs.
+const buildIceServers = (): RTCIceServer[] => {
+  const servers: RTCIceServer[] = [
+    { urls: ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302"] },
+  ];
+  const raw = (import.meta.env.VITE_TURN_URL as string | undefined)?.trim();
+  if (raw) {
+    const urls = raw
+      .split(",")
+      .map(u => u.trim())
+      .filter(Boolean);
+    if (urls.length) {
+      servers.push({
+        urls,
+        username: import.meta.env.VITE_TURN_USERNAME as string | undefined,
+        credential: import.meta.env.VITE_TURN_CREDENTIAL as string | undefined,
+      });
+    }
+  }
+  return servers;
+};
 
-// Enable a TURN relay later by setting these Vite env vars.
-const turnUrl = import.meta.env.VITE_TURN_URL as string | undefined;
-if (turnUrl) {
-  ICE_SERVERS.push({
-    urls: turnUrl,
-    username: import.meta.env.VITE_TURN_USERNAME as string | undefined,
-    credential: import.meta.env.VITE_TURN_CREDENTIAL as string | undefined,
-  });
-}
+const ICE_SERVERS = buildIceServers();
+export const hasTurn = ICE_SERVERS.length > 1;
+
 
 export function useWebRTCRoom({ roomId, uid, name, role, publishVideo, onEvent }: Options) {
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
@@ -48,11 +61,14 @@ export function useWebRTCRoom({ roomId, uid, name, role, publishVideo, onEvent }
   const [sharing, setSharing] = useState(false);
   const [mediaError, setMediaError] = useState<string | null>(null);
   const [connected, setConnected] = useState(false);
+  const [reconnectNonce, setReconnectNonce] = useState(0);
+  const [removed, setRemoved] = useState(false);
 
   const channelRef = useRef<RealtimeChannel | null>(null);
   const pcsRef = useRef<Record<string, RTCPeerConnection>>({});
   const localRef = useRef<MediaStream | null>(null);
   const screenRef = useRef<MediaStream | null>(null);
+  const blockedRef = useRef<Set<string>>(new Set());
   const onEventRef = useRef(onEvent);
   onEventRef.current = onEvent;
   const stateRef = useRef({ micOn: true, camOn: publishVideo });
@@ -61,6 +77,18 @@ export function useWebRTCRoom({ roomId, uid, name, role, publishVideo, onEvent }
   const send = useCallback((event: string, payload: any) => {
     channelRef.current?.send({ type: "broadcast", event, payload });
   }, []);
+
+  const cleanupPeer = useCallback((peerId: string) => {
+    pcsRef.current[peerId]?.close();
+    delete pcsRef.current[peerId];
+    setPeers(prev => {
+      const next = { ...prev };
+      delete next[peerId];
+      return next;
+    });
+  }, []);
+
+  const callPeerRef = useRef<(peerId: string, iceRestart?: boolean) => Promise<void>>();
 
   const createPeer = useCallback(
     (peerId: string) => {
@@ -82,30 +110,39 @@ export function useWebRTCRoom({ roomId, uid, name, role, publishVideo, onEvent }
           [peerId]: { ...(prev[peerId] || { uid: peerId, name: "Guest", role: "student", micOn: true, camOn: true }), stream },
         }));
       };
+      // Recover from temporary network drops: the deterministic caller re-offers
+      // with an ICE restart instead of leaving a dead connection behind.
+      pc.onconnectionstatechange = () => {
+        if (pc.connectionState === "failed" || pc.connectionState === "disconnected") {
+          if (blockedRef.current.has(peerId)) return;
+          window.setTimeout(() => {
+            const current = pcsRef.current[peerId];
+            if (!current || current !== pc) return;
+            if (current.connectionState === "connected") return;
+            if (uid < peerId) void callPeerRef.current?.(peerId, true);
+          }, 2000);
+        }
+      };
       return pc;
     },
     [send, uid]
   );
 
   const callPeer = useCallback(
-    async (peerId: string) => {
+    async (peerId: string, iceRestart = false) => {
       const pc = createPeer(peerId);
-      const offer = await pc.createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: true });
+      const offer = await pc.createOffer({
+        offerToReceiveAudio: true,
+        offerToReceiveVideo: true,
+        iceRestart,
+      });
       await pc.setLocalDescription(offer);
       send("signal", { from: uid, to: peerId, kind: "offer", data: offer });
     },
     [createPeer, send, uid]
   );
+  callPeerRef.current = callPeer;
 
-  const cleanupPeer = useCallback((peerId: string) => {
-    pcsRef.current[peerId]?.close();
-    delete pcsRef.current[peerId];
-    setPeers(prev => {
-      const next = { ...prev };
-      delete next[peerId];
-      return next;
-    });
-  }, []);
 
   // ---- media + signalling lifecycle ----
   useEffect(() => {
@@ -140,7 +177,7 @@ export function useWebRTCRoom({ roomId, uid, name, role, publishVideo, onEvent }
           const state = channel!.presenceState() as Record<string, any[]>;
           const present: Record<string, RoomPeer> = {};
           Object.entries(state).forEach(([key, metas]) => {
-            if (key === uid) return;
+            if (key === uid || blockedRef.current.has(key)) return;
             const meta = metas[0] || {};
             present[key] = {
               uid: key,
@@ -169,6 +206,7 @@ export function useWebRTCRoom({ roomId, uid, name, role, publishVideo, onEvent }
         .on("presence", { event: "leave" }, ({ key }: any) => cleanupPeer(key))
         .on("broadcast", { event: "signal" }, async ({ payload }: any) => {
           if (payload.to !== uid) return;
+          if (blockedRef.current.has(payload.from)) return;
           const pc = createPeer(payload.from);
           if (payload.kind === "offer") {
             await pc.setRemoteDescription(new RTCSessionDescription(payload.data));
@@ -184,14 +222,23 @@ export function useWebRTCRoom({ roomId, uid, name, role, publishVideo, onEvent }
           }
         })
         .on("broadcast", { event: "room" }, ({ payload }: any) => {
-          onEventRef.current?.(payload as RoomEvent);
+          const e = payload as RoomEvent;
+          if (e.type === "remove" && e.payload?.uid === uid) {
+            setRemoved(true);
+          }
+          onEventRef.current?.(e);
         })
         .subscribe(async status => {
           if (status === "SUBSCRIBED") {
             setConnected(true);
+            // A resubscribe means we dropped and came back: tell consumers to resync.
+            setReconnectNonce(n => n + 1);
             await channel!.track({ name, role, micOn: stateRef.current.micOn, camOn: stateRef.current.camOn });
+          } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT" || status === "CLOSED") {
+            setConnected(false);
           }
         });
+
     })();
 
     return () => {
@@ -278,6 +325,15 @@ export function useWebRTCRoom({ roomId, uid, name, role, publishVideo, onEvent }
     updatePresence({ micOn: false });
   }, [updatePresence]);
 
+  // Host-side: stop rendering/negotiating with a removed participant.
+  const blockPeer = useCallback(
+    (peerId: string) => {
+      blockedRef.current.add(peerId);
+      cleanupPeer(peerId);
+    },
+    [cleanupPeer]
+  );
+
   const peerList = useMemo(() => Object.values(peers), [peers]);
   const screenStream = sharing ? screenRef.current : null;
 
@@ -289,11 +345,16 @@ export function useWebRTCRoom({ roomId, uid, name, role, publishVideo, onEvent }
     camOn,
     sharing,
     connected,
+    reconnectNonce,
+    removed,
+    hasTurn,
     mediaError,
     toggleMic,
     toggleCam,
     toggleShare,
+    blockPeer,
     broadcast,
+
     forceMuteSelf,
   };
 }

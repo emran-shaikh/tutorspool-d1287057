@@ -20,9 +20,10 @@ import {
   ensureRoom,
   getMessages,
   getStrokes,
+  joinAttendance,
   parseRoomId,
-  recordJoin,
   recordLeave,
+
   resolveRoomAccess,
   saveMessage,
   saveStroke,
@@ -67,15 +68,15 @@ export default function Classroom() {
           tutorId: result.tutorId,
           title: result.title,
         }).catch(() => undefined);
-        const [msgs, board, attendanceId] = await Promise.all([
+        const [msgs, board, attendance] = await Promise.all([
           getMessages(roomId).catch(() => []),
           getStrokes(roomId).catch(() => []),
-          recordJoin({ roomId, uid, name, role }).catch(() => ""),
+          joinAttendance({ roomId, uid, name, role }).catch(() => null),
         ]);
         if (cancelled) return;
         setMessages(msgs);
         setStrokes(board);
-        if (attendanceId) attendanceRef.current = { id: attendanceId, joinedAt: new Date().toISOString() };
+        if (attendance) attendanceRef.current = attendance;
       }
       setLoading(false);
     })();
@@ -112,14 +113,22 @@ export default function Classroom() {
         setStrokes([]);
       } else if (e.type === "end") {
         toast({ title: "Class ended", description: "The tutor ended this class." });
-        navigate(-1);
+        void leaveRef.current?.();
       } else if (e.type === "force-mute" && e.payload?.uid === uid) {
         forceMuteSelfRef.current?.();
         toast({ title: "You were muted by the tutor" });
+      } else if (e.type === "remove" && e.payload?.uid === uid) {
+        toast({
+          title: "Removed from class",
+          description: "The tutor removed you from this classroom.",
+          variant: "destructive",
+        });
+        void leaveRef.current?.();
       }
     },
-    [navigate, toast, uid]
+    [toast, uid]
   );
+
 
   const isHost = !!access?.isHost;
   const canPublishVideo = access?.canPublishVideo ?? false;
@@ -163,18 +172,59 @@ export default function Classroom() {
     void clearBoard(roomId).catch(() => undefined);
   };
 
-  const leave = async () => {
+  const leave = useCallback(async () => {
     const a = attendanceRef.current;
     attendanceRef.current = null;
     if (a) await recordLeave(a.id, a.joinedAt).catch(() => undefined);
     navigate(-1);
-  };
+  }, [navigate]);
+
+  const leaveRef = useRef<() => Promise<void>>();
+  leaveRef.current = leave;
 
   const endForAll = async () => {
     room.broadcast("end", {});
     await endRoom(roomId).catch(() => undefined);
     await leave();
   };
+
+  const muteParticipant = (peerUid: string, peerName: string) => {
+    room.broadcast("force-mute", { uid: peerUid });
+    toast({ title: `${peerName.split(" ")[0]} was muted` });
+  };
+
+  const removeParticipant = (peerUid: string, peerName: string) => {
+    room.broadcast("remove", { uid: peerUid });
+    room.blockPeer(peerUid);
+    toast({ title: `${peerName.split(" ")[0]} was removed from the class` });
+  };
+
+  // ---- resync after a reconnect: pull the board and chat we may have missed ----
+  const lastNonce = useRef(0);
+  useEffect(() => {
+    if (!access?.allowed) return;
+    if (room.reconnectNonce <= 1) {
+      lastNonce.current = room.reconnectNonce;
+      return;
+    }
+    if (room.reconnectNonce === lastNonce.current) return;
+    lastNonce.current = room.reconnectNonce;
+    let cancelled = false;
+    (async () => {
+      const [msgs, board] = await Promise.all([
+        getMessages(roomId).catch(() => null),
+        getStrokes(roomId).catch(() => null),
+      ]);
+      if (cancelled) return;
+      if (msgs) setMessages(msgs);
+      if (board) setStrokes(board);
+      toast({ title: "Reconnected", description: "Chat and whiteboard are back in sync." });
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [room.reconnectNonce, access?.allowed, roomId, toast]);
+
 
   const hostStream = useMemo(() => {
     if (isHost) return room.screenStream || room.localStream;
@@ -240,9 +290,16 @@ export default function Classroom() {
         </div>
       </header>
 
+      {!room.connected && (
+        <p className="bg-amber-500/15 px-4 py-1.5 text-xs text-amber-300">
+          Connection lost — reconnecting you to the class. Your attendance and whiteboard will resume automatically.
+        </p>
+      )}
+
       {room.mediaError && (
         <p className="bg-amber-500/15 px-4 py-1.5 text-xs text-amber-300">{room.mediaError}</p>
       )}
+
 
       {/* Body */}
       <div className="flex min-h-0 flex-1 flex-col lg:flex-row gap-3 p-3">
@@ -324,16 +381,28 @@ export default function Classroom() {
                     camOn={p.camOn}
                     className="aspect-video w-full"
                   />
-                  {isHost && p.micOn && (
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="h-7 w-full text-xs text-slate-400"
-                      onClick={() => room.broadcast("force-mute", { uid: p.uid })}
-                    >
-                      Mute {p.name.split(" ")[0]}
-                    </Button>
+                  {isHost && (
+                    <div className="flex gap-1">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        disabled={!p.micOn}
+                        className="h-7 flex-1 text-xs text-slate-400"
+                        onClick={() => muteParticipant(p.uid, p.name)}
+                      >
+                        {p.micOn ? `Mute ${p.name.split(" ")[0]}` : "Muted"}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-7 flex-1 text-xs text-destructive hover:text-destructive"
+                        onClick={() => removeParticipant(p.uid, p.name)}
+                      >
+                        Remove
+                      </Button>
+                    </div>
                   )}
+
                 </div>
               ))}
               {room.peers.length === 0 && (

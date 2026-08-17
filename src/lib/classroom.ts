@@ -183,6 +183,40 @@ export const recordJoin = async (
   return ref.id;
 };
 
+/**
+ * Reconnect-safe join: reuses an attendance record that was left open by a
+ * dropped connection (within the last 2 hours) instead of creating duplicates.
+ */
+export const joinAttendance = async (
+  p: Omit<ClassroomParticipant, 'id' | 'joinedAt'>
+): Promise<{ id: string; joinedAt: string } | null> => {
+  try {
+    const snap = await getDocs(
+      query(
+        collection(db, 'classroomParticipants'),
+        where('roomId', '==', p.roomId),
+        where('uid', '==', p.uid)
+      )
+    );
+    const cutoff = Date.now() - 2 * 60 * 60 * 1000;
+    const open = snap.docs
+      .map(d => ({ ...(d.data() as ClassroomParticipant), id: d.id }))
+      .filter(a => !a.leftAt && new Date(a.joinedAt).getTime() > cutoff)
+      .sort((a, b) => b.joinedAt.localeCompare(a.joinedAt))[0];
+    if (open?.id) return { id: open.id, joinedAt: open.joinedAt };
+  } catch {
+    /* fall through to a fresh record */
+  }
+  const joinedAt = new Date().toISOString();
+  try {
+    const id = await recordJoin(p);
+    return { id, joinedAt };
+  } catch {
+    return null;
+  }
+};
+
+
 export const recordLeave = async (attendanceId: string, joinedAt: string): Promise<void> => {
   const leftAt = new Date().toISOString();
   const minutes = Math.max(
