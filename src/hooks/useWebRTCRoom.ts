@@ -325,6 +325,15 @@ export function useWebRTCRoom({ roomId, uid, name, role, publishVideo, onEvent }
     updatePresence({ micOn: false });
   }, [updatePresence]);
 
+  // Host-side: stop rendering/negotiating with a removed participant.
+  const blockPeer = useCallback(
+    (peerId: string) => {
+      blockedRef.current.add(peerId);
+      cleanupPeer(peerId);
+    },
+    [cleanupPeer]
+  );
+
   const peerList = useMemo(() => Object.values(peers), [peers]);
   const screenStream = sharing ? screenRef.current : null;
 
@@ -336,11 +345,16 @@ export function useWebRTCRoom({ roomId, uid, name, role, publishVideo, onEvent }
     camOn,
     sharing,
     connected,
+    reconnectNonce,
+    removed,
+    hasTurn,
     mediaError,
     toggleMic,
     toggleCam,
     toggleShare,
+    blockPeer,
     broadcast,
+
     forceMuteSelf,
   };
 }
