@@ -224,15 +224,19 @@ export function useWebRTCRoom({ roomId, uid, name, role, publishVideo, onEvent }
     (async () => {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
-          audio: true,
-          video: publishVideo ? { width: { ideal: 1280 }, height: { ideal: 720 } } : false,
+          audio: AUDIO_CONSTRAINTS,
+          video: publishVideo ? { width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 24, max: 30 } } : false,
         });
         if (cancelled) {
           stream.getTracks().forEach(t => t.stop());
           return;
         }
+        // Hint the encoder that this is speech, not music.
+        stream.getAudioTracks().forEach(t => ((t as any).contentHint = "speech"));
+        stream.getVideoTracks().forEach(t => ((t as any).contentHint = "motion"));
         localRef.current = stream;
         setLocalStream(stream);
+
       } catch {
         if (!cancelled) setMediaError("We couldn't access your camera or microphone. You can still watch, chat and use the whiteboard.");
       }
