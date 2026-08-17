@@ -205,12 +205,15 @@ export function useWebRTCRoom({ roomId, uid, name, role, publishVideo, onEvent }
         offerToReceiveVideo: true,
         iceRestart,
       });
-      await pc.setLocalDescription(offer);
-      send("signal", { from: uid, to: peerId, kind: "offer", data: offer });
+      const tuned = { type: offer.type, sdp: tuneOpus(offer.sdp || "") } as RTCSessionDescriptionInit;
+      await pc.setLocalDescription(tuned);
+      prioritiseAudio(pc);
+      send("signal", { from: uid, to: peerId, kind: "offer", data: tuned });
     },
     [createPeer, send, uid]
   );
   callPeerRef.current = callPeer;
+
 
 
   // ---- media + signalling lifecycle ----
