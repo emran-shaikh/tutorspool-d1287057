@@ -283,8 +283,11 @@ export function useWebRTCRoom({ roomId, uid, name, role, publishVideo, onEvent }
           if (payload.kind === "offer") {
             await pc.setRemoteDescription(new RTCSessionDescription(payload.data));
             const answer = await pc.createAnswer();
-            await pc.setLocalDescription(answer);
-            send("signal", { from: uid, to: payload.from, kind: "answer", data: answer });
+            const tuned = { type: answer.type, sdp: tuneOpus(answer.sdp || "") } as RTCSessionDescriptionInit;
+            await pc.setLocalDescription(tuned);
+            prioritiseAudio(pc);
+            send("signal", { from: uid, to: payload.from, kind: "answer", data: tuned });
+
           } else if (payload.kind === "answer") {
             if (pc.signalingState !== "stable") {
               await pc.setRemoteDescription(new RTCSessionDescription(payload.data));
