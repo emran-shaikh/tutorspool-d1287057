@@ -61,11 +61,14 @@ export function useWebRTCRoom({ roomId, uid, name, role, publishVideo, onEvent }
   const [sharing, setSharing] = useState(false);
   const [mediaError, setMediaError] = useState<string | null>(null);
   const [connected, setConnected] = useState(false);
+  const [reconnectNonce, setReconnectNonce] = useState(0);
+  const [removed, setRemoved] = useState(false);
 
   const channelRef = useRef<RealtimeChannel | null>(null);
   const pcsRef = useRef<Record<string, RTCPeerConnection>>({});
   const localRef = useRef<MediaStream | null>(null);
   const screenRef = useRef<MediaStream | null>(null);
+  const blockedRef = useRef<Set<string>>(new Set());
   const onEventRef = useRef(onEvent);
   onEventRef.current = onEvent;
   const stateRef = useRef({ micOn: true, camOn: publishVideo });
@@ -74,6 +77,18 @@ export function useWebRTCRoom({ roomId, uid, name, role, publishVideo, onEvent }
   const send = useCallback((event: string, payload: any) => {
     channelRef.current?.send({ type: "broadcast", event, payload });
   }, []);
+
+  const cleanupPeer = useCallback((peerId: string) => {
+    pcsRef.current[peerId]?.close();
+    delete pcsRef.current[peerId];
+    setPeers(prev => {
+      const next = { ...prev };
+      delete next[peerId];
+      return next;
+    });
+  }, []);
+
+  const callPeerRef = useRef<(peerId: string, iceRestart?: boolean) => Promise<void>>();
 
   const createPeer = useCallback(
     (peerId: string) => {
@@ -95,30 +110,39 @@ export function useWebRTCRoom({ roomId, uid, name, role, publishVideo, onEvent }
           [peerId]: { ...(prev[peerId] || { uid: peerId, name: "Guest", role: "student", micOn: true, camOn: true }), stream },
         }));
       };
+      // Recover from temporary network drops: the deterministic caller re-offers
+      // with an ICE restart instead of leaving a dead connection behind.
+      pc.onconnectionstatechange = () => {
+        if (pc.connectionState === "failed" || pc.connectionState === "disconnected") {
+          if (blockedRef.current.has(peerId)) return;
+          window.setTimeout(() => {
+            const current = pcsRef.current[peerId];
+            if (!current || current !== pc) return;
+            if (current.connectionState === "connected") return;
+            if (uid < peerId) void callPeerRef.current?.(peerId, true);
+          }, 2000);
+        }
+      };
       return pc;
     },
     [send, uid]
   );
 
   const callPeer = useCallback(
-    async (peerId: string) => {
+    async (peerId: string, iceRestart = false) => {
       const pc = createPeer(peerId);
-      const offer = await pc.createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: true });
+      const offer = await pc.createOffer({
+        offerToReceiveAudio: true,
+        offerToReceiveVideo: true,
+        iceRestart,
+      });
       await pc.setLocalDescription(offer);
       send("signal", { from: uid, to: peerId, kind: "offer", data: offer });
     },
     [createPeer, send, uid]
   );
+  callPeerRef.current = callPeer;
 
-  const cleanupPeer = useCallback((peerId: string) => {
-    pcsRef.current[peerId]?.close();
-    delete pcsRef.current[peerId];
-    setPeers(prev => {
-      const next = { ...prev };
-      delete next[peerId];
-      return next;
-    });
-  }, []);
 
   // ---- media + signalling lifecycle ----
   useEffect(() => {
