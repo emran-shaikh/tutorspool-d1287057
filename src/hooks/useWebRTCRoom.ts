@@ -177,7 +177,7 @@ export function useWebRTCRoom({ roomId, uid, name, role, publishVideo, onEvent }
           const state = channel!.presenceState() as Record<string, any[]>;
           const present: Record<string, RoomPeer> = {};
           Object.entries(state).forEach(([key, metas]) => {
-            if (key === uid) return;
+            if (key === uid || blockedRef.current.has(key)) return;
             const meta = metas[0] || {};
             present[key] = {
               uid: key,
@@ -206,6 +206,7 @@ export function useWebRTCRoom({ roomId, uid, name, role, publishVideo, onEvent }
         .on("presence", { event: "leave" }, ({ key }: any) => cleanupPeer(key))
         .on("broadcast", { event: "signal" }, async ({ payload }: any) => {
           if (payload.to !== uid) return;
+          if (blockedRef.current.has(payload.from)) return;
           const pc = createPeer(payload.from);
           if (payload.kind === "offer") {
             await pc.setRemoteDescription(new RTCSessionDescription(payload.data));
@@ -221,14 +222,23 @@ export function useWebRTCRoom({ roomId, uid, name, role, publishVideo, onEvent }
           }
         })
         .on("broadcast", { event: "room" }, ({ payload }: any) => {
-          onEventRef.current?.(payload as RoomEvent);
+          const e = payload as RoomEvent;
+          if (e.type === "remove" && e.payload?.uid === uid) {
+            setRemoved(true);
+          }
+          onEventRef.current?.(e);
         })
         .subscribe(async status => {
           if (status === "SUBSCRIBED") {
             setConnected(true);
+            // A resubscribe means we dropped and came back: tell consumers to resync.
+            setReconnectNonce(n => n + 1);
             await channel!.track({ name, role, micOn: stateRef.current.micOn, camOn: stateRef.current.camOn });
+          } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT" || status === "CLOSED") {
+            setConnected(false);
           }
         });
+
     })();
 
     return () => {
