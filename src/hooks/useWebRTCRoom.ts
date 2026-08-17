@@ -52,6 +52,73 @@ const buildIceServers = (): RTCIceServer[] => {
 const ICE_SERVERS = buildIceServers();
 export const hasTurn = ICE_SERVERS.length > 1;
 
+// ---- Audio quality tuning -------------------------------------------------
+// Clean, intelligible speech on weak networks: browser DSP on, mono 48 kHz.
+const AUDIO_CONSTRAINTS: MediaTrackConstraints = {
+  echoCancellation: true,
+  noiseSuppression: true,
+  autoGainControl: true,
+  channelCount: 1,
+  sampleRate: 48000,
+  sampleSize: 16,
+};
+
+// Opus tuning: in-band FEC + DTX so packet loss and silence cost less bandwidth,
+// with a bitrate floor/ceiling that stays clear even on slow mobile links.
+const tuneOpus = (sdp: string): string => {
+  const opusPt = sdp.match(/a=rtpmap:(\d+) opus\/48000/i)?.[1];
+  if (!opusPt) return sdp;
+  const wanted = [
+    "stereo=0",
+    "sprop-stereo=0",
+    "useinbandfec=1",
+    "usedtx=1",
+    "maxaveragebitrate=40000",
+    "maxplaybackrate=48000",
+    "cbr=0",
+  ];
+  const fmtpRe = new RegExp(`a=fmtp:${opusPt} (.*)`);
+  if (fmtpRe.test(sdp)) {
+    sdp = sdp.replace(fmtpRe, (_m, params: string) => {
+      const kept = params
+        .split(";")
+        .map(p => p.trim())
+        .filter(p => p && !wanted.some(w => p.startsWith(w.split("=")[0] + "=")));
+      return `a=fmtp:${opusPt} ${[...kept, ...wanted].join(";")}`;
+    });
+  } else {
+    sdp = sdp.replace(
+      new RegExp(`(a=rtpmap:${opusPt} opus/48000/2\\r?\\n)`),
+      `$1a=fmtp:${opusPt} ${wanted.join(";")}\r\n`
+    );
+  }
+  // 20 ms packets keep latency low without extra overhead.
+  if (!/a=ptime:/.test(sdp)) {
+    sdp = sdp.replace(new RegExp(`(a=fmtp:${opusPt} .*\\r?\\n)`), `$1a=ptime:20\r\na=maxptime:60\r\n`);
+  }
+  return sdp;
+};
+
+// Audio always wins the bandwidth race; video degrades first.
+const prioritiseAudio = (pc: RTCPeerConnection) => {
+  pc.getSenders().forEach(sender => {
+    if (!sender.track) return;
+    const params = sender.getParameters();
+    if (!params.encodings || !params.encodings.length) params.encodings = [{}];
+    if (sender.track.kind === "audio") {
+      params.encodings[0].maxBitrate = 40000;
+      (params.encodings[0] as any).networkPriority = "high";
+      (params.encodings[0] as any).priority = "high";
+    } else {
+      params.encodings[0].maxBitrate = 900000;
+      (params as any).degradationPreference = "balanced";
+      (params.encodings[0] as any).networkPriority = "low";
+    }
+    sender.setParameters(params).catch(() => undefined);
+  });
+};
+
+
 
 export function useWebRTCRoom({ roomId, uid, name, role, publishVideo, onEvent }: Options) {
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
@@ -97,6 +164,8 @@ export function useWebRTCRoom({ roomId, uid, name, role, publishVideo, onEvent }
       pcsRef.current[peerId] = pc;
 
       localRef.current?.getTracks().forEach(t => pc.addTrack(t, localRef.current!));
+      prioritiseAudio(pc);
+
 
       pc.onicecandidate = e => {
         if (e.candidate) {
@@ -136,12 +205,15 @@ export function useWebRTCRoom({ roomId, uid, name, role, publishVideo, onEvent }
         offerToReceiveVideo: true,
         iceRestart,
       });
-      await pc.setLocalDescription(offer);
-      send("signal", { from: uid, to: peerId, kind: "offer", data: offer });
+      const tuned = { type: offer.type, sdp: tuneOpus(offer.sdp || "") } as RTCSessionDescriptionInit;
+      await pc.setLocalDescription(tuned);
+      prioritiseAudio(pc);
+      send("signal", { from: uid, to: peerId, kind: "offer", data: tuned });
     },
     [createPeer, send, uid]
   );
   callPeerRef.current = callPeer;
+
 
 
   // ---- media + signalling lifecycle ----
@@ -152,15 +224,19 @@ export function useWebRTCRoom({ roomId, uid, name, role, publishVideo, onEvent }
     (async () => {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
-          audio: true,
-          video: publishVideo ? { width: { ideal: 1280 }, height: { ideal: 720 } } : false,
+          audio: AUDIO_CONSTRAINTS,
+          video: publishVideo ? { width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 24, max: 30 } } : false,
         });
         if (cancelled) {
           stream.getTracks().forEach(t => t.stop());
           return;
         }
+        // Hint the encoder that this is speech, not music.
+        stream.getAudioTracks().forEach(t => ((t as any).contentHint = "speech"));
+        stream.getVideoTracks().forEach(t => ((t as any).contentHint = "motion"));
         localRef.current = stream;
         setLocalStream(stream);
+
       } catch {
         if (!cancelled) setMediaError("We couldn't access your camera or microphone. You can still watch, chat and use the whiteboard.");
       }
@@ -211,8 +287,11 @@ export function useWebRTCRoom({ roomId, uid, name, role, publishVideo, onEvent }
           if (payload.kind === "offer") {
             await pc.setRemoteDescription(new RTCSessionDescription(payload.data));
             const answer = await pc.createAnswer();
-            await pc.setLocalDescription(answer);
-            send("signal", { from: uid, to: payload.from, kind: "answer", data: answer });
+            const tuned = { type: answer.type, sdp: tuneOpus(answer.sdp || "") } as RTCSessionDescriptionInit;
+            await pc.setLocalDescription(tuned);
+            prioritiseAudio(pc);
+            send("signal", { from: uid, to: payload.from, kind: "answer", data: tuned });
+
           } else if (payload.kind === "answer") {
             if (pc.signalingState !== "stable") {
               await pc.setRemoteDescription(new RTCSessionDescription(payload.data));
