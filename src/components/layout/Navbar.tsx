@@ -57,6 +57,7 @@ function useNavGroups(): NavGroup[] {
         { label: t("nav.subjects"), href: "/subjects", icon: BookOpen },
         { label: t("nav.findTutors"), href: "/tutors", icon: Users },
         { label: t("nav.groupClasses"), href: "/group-classes", icon: Users },
+        { label: "Courses", href: "/courses", icon: BookOpen },
       ],
     },
     {
