@@ -539,3 +539,38 @@ service cloud.firestore {
 ## Testing Rules
 
 Use the Firebase Emulator Suite or the Rules Playground in the Firebase Console to test these rules before deploying to production.
+
+## Tutor Courses (self-paced marketplace)
+
+```
+match /courses/{courseId} {
+  allow read: if resource.data.status == 'published'
+              || (isSignedIn() && resource.data.tutorId == request.auth.uid)
+              || isAdmin();
+  allow create: if isSignedIn() && request.resource.data.tutorId == request.auth.uid;
+  allow update, delete: if (isSignedIn() && resource.data.tutorId == request.auth.uid) || isAdmin();
+}
+
+match /courseLessons/{lessonId} {
+  allow read: if resource.data.isFreePreview == true
+              || (isSignedIn() && resource.data.tutorId == request.auth.uid)
+              || isAdmin()
+              || (isSignedIn() && exists(/databases/$(database)/documents/courseProgress/$(request.auth.uid + '_' + resource.data.courseId)))
+              || isSignedIn();
+  allow create, update, delete: if (isSignedIn() && request.resource.data.tutorId == request.auth.uid) || isAdmin();
+}
+
+match /courseEnrollments/{enrollmentId} {
+  allow read: if isSignedIn() && (resource.data.studentId == request.auth.uid
+              || resource.data.tutorId == request.auth.uid || isAdmin());
+  allow create: if isSignedIn() && request.resource.data.studentId == request.auth.uid
+                && request.resource.data.status == 'pending';
+  // Only an admin may activate access or record payment/commission.
+  allow update, delete: if isAdmin();
+}
+
+match /courseProgress/{progressId} {
+  allow read, write: if isSignedIn() && progressId.split('_')[0] == request.auth.uid;
+  allow read: if isAdmin();
+}
+```
