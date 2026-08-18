@@ -471,7 +471,7 @@ export const deleteUser = async (uid: string, role: string): Promise<void> => {
 // Admin Notification Types and Functions
 export interface AdminNotification {
   id?: string;
-  type: 'new_student' | 'new_tutor' | 'session_booked' | 'session_completed' | 'tutor_approved' | 'new_review' | 'group_join_request';
+  type: 'new_student' | 'new_tutor' | 'session_booked' | 'session_completed' | 'tutor_approved' | 'new_review' | 'group_join_request' | 'course_enrollment_request';
   title: string;
   message: string;
   isRead: boolean;

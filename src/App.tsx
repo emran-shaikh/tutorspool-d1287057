@@ -63,6 +63,11 @@ const GroupClassDetail = lazy(() => import("./pages/GroupClassDetail"));
 const TutorGroupClasses = lazy(() => import("./pages/tutor/GroupClasses"));
 const MyGroupClasses = lazy(() => import("./pages/student/MyGroupClasses"));
 const ManageGroupClasses = lazy(() => import("./pages/admin/ManageGroupClasses"));
+const Courses = lazy(() => import("./pages/Courses"));
+const CourseDetail = lazy(() => import("./pages/CourseDetail"));
+const TutorCourses = lazy(() => import("./pages/tutor/TutorCourses"));
+const MyCourses = lazy(() => import("./pages/student/MyCourses"));
+const ManageCourses = lazy(() => import("./pages/admin/ManageCourses"));
 const Achievements = lazy(() => import("./pages/student/Achievements"));
 const ParentDashboard = lazy(() => import("./pages/dashboard/ParentDashboard"));
 const LinkChild = lazy(() => import("./pages/parent/LinkChild"));
@@ -144,6 +149,8 @@ const App = () => (
                 <Route path="/tutors/:uid" element={<TutorProfilePage />} />
                 <Route path="/group-classes" element={<GroupClasses />} />
                 <Route path="/group-classes/:packageId" element={<GroupClassDetail />} />
+                <Route path="/courses" element={<Courses />} />
+                <Route path="/courses/:courseId" element={<CourseDetail />} />
                 <Route path="/reviews" element={<Reviews />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/contact" element={<Contact />} />
@@ -172,6 +179,8 @@ const App = () => (
                 <Route path="/student/quiz/:quizId/results" element={<ProtectedRoute allowedRoles={['student']}><QuizResults /></ProtectedRoute>} />
                 <Route path="/student/achievements" element={<ProtectedRoute allowedRoles={['student']}><Achievements /></ProtectedRoute>} />
                 <Route path="/student/group-classes" element={<ProtectedRoute allowedRoles={['student']}><MyGroupClasses /></ProtectedRoute>} />
+                <Route path="/student/courses" element={<ProtectedRoute allowedRoles={['student']}><MyCourses /></ProtectedRoute>} />
+                <Route path="/student/courses/:courseId" element={<ProtectedRoute allowedRoles={['student']}><MyCourses /></ProtectedRoute>} />
                 <Route path="/student/tutors-connected" element={<ProtectedRoute allowedRoles={['student']}><MyTutors /></ProtectedRoute>} />
 
                 {/* Live classroom (in-house) */}
@@ -187,6 +196,7 @@ const App = () => (
                 <Route path="/tutor/quizzes/:quizId" element={<ProtectedRoute allowedRoles={['tutor']}><QuizDetail /></ProtectedRoute>} />
                 <Route path="/tutor/students" element={<ProtectedRoute allowedRoles={['tutor']}><MyStudents /></ProtectedRoute>} />
                 <Route path="/tutor/group-classes" element={<ProtectedRoute allowedRoles={['tutor']}><TutorGroupClasses /></ProtectedRoute>} />
+                <Route path="/tutor/courses" element={<ProtectedRoute allowedRoles={['tutor']}><TutorCourses /></ProtectedRoute>} />
 
                 {/* Admin Routes */}
                 <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
@@ -202,6 +212,7 @@ const App = () => (
                 <Route path="/admin/users/student/:uid" element={<ProtectedRoute allowedRoles={['admin']}><AdminEditStudent /></ProtectedRoute>} />
                 <Route path="/admin/connections" element={<ProtectedRoute allowedRoles={['admin']}><ManageConnections /></ProtectedRoute>} />
                 <Route path="/admin/group-classes" element={<ProtectedRoute allowedRoles={['admin']}><ManageGroupClasses /></ProtectedRoute>} />
+                <Route path="/admin/courses" element={<ProtectedRoute allowedRoles={['admin']}><ManageCourses /></ProtectedRoute>} />
                 <Route path="/admin/email-analytics" element={<ProtectedRoute allowedRoles={['admin']}><EmailAnalytics /></ProtectedRoute>} />
 
                 {/* Parent Routes */}
