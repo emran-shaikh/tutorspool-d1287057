@@ -289,6 +289,21 @@ export default function AdminDashboard() {
             </Button>
           </CardContent>
         </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <BookOpen className="h-5 w-5 text-primary" />
+              Courses
+            </CardTitle>
+            <CardDescription>Confirm payments, unlock access & track commission</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Button variant="default" className="w-full justify-start" asChild>
+              <Link to="/admin/courses"><BookOpen className="h-4 w-4 mr-2" /> Manage Courses</Link>
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     </DashboardLayout>
   );
