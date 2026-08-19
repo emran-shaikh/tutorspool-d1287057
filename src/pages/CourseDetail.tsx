@@ -68,6 +68,8 @@ export default function CourseDetail() {
 
   const [course, setCourse] = useState<Course | null>(null);
   const [previews, setPreviews] = useState<CourseLesson[]>([]);
+  const [previewLesson, setPreviewLesson] = useState<CourseLesson | null>(null);
+
   const [myEnrollment, setMyEnrollment] = useState<CourseEnrollment | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
