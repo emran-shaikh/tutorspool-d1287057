@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, Users, Clock, DollarSign, Video, GraduationCap, TrendingUp, Star } from "lucide-react";
+import { Calendar, Users, Clock, DollarSign, Video, GraduationCap, TrendingUp, Star, BookOpen } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { getTutorSessions, getTutorProfile, Session, TutorProfile } from "@/lib/firestore";
@@ -280,6 +280,24 @@ export default function TutorDashboard() {
             <p className="text-sm text-muted-foreground mb-4">Manage your subscription-based group tuition packages.</p>
             <Button className="w-full bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 shadow-lg shadow-teal-500/25" asChild>
               <Link to="/tutor/group-classes">Manage Group Classes</Link>
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card className="border-emerald-100 dark:border-emerald-900 bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-950/50 dark:to-green-950/50">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <div className="p-1.5 rounded-md bg-gradient-to-br from-emerald-500 to-green-500">
+                <BookOpen className="h-4 w-4 text-white" />
+              </div>
+              My Courses
+            </CardTitle>
+            <CardDescription>Create, publish & sell self-paced courses</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground mb-4">Build lessons, set your price and track sales & earnings.</p>
+            <Button className="w-full bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 shadow-lg shadow-emerald-500/25" asChild>
+              <Link to="/tutor/courses">Manage Courses</Link>
             </Button>
           </CardContent>
         </Card>
