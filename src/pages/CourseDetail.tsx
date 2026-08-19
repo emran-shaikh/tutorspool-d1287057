@@ -29,11 +29,36 @@ import {
   CourseEnrollment,
   CourseLesson,
 } from "@/lib/courses";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const ADMIN_WHATSAPP = "923453284284";
 
+/** Convert common video links into an embeddable URL. */
+const toEmbedUrl = (url: string) => {
+  try {
+    const u = new URL(url);
+    if (u.hostname.includes("youtube.com")) {
+      const id = u.searchParams.get("v");
+      if (id) return `https://www.youtube.com/embed/${id}`;
+    }
+    if (u.hostname === "youtu.be") return `https://www.youtube.com/embed${u.pathname}`;
+    if (u.hostname.includes("vimeo.com") && !u.pathname.startsWith("/video"))
+      return `https://player.vimeo.com/video${u.pathname}`;
+    return url;
+  } catch {
+    return url;
+  }
+};
+
 const lessonIcon = (type: CourseLesson["type"]) =>
   type === "video" ? Video : type === "file" ? FileText : PlayCircle;
+
 
 export default function CourseDetail() {
   const { courseId } = useParams<{ courseId: string }>();
@@ -43,6 +68,8 @@ export default function CourseDetail() {
 
   const [course, setCourse] = useState<Course | null>(null);
   const [previews, setPreviews] = useState<CourseLesson[]>([]);
+  const [previewLesson, setPreviewLesson] = useState<CourseLesson | null>(null);
+
   const [myEnrollment, setMyEnrollment] = useState<CourseEnrollment | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -270,19 +297,23 @@ export default function CourseDetail() {
                               {lessons.map(l => {
                                 const Icon = lessonIcon(l.type);
                                 return (
-                                  <li
-                                    key={l.id}
-                                    className="flex items-center gap-2 text-sm text-muted-foreground"
-                                  >
-                                    <Icon className="h-4 w-4 text-primary shrink-0" />
-                                    <span className="flex-1">{l.title}</span>
-                                    <Badge variant="secondary" className="text-[11px]">Free preview</Badge>
+                                  <li key={l.id}>
+                                    <button
+                                      type="button"
+                                      onClick={() => setPreviewLesson(l)}
+                                      className="w-full flex items-center gap-2 text-sm text-muted-foreground rounded-md px-2 py-1.5 -mx-2 hover:bg-muted hover:text-foreground transition-colors text-left"
+                                    >
+                                      <Icon className="h-4 w-4 text-primary shrink-0" />
+                                      <span className="flex-1">{l.title}</span>
+                                      <Badge variant="secondary" className="text-[11px]">Free preview</Badge>
+                                    </button>
                                   </li>
                                 );
                               })}
                             </ul>
                           </div>
                         ))}
+
                         <p className="text-xs text-muted-foreground flex items-center gap-2">
                           <Lock className="h-3.5 w-3.5" /> Remaining lessons unlock after enrollment.
                         </p>
@@ -349,7 +380,49 @@ export default function CourseDetail() {
         )}
       </main>
 
+      <Dialog open={!!previewLesson} onOpenChange={o => !o && setPreviewLesson(null)}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>{previewLesson?.title}</DialogTitle>
+            <DialogDescription>Free preview lesson</DialogDescription>
+          </DialogHeader>
+          {previewLesson?.type === "video" && previewLesson.videoUrl && (
+            <div className="aspect-video w-full rounded-lg overflow-hidden bg-black">
+              <iframe
+                src={toEmbedUrl(previewLesson.videoUrl)}
+                title={previewLesson.title}
+                className="w-full h-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; picture-in-picture"
+                allowFullScreen
+              />
+            </div>
+          )}
+          {previewLesson?.type === "file" && previewLesson.fileUrl && (
+            <Button asChild variant="outline">
+              <a href={previewLesson.fileUrl} target="_blank" rel="noopener noreferrer">
+                <FileText className="h-4 w-4 mr-2" />
+                {previewLesson.fileName || "Open material"}
+              </a>
+            </Button>
+          )}
+          {previewLesson?.content && (
+            <p className="text-sm leading-relaxed whitespace-pre-line text-muted-foreground max-h-[50vh] overflow-y-auto">
+              {previewLesson.content}
+            </p>
+          )}
+          {previewLesson &&
+            !previewLesson.content &&
+            !previewLesson.videoUrl &&
+            !previewLesson.fileUrl && (
+              <p className="text-sm text-muted-foreground">
+                This preview lesson has no content yet.
+              </p>
+            )}
+        </DialogContent>
+      </Dialog>
+
       <Footer />
+
     </div>
   );
 }
