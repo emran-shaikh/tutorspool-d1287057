@@ -353,7 +353,49 @@ export default function CourseDetail() {
         )}
       </main>
 
+      <Dialog open={!!previewLesson} onOpenChange={o => !o && setPreviewLesson(null)}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>{previewLesson?.title}</DialogTitle>
+            <DialogDescription>Free preview lesson</DialogDescription>
+          </DialogHeader>
+          {previewLesson?.type === "video" && previewLesson.videoUrl && (
+            <div className="aspect-video w-full rounded-lg overflow-hidden bg-black">
+              <iframe
+                src={toEmbedUrl(previewLesson.videoUrl)}
+                title={previewLesson.title}
+                className="w-full h-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; picture-in-picture"
+                allowFullScreen
+              />
+            </div>
+          )}
+          {previewLesson?.type === "file" && previewLesson.fileUrl && (
+            <Button asChild variant="outline">
+              <a href={previewLesson.fileUrl} target="_blank" rel="noopener noreferrer">
+                <FileText className="h-4 w-4 mr-2" />
+                {previewLesson.fileName || "Open material"}
+              </a>
+            </Button>
+          )}
+          {previewLesson?.content && (
+            <p className="text-sm leading-relaxed whitespace-pre-line text-muted-foreground max-h-[50vh] overflow-y-auto">
+              {previewLesson.content}
+            </p>
+          )}
+          {previewLesson &&
+            !previewLesson.content &&
+            !previewLesson.videoUrl &&
+            !previewLesson.fileUrl && (
+              <p className="text-sm text-muted-foreground">
+                This preview lesson has no content yet.
+              </p>
+            )}
+        </DialogContent>
+      </Dialog>
+
       <Footer />
+
     </div>
   );
 }
