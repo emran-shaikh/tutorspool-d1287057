@@ -29,11 +29,36 @@ import {
   CourseEnrollment,
   CourseLesson,
 } from "@/lib/courses";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const ADMIN_WHATSAPP = "923453284284";
 
+/** Convert common video links into an embeddable URL. */
+const toEmbedUrl = (url: string) => {
+  try {
+    const u = new URL(url);
+    if (u.hostname.includes("youtube.com")) {
+      const id = u.searchParams.get("v");
+      if (id) return `https://www.youtube.com/embed/${id}`;
+    }
+    if (u.hostname === "youtu.be") return `https://www.youtube.com/embed${u.pathname}`;
+    if (u.hostname.includes("vimeo.com") && !u.pathname.startsWith("/video"))
+      return `https://player.vimeo.com/video${u.pathname}`;
+    return url;
+  } catch {
+    return url;
+  }
+};
+
 const lessonIcon = (type: CourseLesson["type"]) =>
   type === "video" ? Video : type === "file" ? FileText : PlayCircle;
+
 
 export default function CourseDetail() {
   const { courseId } = useParams<{ courseId: string }>();
