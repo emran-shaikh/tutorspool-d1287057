@@ -270,19 +270,23 @@ export default function CourseDetail() {
                               {lessons.map(l => {
                                 const Icon = lessonIcon(l.type);
                                 return (
-                                  <li
-                                    key={l.id}
-                                    className="flex items-center gap-2 text-sm text-muted-foreground"
-                                  >
-                                    <Icon className="h-4 w-4 text-primary shrink-0" />
-                                    <span className="flex-1">{l.title}</span>
-                                    <Badge variant="secondary" className="text-[11px]">Free preview</Badge>
+                                  <li key={l.id}>
+                                    <button
+                                      type="button"
+                                      onClick={() => setPreviewLesson(l)}
+                                      className="w-full flex items-center gap-2 text-sm text-muted-foreground rounded-md px-2 py-1.5 -mx-2 hover:bg-muted hover:text-foreground transition-colors text-left"
+                                    >
+                                      <Icon className="h-4 w-4 text-primary shrink-0" />
+                                      <span className="flex-1">{l.title}</span>
+                                      <Badge variant="secondary" className="text-[11px]">Free preview</Badge>
+                                    </button>
                                   </li>
                                 );
                               })}
                             </ul>
                           </div>
                         ))}
+
                         <p className="text-xs text-muted-foreground flex items-center gap-2">
                           <Lock className="h-3.5 w-3.5" /> Remaining lessons unlock after enrollment.
                         </p>
