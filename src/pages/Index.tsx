@@ -3,6 +3,7 @@ import { Footer } from "@/components/layout/Footer";
 import { HeroSection } from "@/components/home/HeroSection";
 import { FeaturesSection } from "@/components/home/FeaturesSection";
 import { FeaturedTutors } from "@/components/home/FeaturedTutors";
+import { FeaturedCourses } from "@/components/home/FeaturedCourses";
 import { FaqSection } from "@/components/home/FaqSection";
 import { CTASection } from "@/components/home/CTASection";
 import { ExitIntentPopup } from "@/components/ExitIntentPopup";
