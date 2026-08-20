@@ -185,6 +185,7 @@ export function Navbar() {
 
         {/* Right Side Actions */}
         <div className="flex items-center gap-2 sm:gap-3">
+          <BuildBadge />
           <div className="hidden sm:flex items-center">
             <CurrencySwitcher />
             <LanguageSwitcher />
