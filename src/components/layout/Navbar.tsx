@@ -19,6 +19,7 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "@/contexts/AuthContext";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { CurrencySwitcher } from "@/components/CurrencySwitcher";
+import { BuildBadge } from "@/components/BuildBadge";
 import {
   DropdownMenu,
   DropdownMenuContent,
