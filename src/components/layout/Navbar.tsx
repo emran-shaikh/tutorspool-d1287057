@@ -19,6 +19,7 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "@/contexts/AuthContext";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { CurrencySwitcher } from "@/components/CurrencySwitcher";
+import { BuildBadge } from "@/components/BuildBadge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -184,6 +185,7 @@ export function Navbar() {
 
         {/* Right Side Actions */}
         <div className="flex items-center gap-2 sm:gap-3">
+          <BuildBadge />
           <div className="hidden sm:flex items-center">
             <CurrencySwitcher />
             <LanguageSwitcher />
