@@ -10,6 +10,7 @@ const staticRoutes = [
   { path: "/subjects", priority: "0.9", changefreq: "weekly" },
   { path: "/tutors", priority: "0.9", changefreq: "weekly" },
   { path: "/group-classes", priority: "0.9", changefreq: "weekly" },
+  { path: "/courses", priority: "0.9", changefreq: "weekly" },
   { path: "/reviews", priority: "0.8", changefreq: "weekly" },
   { path: "/about", priority: "0.7", changefreq: "monthly" },
   { path: "/contact", priority: "0.7", changefreq: "monthly" },
@@ -30,6 +31,46 @@ function altLinks(path: string) {
     ).join("\n") +
     `\n    <xhtml:link rel="alternate" hreflang="x-default" href="${SITE_URL}${path}"/>`
   );
+}
+
+async function runQuery(collectionId: string, filter?: { field: string; value: any }) {
+  try {
+    const url = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents:runQuery`;
+    const structuredQuery: any = { from: [{ collectionId }] };
+    if (filter) {
+      structuredQuery.where = {
+        fieldFilter: {
+          field: { fieldPath: filter.field },
+          op: "EQUAL",
+          value: filter.value,
+        },
+      };
+    }
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ structuredQuery }),
+    });
+    const data = await res.json();
+    if (!Array.isArray(data)) return [];
+    return data.filter((item: any) => item.document);
+  } catch (e) {
+    console.error(`Error fetching ${collectionId}:`, e);
+    return [];
+  }
+}
+
+function docId(item: any) {
+  return String(item.document.name).split("/").pop() || "";
+}
+
+function lastmodOf(item: any, fields: string[]) {
+  const f = item.document.fields || {};
+  for (const key of fields) {
+    const ts = f[key]?.timestampValue;
+    if (ts) return String(ts).split("T")[0];
+  }
+  return undefined;
 }
 
 async function fetchPublishedBlogPosts() {
@@ -72,7 +113,12 @@ async function fetchPublishedBlogPosts() {
 }
 
 serve(async () => {
-  const blogPosts = await fetchPublishedBlogPosts();
+  const [blogPosts, tutors, courses, groupPackages] = await Promise.all([
+    fetchPublishedBlogPosts(),
+    runQuery("tutorProfiles", { field: "isApproved", value: { booleanValue: true } }),
+    runQuery("courses", { field: "status", value: { stringValue: "published" } }),
+    runQuery("groupPackages", { field: "status", value: { stringValue: "approved" } }),
+  ]);
 
   let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
@@ -97,6 +143,26 @@ ${altLinks(route.path)}
     <lastmod>${lastmod}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
+  </url>
+`;
+    }
+  }
+
+  const dynamicGroups: { items: any[]; prefix: string; priority: string; changefreq: string; lastmodFields: string[] }[] = [
+    { items: tutors, prefix: "/tutors/", priority: "0.7", changefreq: "weekly", lastmodFields: ["updatedAt"] },
+    { items: courses, prefix: "/courses/", priority: "0.8", changefreq: "weekly", lastmodFields: ["updatedAt", "publishedAt"] },
+    { items: groupPackages, prefix: "/group-classes/", priority: "0.7", changefreq: "weekly", lastmodFields: ["updatedAt"] },
+  ];
+
+  for (const group of dynamicGroups) {
+    for (const item of group.items) {
+      const id = docId(item);
+      if (!id) continue;
+      const lastmod = lastmodOf(item, group.lastmodFields);
+      xml += `  <url>
+    <loc>${SITE_URL}${group.prefix}${id}</loc>
+${lastmod ? `    <lastmod>${lastmod}</lastmod>\n` : ""}    <changefreq>${group.changefreq}</changefreq>
+    <priority>${group.priority}</priority>
   </url>
 `;
     }
