@@ -3,7 +3,7 @@ import { useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { SUPPORTED_LANGS } from "@/i18n";
 
-export const SITE_URL = "https://tutorspool.com";
+export const SITE_URL = "https://www.tutorspool.com";
 
 /** Routes that must never be indexed (private / transactional surfaces). */
 const PRIVATE_PREFIXES = [

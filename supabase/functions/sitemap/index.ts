@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-const SITE_URL = "https://tutorspool.com";
+const SITE_URL = "https://www.tutorspool.com";
 const FIREBASE_PROJECT_ID = "tutorspooldb";
 
 const LANGS = ["en", "ar", "es"];

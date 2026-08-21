@@ -19,4 +19,4 @@ Disallow: /tutor/
 Disallow: /results/
 Disallow: /forgot-password
 
-Sitemap: https://tutorspool.com/sitemap.xml
+Sitemap: https://www.tutorspool.com/sitemap.xml
