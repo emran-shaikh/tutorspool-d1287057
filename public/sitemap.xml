@@ -3,6 +3,8 @@
   <url><loc>https://tutorspool.com/</loc><xhtml:link rel="alternate" hreflang="en" href="https://tutorspool.com/"/><xhtml:link rel="alternate" hreflang="ar" href="https://tutorspool.com/?lng=ar"/><xhtml:link rel="alternate" hreflang="es" href="https://tutorspool.com/?lng=es"/><xhtml:link rel="alternate" hreflang="x-default" href="https://tutorspool.com/"/><changefreq>weekly</changefreq><priority>1.0</priority></url>
   <url><loc>https://tutorspool.com/subjects</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
   <url><loc>https://tutorspool.com/tutors</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://tutorspool.com/group-classes</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://tutorspool.com/courses</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
   <url><loc>https://tutorspool.com/reviews</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
   <url><loc>https://tutorspool.com/about</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://tutorspool.com/contact</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
