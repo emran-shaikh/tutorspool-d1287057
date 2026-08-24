@@ -28,6 +28,7 @@ export interface TutorProfile {
   hourlyRate: number;
   experience: string;
   isApproved: boolean;
+  isFeatured?: boolean;
   photoURL?: string;
   createdAt: string;
   // Optional fields
@@ -276,6 +277,17 @@ export const approveTutor = async (uid: string): Promise<void> => {
     throw error;
   }
 };
+
+export const setTutorFeatured = async (uid: string, isFeatured: boolean): Promise<void> => {
+  try {
+    await setDoc(doc(db, 'tutorProfiles', uid), { isFeatured }, { merge: true });
+  } catch (error) {
+    console.error('Error updating featured status:', error);
+    throw error;
+  }
+};
+
+
 
 // Availability functions
 export const getTutorAvailability = async (tutorId: string): Promise<AvailabilitySlot[]> => {

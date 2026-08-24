@@ -4,9 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Users, UserCheck, Ban, CheckCircle, Eye, X, Trash2, ShieldAlert, Pencil, Mail, AlertCircle } from "lucide-react";
+import { ArrowLeft, Users, UserCheck, Ban, CheckCircle, Eye, X, Trash2, ShieldAlert, Pencil, Mail, AlertCircle, Star } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import { getAllUsers, getAllTutors, approveTutor, updateUserStatus, deleteUser, TutorProfile, createAdminNotification } from "@/lib/firestore";
+import { getAllUsers, getAllTutors, approveTutor, updateUserStatus, deleteUser, TutorProfile, createAdminNotification, setTutorFeatured } from "@/lib/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -139,6 +139,18 @@ export default function ManageUsers() {
       fetchData();
     } catch (error) {
       toast({ title: "Error", description: "Failed to approve tutor", variant: "destructive" });
+    }
+  };
+
+  const handleToggleFeatured = async (tutor: TutorProfile) => {
+    const next = !tutor.isFeatured;
+    setTutors(prev => prev.map(t => t.uid === tutor.uid ? { ...t, isFeatured: next } : t));
+    try {
+      await setTutorFeatured(tutor.uid, next);
+      toast({ title: next ? "Tutor featured" : "Removed from featured", description: next ? `${tutor.fullName} will now appear first on the home page.` : `${tutor.fullName} is no longer featured.` });
+    } catch (error) {
+      setTutors(prev => prev.map(t => t.uid === tutor.uid ? { ...t, isFeatured: !next } : t));
+      toast({ title: "Error", description: "Failed to update featured status", variant: "destructive" });
     }
   };
 
@@ -337,7 +349,20 @@ export default function ManageUsers() {
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
+                          {tutor.isFeatured && (
+                            <Badge variant="secondary" className="gap-1">
+                              <Star className="h-3 w-3 fill-current" /> Featured
+                            </Badge>
+                          )}
                           <Badge variant="default" className="bg-success">Active</Badge>
+                          <Button
+                            size="sm"
+                            variant={tutor.isFeatured ? "default" : "outline"}
+                            onClick={() => handleToggleFeatured(tutor)}
+                          >
+                            <Star className={`h-4 w-4 mr-1 ${tutor.isFeatured ? "fill-current" : ""}`} />
+                            {tutor.isFeatured ? "Unfeature" : "Feature"}
+                          </Button>
                           <Button size="sm" variant="ghost" asChild>
                             <Link to={`/admin/users/tutor/${tutor.uid}`}>
                               <Pencil className="h-4 w-4" />
