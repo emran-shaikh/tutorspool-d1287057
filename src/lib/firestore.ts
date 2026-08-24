@@ -28,6 +28,7 @@ export interface TutorProfile {
   hourlyRate: number;
   experience: string;
   isApproved: boolean;
+  isFeatured?: boolean;
   photoURL?: string;
   createdAt: string;
   // Optional fields
