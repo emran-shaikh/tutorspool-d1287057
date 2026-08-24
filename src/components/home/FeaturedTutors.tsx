@@ -36,7 +36,13 @@ export function FeaturedTutors() {
           };
         });
 
-        setTutors(tutorsWithRatings.slice(0, 4));
+        const sorted = [...tutorsWithRatings].sort((a, b) => {
+          const featuredDiff = Number(!!b.isFeatured) - Number(!!a.isFeatured);
+          if (featuredDiff !== 0) return featuredDiff;
+          return b.avgRating - a.avgRating;
+        });
+
+        setTutors(sorted.slice(0, 4));
       } catch (error) {
         console.error('Error fetching tutors:', error);
       } finally {
