@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/carousel";
 import { ArrowRight, BookOpen, PlayCircle, Users, Sparkles } from "lucide-react";
 import { Price } from "@/components/Price";
+import { Skeleton } from "@/components/ui/skeleton";
 import { getPublishedCourses, Course } from "@/lib/courses";
 import Autoplay from "embla-carousel-autoplay";
 
@@ -49,8 +50,28 @@ export function FeaturedCourses() {
     return (
       <section className="py-20 bg-muted/20">
         <div className="container">
-          <div className="flex justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+          <div className="text-center mb-14">
+            <Skeleton className="h-8 w-44 mx-auto mb-4 rounded-full" />
+            <Skeleton className="h-10 w-96 max-w-full mx-auto mb-4" />
+            <Skeleton className="h-5 w-[28rem] max-w-full mx-auto" />
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="rounded-2xl border border-border/60 bg-card overflow-hidden shadow-[var(--shadow-card)]">
+                <Skeleton className="h-44 w-full rounded-none" />
+                <div className="p-5">
+                  <div className="flex gap-2 mb-2">
+                    <Skeleton className="h-5 w-20 rounded-full" />
+                    <Skeleton className="h-5 w-16 rounded-full" />
+                  </div>
+                  <Skeleton className="h-5 w-3/4 mb-2" />
+                  <Skeleton className="h-4 w-1/3 mb-3" />
+                  <Skeleton className="h-4 w-full mb-1" />
+                  <Skeleton className="h-4 w-2/3 mb-4" />
+                  <Skeleton className="h-4 w-24" />
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
