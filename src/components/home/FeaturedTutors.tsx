@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Star, ArrowRight, GraduationCap, Clock, DollarSign, Sparkles } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { getTutors, TutorProfile, getAllReviews } from "@/lib/firestore";
 import { Price } from "@/components/Price";
 
@@ -60,8 +61,29 @@ export function FeaturedTutors() {
     return (
       <section className="py-20 bg-muted/30">
         <div className="container">
-          <div className="flex justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <div className="text-center mb-14">
+            <Skeleton className="h-8 w-40 mx-auto mb-4 rounded-full" />
+            <Skeleton className="h-10 w-80 max-w-full mx-auto mb-4" />
+            <Skeleton className="h-5 w-96 max-w-full mx-auto" />
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="rounded-2xl border border-border/60 bg-card overflow-hidden shadow-[var(--shadow-card)]">
+                <Skeleton className="h-1.5 w-full rounded-none" />
+                <div className="p-6 flex flex-col items-center">
+                  <Skeleton className="h-28 w-28 rounded-full mb-5" />
+                  <Skeleton className="h-5 w-32 mb-2" />
+                  <Skeleton className="h-3 w-20 mb-3" />
+                  <div className="flex gap-1.5 mb-4">
+                    <Skeleton className="h-5 w-16 rounded-full" />
+                    <Skeleton className="h-5 w-16 rounded-full" />
+                  </div>
+                  <Skeleton className="h-px w-full mb-4" />
+                  <Skeleton className="h-4 w-full mb-4" />
+                  <Skeleton className="h-10 w-full rounded-md" />
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
