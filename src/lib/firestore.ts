@@ -13,7 +13,8 @@ import {
   Timestamp,
   serverTimestamp
 } from 'firebase/firestore';
-import { db } from './firebase';
+import { db, auth } from './firebase';
+import { supabase } from '@/integrations/supabase/client';
 
 // Environment check for conditional logging
 const isDev = import.meta.env.DEV;
