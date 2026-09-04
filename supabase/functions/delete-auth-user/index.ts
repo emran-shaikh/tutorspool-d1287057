@@ -104,8 +104,11 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { idToken, uid, email } = await req.json();
-    if (!idToken) {
+    const { idToken, uid, email, adminKey } = await req.json();
+    const serverKey = Deno.env.get("ADMIN_SECURITY_KEY");
+    const keyAuthorized = Boolean(adminKey && serverKey && adminKey === serverKey);
+
+    if (!idToken && !keyAuthorized) {
       return new Response(JSON.stringify({ error: "Missing idToken" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -114,13 +117,15 @@ Deno.serve(async (req) => {
 
     const { token, projectId } = await getAccessToken();
 
-    // Verify the caller is a signed-in admin
-    const caller = await lookupAccount(token, projectId, { idToken });
-    if (!caller?.localId || !(await isAdmin(token, projectId, caller.localId))) {
-      return new Response(JSON.stringify({ error: "Not authorized" }), {
-        status: 403,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    if (!keyAuthorized) {
+      // Verify the caller is a signed-in admin
+      const caller = await lookupAccount(token, projectId, { idToken });
+      if (!caller?.localId || !(await isAdmin(token, projectId, caller.localId))) {
+        return new Response(JSON.stringify({ error: "Not authorized" }), {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
     }
 
     // Resolve the target account
