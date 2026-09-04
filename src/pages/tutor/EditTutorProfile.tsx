@@ -11,7 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ArrowLeft, User, Save, X, Plus, GraduationCap, Pencil, Check } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { PhotoUpload } from "@/components/PhotoUpload";
-import { getTutorProfile, createTutorProfile, TutorProfile } from "@/lib/firestore";
+import { getTutorProfile, createTutorProfile, updateTutorProfile, TutorProfile } from "@/lib/firestore";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { fireLevelUpConfetti, fireBadgeConfetti } from "@/lib/confetti";
@@ -138,7 +138,8 @@ export default function EditTutorProfile() {
     setSaving(true);
 
     try {
-      const profileData: TutorProfile = {
+      // Fields the tutor is allowed to edit (never isApproved / isFeatured)
+      const editableData = {
         uid: userProfile.uid,
         fullName: userProfile.fullName,
         email: userProfile.email,
@@ -146,19 +147,28 @@ export default function EditTutorProfile() {
         experience,
         hourlyRate,
         subjects,
-        photoURL: photoURL || undefined,
-        isApproved: profile?.isApproved || false,
-        createdAt: profile?.createdAt || new Date().toISOString(),
+        photoURL: photoURL || "",
         qualifications,
         degreeLevel,
         majorSubjects,
-        teachingStyle
+        teachingStyle,
+      };
+
+      const profileData: TutorProfile = {
+        ...editableData,
+        isApproved: profile?.isApproved || false,
+        createdAt: profile?.createdAt || new Date().toISOString(),
       };
 
       const wasComplete = profile ? isProfileComplete(profile) : false;
       const nowComplete = isProfileComplete(profileData);
 
-      await createTutorProfile(profileData);
+      if (profile) {
+        // Existing profile: only send editable fields so approval status is untouched
+        await updateTutorProfile(userProfile.uid, editableData);
+      } else {
+        await createTutorProfile(profileData);
+      }
       setProfile(profileData);
       setEditingField(null);
       setIsNewProfile(false);

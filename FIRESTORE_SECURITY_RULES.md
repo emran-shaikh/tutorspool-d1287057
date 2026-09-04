@@ -72,7 +72,7 @@ service cloud.firestore {
       // Only the tutor themselves or admins can create/update their profile
       allow create: if (isOwner(tutorId) && isTutor()) || isAdmin();
       allow update: if (isOwner(tutorId) && isTutor() 
-        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['isApproved']))
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['isApproved', 'isFeatured']))
         || isAdmin();
       
       // Only admins can delete tutor profiles
