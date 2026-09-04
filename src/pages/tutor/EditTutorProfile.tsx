@@ -11,7 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ArrowLeft, User, Save, X, Plus, GraduationCap, Pencil, Check } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { PhotoUpload } from "@/components/PhotoUpload";
-import { getTutorProfile, createTutorProfile, TutorProfile } from "@/lib/firestore";
+import { getTutorProfile, createTutorProfile, updateTutorProfile, TutorProfile } from "@/lib/firestore";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { fireLevelUpConfetti, fireBadgeConfetti } from "@/lib/confetti";
