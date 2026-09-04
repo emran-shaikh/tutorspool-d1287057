@@ -293,7 +293,7 @@ export default function BookSession() {
                   <div className="text-sm text-muted-foreground space-y-1">
                     {availability.map((slot) => (
                       <p key={slot.id}>
-                        {dayNames[slot.dayOfWeek]}: {slot.startTime} - {slot.endTime}
+                        {dayNames[slot.dayOfWeek]}: {to12h(slot.startTime)} - {to12h(slot.endTime)}
                       </p>
                     ))}
                   </div>
