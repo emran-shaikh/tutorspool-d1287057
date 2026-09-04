@@ -43,7 +43,7 @@ export default function ManageUsers() {
   const [tutors, setTutors] = useState<TutorProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTutor, setSelectedTutor] = useState<TutorProfile | null>(null);
-  const [userToDelete, setUserToDelete] = useState<{ uid: string; name: string; role: string } | null>(null);
+  const [userToDelete, setUserToDelete] = useState<{ uid: string; name: string; role: string; email?: string } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [notifyTutor, setNotifyTutor] = useState<TutorProfile | null>(null);
   const [notifyMessage, setNotifyMessage] = useState("");
@@ -172,7 +172,7 @@ export default function ManageUsers() {
     
     setIsDeleting(true);
     try {
-      await deleteUser(userToDelete.uid, userToDelete.role);
+      await deleteUser(userToDelete.uid, userToDelete.role, userToDelete.email);
       
       // Optimistically remove from local state immediately
       setUsers(prev => prev.filter(u => u.uid !== deletedUid));
