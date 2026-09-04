@@ -3,10 +3,11 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, Users, UserCheck, Ban, CheckCircle, Eye, X, Trash2, ShieldAlert, Pencil, Mail, AlertCircle, Star } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import { getAllUsers, getAllTutors, approveTutor, updateUserStatus, deleteUser, TutorProfile, createAdminNotification, setTutorFeatured } from "@/lib/firestore";
+import { getAllUsers, getAllTutors, approveTutor, updateUserStatus, deleteUser, deleteAuthAccount, TutorProfile, createAdminNotification, setTutorFeatured } from "@/lib/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -161,6 +162,28 @@ export default function ManageUsers() {
       fetchData();
     } catch (error) {
       toast({ title: "Error", description: "Failed to update user", variant: "destructive" });
+    }
+  };
+
+  const [releaseEmail, setReleaseEmail] = useState("");
+  const [releasing, setReleasing] = useState(false);
+
+  const handleReleaseEmail = async () => {
+    const email = releaseEmail.trim();
+    if (!email) return;
+    setReleasing(true);
+    try {
+      await deleteAuthAccount("", email);
+      toast({ title: "Login cleared", description: `${email} can now be used to register again.` });
+      setReleaseEmail("");
+    } catch (error) {
+      toast({
+        title: "Could not clear login",
+        description: "Please check the email address and try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setReleasing(false);
     }
   };
 
