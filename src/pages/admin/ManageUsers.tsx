@@ -309,7 +309,7 @@ export default function ManageUsers() {
                           <Button 
                             size="sm" 
                             variant="destructive"
-                            onClick={() => setUserToDelete({ uid: tutor.uid, name: tutor.fullName, role: 'tutor' })}
+                            onClick={() => setUserToDelete({ uid: tutor.uid, name: tutor.fullName, role: 'tutor', email: tutor.email })}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -372,7 +372,7 @@ export default function ManageUsers() {
                             size="sm" 
                             variant="ghost"
                             className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                            onClick={() => setUserToDelete({ uid: tutor.uid, name: tutor.fullName, role: 'tutor' })}
+                            onClick={() => setUserToDelete({ uid: tutor.uid, name: tutor.fullName, role: 'tutor', email: tutor.email })}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -425,7 +425,7 @@ export default function ManageUsers() {
                             size="sm" 
                             variant="ghost"
                             className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                            onClick={() => setUserToDelete({ uid: student.uid, name: student.fullName, role: 'student' })}
+                            onClick={() => setUserToDelete({ uid: student.uid, name: student.fullName, role: 'student', email: student.email })}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -464,7 +464,7 @@ export default function ManageUsers() {
                             size="sm" 
                             variant="ghost"
                             className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                            onClick={() => setUserToDelete({ uid: admin.uid, name: admin.fullName, role: 'admin' })}
+                            onClick={() => setUserToDelete({ uid: admin.uid, name: admin.fullName, role: 'admin', email: admin.email })}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>

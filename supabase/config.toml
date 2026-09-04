@@ -31,3 +31,6 @@ verify_jwt = false
 verify_jwt = false
 
 
+
+[functions.delete-auth-user]
+verify_jwt = false
