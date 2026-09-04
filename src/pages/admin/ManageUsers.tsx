@@ -210,6 +210,28 @@ export default function ManageUsers() {
         <p className="text-muted-foreground">Approve tutors and manage all platform users</p>
       </div>
 
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="text-base">Free up an email address</CardTitle>
+          <CardDescription>
+            If someone was removed but still sees "This email is already registered", enter their email to clear the leftover login.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col sm:flex-row gap-2">
+          <Input
+            type="email"
+            placeholder="person@example.com"
+            value={releaseEmail}
+            onChange={(e) => setReleaseEmail(e.target.value)}
+          />
+          <Button onClick={handleReleaseEmail} disabled={releasing || !releaseEmail.trim()}>
+            {releasing ? "Clearing..." : "Clear login"}
+          </Button>
+        </CardContent>
+      </Card>
+
+
+
       {loading ? (
         <div className="flex justify-center py-12">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
