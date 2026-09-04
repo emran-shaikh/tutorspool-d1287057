@@ -17,6 +17,16 @@ import { Price } from "@/components/Price";
 
 const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
+// Convert a 24-hour "HH:mm" string to a 12-hour "h:mm AM/PM" string
+function to12h(time: string): string {
+  const [hStr, m] = (time || "").split(":");
+  const h = parseInt(hStr, 10);
+  if (isNaN(h)) return time;
+  const period = h >= 12 ? "PM" : "AM";
+  const hour12 = h % 12 === 0 ? 12 : h % 12;
+  return `${hour12}:${m} ${period}`;
+}
+
 export default function BookSession() {
   const { tutorId } = useParams<{ tutorId: string }>();
   const navigate = useNavigate();
