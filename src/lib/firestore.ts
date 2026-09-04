@@ -13,7 +13,8 @@ import {
   Timestamp,
   serverTimestamp
 } from 'firebase/firestore';
-import { db } from './firebase';
+import { db, auth } from './firebase';
+import { supabase } from '@/integrations/supabase/client';
 
 // Environment check for conditional logging
 const isDev = import.meta.env.DEV;
@@ -452,9 +453,27 @@ export const updateUserStatus = async (uid: string, isActive: boolean): Promise<
   }
 };
 
+// Remove the actual login account so the email can be used to register again (Admin only)
+export const deleteAuthAccount = async (uid: string, email?: string): Promise<void> => {
+  const idToken = await auth.currentUser?.getIdToken();
+  if (!idToken) throw new Error('Not signed in');
+  const { data, error } = await supabase.functions.invoke('delete-auth-user', {
+    body: { idToken, uid, email },
+  });
+  if (error) throw error;
+  if (data && data.error) throw new Error(data.error);
+};
+
 // Delete user and all related data (Admin only)
-export const deleteUser = async (uid: string, role: string): Promise<void> => {
+export const deleteUser = async (uid: string, role: string, email?: string): Promise<void> => {
   try {
+    // Remove the login account first (best-effort, but surface real failures)
+    try {
+      await deleteAuthAccount(uid, email);
+    } catch (e) {
+      if (isDev) console.error('Could not delete auth account:', e);
+    }
+
     // Delete from users collection (may not exist, so catch individually)
     try { await deleteDoc(doc(db, 'users', uid)); } catch (e) { if (isDev) console.warn('users doc missing:', e); }
     

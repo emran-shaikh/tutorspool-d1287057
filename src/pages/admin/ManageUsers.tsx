@@ -3,10 +3,11 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, Users, UserCheck, Ban, CheckCircle, Eye, X, Trash2, ShieldAlert, Pencil, Mail, AlertCircle, Star } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import { getAllUsers, getAllTutors, approveTutor, updateUserStatus, deleteUser, TutorProfile, createAdminNotification, setTutorFeatured } from "@/lib/firestore";
+import { getAllUsers, getAllTutors, approveTutor, updateUserStatus, deleteUser, deleteAuthAccount, TutorProfile, createAdminNotification, setTutorFeatured } from "@/lib/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -43,7 +44,7 @@ export default function ManageUsers() {
   const [tutors, setTutors] = useState<TutorProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTutor, setSelectedTutor] = useState<TutorProfile | null>(null);
-  const [userToDelete, setUserToDelete] = useState<{ uid: string; name: string; role: string } | null>(null);
+  const [userToDelete, setUserToDelete] = useState<{ uid: string; name: string; role: string; email?: string } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [notifyTutor, setNotifyTutor] = useState<TutorProfile | null>(null);
   const [notifyMessage, setNotifyMessage] = useState("");
@@ -164,6 +165,28 @@ export default function ManageUsers() {
     }
   };
 
+  const [releaseEmail, setReleaseEmail] = useState("");
+  const [releasing, setReleasing] = useState(false);
+
+  const handleReleaseEmail = async () => {
+    const email = releaseEmail.trim();
+    if (!email) return;
+    setReleasing(true);
+    try {
+      await deleteAuthAccount("", email);
+      toast({ title: "Login cleared", description: `${email} can now be used to register again.` });
+      setReleaseEmail("");
+    } catch (error) {
+      toast({
+        title: "Could not clear login",
+        description: "Please check the email address and try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setReleasing(false);
+    }
+  };
+
   const handleDeleteUser = async () => {
     if (!userToDelete) return;
     
@@ -172,7 +195,7 @@ export default function ManageUsers() {
     
     setIsDeleting(true);
     try {
-      await deleteUser(userToDelete.uid, userToDelete.role);
+      await deleteUser(userToDelete.uid, userToDelete.role, userToDelete.email);
       
       // Optimistically remove from local state immediately
       setUsers(prev => prev.filter(u => u.uid !== deletedUid));
@@ -209,6 +232,28 @@ export default function ManageUsers() {
         <h1 className="font-display text-3xl font-bold mb-2">Manage Users</h1>
         <p className="text-muted-foreground">Approve tutors and manage all platform users</p>
       </div>
+
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="text-base">Free up an email address</CardTitle>
+          <CardDescription>
+            If someone was removed but still sees "This email is already registered", enter their email to clear the leftover login.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col sm:flex-row gap-2">
+          <Input
+            type="email"
+            placeholder="person@example.com"
+            value={releaseEmail}
+            onChange={(e) => setReleaseEmail(e.target.value)}
+          />
+          <Button onClick={handleReleaseEmail} disabled={releasing || !releaseEmail.trim()}>
+            {releasing ? "Clearing..." : "Clear login"}
+          </Button>
+        </CardContent>
+      </Card>
+
+
 
       {loading ? (
         <div className="flex justify-center py-12">
@@ -309,7 +354,7 @@ export default function ManageUsers() {
                           <Button 
                             size="sm" 
                             variant="destructive"
-                            onClick={() => setUserToDelete({ uid: tutor.uid, name: tutor.fullName, role: 'tutor' })}
+                            onClick={() => setUserToDelete({ uid: tutor.uid, name: tutor.fullName, role: 'tutor', email: tutor.email })}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -372,7 +417,7 @@ export default function ManageUsers() {
                             size="sm" 
                             variant="ghost"
                             className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                            onClick={() => setUserToDelete({ uid: tutor.uid, name: tutor.fullName, role: 'tutor' })}
+                            onClick={() => setUserToDelete({ uid: tutor.uid, name: tutor.fullName, role: 'tutor', email: tutor.email })}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -425,7 +470,7 @@ export default function ManageUsers() {
                             size="sm" 
                             variant="ghost"
                             className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                            onClick={() => setUserToDelete({ uid: student.uid, name: student.fullName, role: 'student' })}
+                            onClick={() => setUserToDelete({ uid: student.uid, name: student.fullName, role: 'student', email: student.email })}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -464,7 +509,7 @@ export default function ManageUsers() {
                             size="sm" 
                             variant="ghost"
                             className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                            onClick={() => setUserToDelete({ uid: admin.uid, name: admin.fullName, role: 'admin' })}
+                            onClick={() => setUserToDelete({ uid: admin.uid, name: admin.fullName, role: 'admin', email: admin.email })}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
