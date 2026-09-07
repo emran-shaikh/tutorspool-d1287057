@@ -65,8 +65,9 @@ export default function Reviews() {
     return `${Math.floor(diffDays / 365)} year${Math.floor(diffDays / 365) > 1 ? 's' : ''} ago`;
   };
 
-  const averageRating = reviews.length > 0 
-    ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
+  const ratedReviews = reviews.filter((r) => Number.isFinite(Number(r.rating)));
+  const averageRating = ratedReviews.length > 0
+    ? (ratedReviews.reduce((sum, r) => sum + Number(r.rating), 0) / ratedReviews.length).toFixed(1)
     : "0.0";
 
   return (
@@ -84,7 +85,7 @@ export default function Reviews() {
           <div className="container text-center">
             <Badge variant="outline" className="mb-4">
               <Star className="h-3 w-3 mr-1 fill-warning text-warning" />
-              {reviews.length > 0 ? `${averageRating} Average Rating` : "Student Reviews"}
+              {ratedReviews.length > 0 ? `${averageRating} Average Rating` : "Student Reviews"}
             </Badge>
             <h1 className="font-display text-4xl md:text-5xl font-bold mb-4">
               What Our <span className="text-primary">Students</span> Say
