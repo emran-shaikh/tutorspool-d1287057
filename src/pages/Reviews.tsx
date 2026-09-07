@@ -65,8 +65,9 @@ export default function Reviews() {
     return `${Math.floor(diffDays / 365)} year${Math.floor(diffDays / 365) > 1 ? 's' : ''} ago`;
   };
 
-  const averageRating = reviews.length > 0 
-    ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
+  const ratedReviews = reviews.filter((r) => Number.isFinite(Number(r.rating)));
+  const averageRating = ratedReviews.length > 0
+    ? (ratedReviews.reduce((sum, r) => sum + Number(r.rating), 0) / ratedReviews.length).toFixed(1)
     : "0.0";
 
   return (
