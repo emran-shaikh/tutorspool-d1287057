@@ -454,7 +454,12 @@ export const updateUserStatus = async (uid: string, isActive: boolean): Promise<
 };
 
 // Remove the actual login account so the email can be used to register again (Admin only)
-export const deleteAuthAccount = async (uid: string, email?: string): Promise<void> => {
+export interface AuthDeletionResult {
+  deleted: boolean;
+  reason?: string;
+}
+
+export const deleteAuthAccount = async (uid: string, email?: string): Promise<AuthDeletionResult> => {
   const idToken = await auth.currentUser?.getIdToken();
   if (!idToken) throw new Error('Not signed in');
   const { data, error } = await supabase.functions.invoke('delete-auth-user', {
@@ -462,16 +467,20 @@ export const deleteAuthAccount = async (uid: string, email?: string): Promise<vo
   });
   if (error) throw error;
   if (data && data.error) throw new Error(data.error);
+  return { deleted: !!data?.deleted, reason: data?.reason };
 };
 
 // Delete user and all related data (Admin only)
-export const deleteUser = async (uid: string, role: string, email?: string): Promise<void> => {
+// Returns the outcome of the login (auth account) removal so callers can warn the admin.
+export const deleteUser = async (uid: string, role: string, email?: string): Promise<AuthDeletionResult> => {
   try {
-    // Remove the login account first (best-effort, but surface real failures)
+    // Remove the login account first — record the outcome instead of swallowing it
+    let authResult: AuthDeletionResult;
     try {
-      await deleteAuthAccount(uid, email);
+      authResult = await deleteAuthAccount(uid, email);
     } catch (e) {
       if (isDev) console.error('Could not delete auth account:', e);
+      authResult = { deleted: false, reason: e instanceof Error ? e.message : 'auth_delete_failed' };
     }
 
     // Delete from users collection (may not exist, so catch individually)
@@ -493,6 +502,8 @@ export const deleteUser = async (uid: string, role: string, email?: string): Pro
       const linksSnapshot = await getDocs(query(collection(db, 'parentLinks'), where('parentId', '==', uid)));
       await Promise.all(linksSnapshot.docs.map(d => deleteDoc(doc(db, 'parentLinks', d.id))));
     }
+
+    return authResult;
   } catch (error) {
     if (isDev) console.error('Error deleting user:', error);
     throw error;
