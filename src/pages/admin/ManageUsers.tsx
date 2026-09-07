@@ -173,9 +173,20 @@ export default function ManageUsers() {
     if (!email) return;
     setReleasing(true);
     try {
-      await deleteAuthAccount("", email);
-      toast({ title: "Login cleared", description: `${email} can now be used to register again.` });
-      setReleaseEmail("");
+      const result = await deleteAuthAccount("", email);
+      if (result.deleted) {
+        toast({ title: "Login cleared", description: `${email} can now be used to register again.` });
+        setReleaseEmail("");
+      } else {
+        toast({
+          title: "Nothing to clear",
+          description:
+            result.reason === "account_not_found"
+              ? `No login exists for ${email}. It is already free to register.`
+              : `The login for ${email} could not be removed. Please try again.`,
+          variant: result.reason === "account_not_found" ? "default" : "destructive",
+        });
+      }
     } catch (error) {
       toast({
         title: "Could not clear login",
@@ -192,19 +203,28 @@ export default function ManageUsers() {
     
     const deletedUid = userToDelete.uid;
     const deletedName = userToDelete.name;
+    const deletedEmail = userToDelete.email;
     
     setIsDeleting(true);
     try {
-      await deleteUser(userToDelete.uid, userToDelete.role, userToDelete.email);
+      const result = await deleteUser(userToDelete.uid, userToDelete.role, userToDelete.email);
       
       // Optimistically remove from local state immediately
       setUsers(prev => prev.filter(u => u.uid !== deletedUid));
       setTutors(prev => prev.filter(t => t.uid !== deletedUid));
       
-      toast({ 
-        title: "User deleted", 
-        description: `${deletedName} has been permanently removed from the platform.` 
-      });
+      if (result.deleted || result.reason === "account_not_found") {
+        toast({ 
+          title: "User deleted", 
+          description: `${deletedName} has been permanently removed from the platform.` 
+        });
+      } else {
+        toast({
+          title: "Data removed, login still active",
+          description: `${deletedName}'s records were deleted, but the login for ${deletedEmail ?? "this user"} could not be removed. Use "Free up an email address" above to clear it.`,
+          variant: "destructive",
+        });
+      }
       setUserToDelete(null);
     } catch (error) {
       toast({ 
