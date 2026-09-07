@@ -85,7 +85,7 @@ export default function Reviews() {
           <div className="container text-center">
             <Badge variant="outline" className="mb-4">
               <Star className="h-3 w-3 mr-1 fill-warning text-warning" />
-              {reviews.length > 0 ? `${averageRating} Average Rating` : "Student Reviews"}
+              {ratedReviews.length > 0 ? `${averageRating} Average Rating` : "Student Reviews"}
             </Badge>
             <h1 className="font-display text-4xl md:text-5xl font-bold mb-4">
               What Our <span className="text-primary">Students</span> Say
