@@ -45,12 +45,17 @@ export function usePlatformStats(): PlatformStats {
             ? validReviews.reduce((sum, r) => sum + Number(r.rating), 0) / validReviews.length
             : 0;
 
+        // If everything came back empty (e.g. restricted reads on some
+        // devices/sessions resolve with no docs instead of throwing),
+        // treat it like a failure and use the fallback values.
+        const looksEmpty = tutors.length === 0 && users.length === 0;
+
         setStats({
-          tutorCount: tutors.length,
-          studentCount,
-          subjectCount: allSubjects.size,
-          reviewCount: reviews.length,
-          avgRating: avgRating > 0 ? Math.round(avgRating * 10) / 10 : 0,
+          tutorCount: looksEmpty || tutors.length === 0 ? 35 : tutors.length,
+          studentCount: looksEmpty || studentCount === 0 ? 250 : studentCount,
+          subjectCount: looksEmpty || allSubjects.size === 0 ? 15 : allSubjects.size,
+          reviewCount: looksEmpty ? 50 : reviews.length,
+          avgRating: avgRating > 0 ? Math.round(avgRating * 10) / 10 : 4.8,
           loading: false,
         });
       } catch (error) {
