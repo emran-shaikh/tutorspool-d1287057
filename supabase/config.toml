@@ -34,3 +34,6 @@ verify_jwt = false
 
 [functions.delete-auth-user]
 verify_jwt = false
+
+[functions.platform-stats]
+verify_jwt = false
