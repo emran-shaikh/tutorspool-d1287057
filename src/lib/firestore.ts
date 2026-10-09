@@ -70,7 +70,22 @@ export interface BlogPost {
   tags: string[];
   metaTitle?: string;
   metaDescription?: string;
+  // Workflow (legacy posts have no status; derive from isPublished)
+  status?: 'draft' | 'pending' | 'published' | 'rejected';
+  authorRole?: 'admin' | 'tutor';
+  reviewNote?: string;
+  // Optional author card (all optional, author decides)
+  showAuthorCard?: boolean;
+  authorPhoto?: string;
+  authorSubjects?: string[];
+  authorBio?: string;
+  authorQualifications?: string;
+  linkedinUrl?: string;
+  portfolioUrl?: string;
 }
+
+export const getBlogStatus = (p: BlogPost): NonNullable<BlogPost['status']> =>
+  p.status || (p.isPublished ? 'published' : 'draft');
 
 export interface AvailabilitySlot {
   id?: string;
@@ -745,6 +760,14 @@ export const getPublishedBlogPosts = async (): Promise<BlogPost[]> => {
     if (isDev) console.error('Error fetching published blog posts:', error);
     return [];
   }
+};
+
+export const getBlogPostsByAuthor = async (authorId: string): Promise<BlogPost[]> => {
+  const q = query(collection(db, 'blogPosts'), where('authorId', '==', authorId));
+  const snapshot = await getDocs(q);
+  return snapshot.docs
+    .map(d => ({ ...d.data(), id: d.id } as BlogPost))
+    .sort((a, b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''));
 };
 
 export const getBlogPostBySlug = async (slug: string): Promise<BlogPost | null> => {

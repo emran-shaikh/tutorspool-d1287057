@@ -154,17 +154,26 @@ service cloud.firestore {
     
     // Blog posts collection
     match /blogPosts/{postId} {
-      // Anyone can read published blog posts
-      allow read: if resource.data.isPublished == true || isAdmin();
-      
-      // Only admins can create blog posts
-      allow create: if isAdmin();
-      
-      // Only admins can update blog posts
-      allow update: if isAdmin();
-      
-      // Only admins can delete blog posts
-      allow delete: if isAdmin();
+      // Public reads published posts; admins read all; authors read their own
+      allow read: if resource.data.isPublished == true || isAdmin()
+        || (isAuthenticated() && resource.data.authorId == request.auth.uid);
+
+      allow create: if isAdmin()
+        || (isAuthenticated() && request.resource.data.authorId == request.auth.uid
+            && request.resource.data.isPublished == false
+            && request.resource.data.status in ['draft', 'pending']);
+
+      // Tutors may edit their own unpublished posts but can never publish
+      allow update: if isAdmin()
+        || (isAuthenticated() && resource.data.authorId == request.auth.uid
+            && resource.data.isPublished == false
+            && request.resource.data.authorId == request.auth.uid
+            && request.resource.data.isPublished == false
+            && request.resource.data.status in ['draft', 'pending']);
+
+      allow delete: if isAdmin()
+        || (isAuthenticated() && resource.data.authorId == request.auth.uid
+            && resource.data.isPublished == false);
     }
     
     // Admin notifications collection

@@ -4,7 +4,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, User, ArrowLeft, Clock, Facebook, Twitter, Linkedin, Link2 } from "lucide-react";
+import { Calendar, User, ArrowLeft, Clock, Facebook, Twitter, Linkedin, Link2, Globe } from "lucide-react";
 import { getBlogPostBySlug, BlogPost as BlogPostType } from "@/lib/firestore";
 import { format } from "date-fns";
 import { Helmet } from "react-helmet-async";
@@ -65,6 +65,8 @@ export default function BlogPost() {
     );
   }
 
+  const isTutorAuthor = post.authorRole === 'tutor';
+
   // JSON-LD structured data for SEO
   const structuredData = {
     "@context": "https://schema.org",
@@ -74,7 +76,9 @@ export default function BlogPost() {
     "image": post.coverImage,
     "author": {
       "@type": "Person",
-      "name": post.authorName
+      "name": post.authorName,
+      ...(isTutorAuthor ? { "url": `https://www.tutorspool.com/tutors/${post.authorId}` } : {}),
+      ...(post.linkedinUrl ? { "sameAs": [post.linkedinUrl, post.portfolioUrl].filter(Boolean) } : {})
     },
     "datePublished": post.publishedAt || post.createdAt,
     "dateModified": post.updatedAt,
@@ -143,10 +147,27 @@ export default function BlogPost() {
                 </h1>
                 
                 <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-4">
-                  <span className="flex items-center gap-1">
-                    <User className="h-4 w-4" />
-                    {post.authorName}
-                  </span>
+                  {isTutorAuthor ? (
+                    <span className="flex items-center gap-2">
+                      {post.authorPhoto ? (
+                        <img src={post.authorPhoto} alt={post.authorName} className="h-8 w-8 rounded-full object-cover" />
+                      ) : <User className="h-4 w-4" />}
+                      <Link to={`/tutors/${post.authorId}`} className="font-medium text-foreground hover:text-primary">{post.authorName}</Link>
+                      {post.linkedinUrl && (
+                        <a href={post.linkedinUrl} target="_blank" rel="noopener noreferrer nofollow" aria-label="LinkedIn" className="hover:text-primary">
+                          <Linkedin className="h-4 w-4" />
+                        </a>
+                      )}
+                      {(post.authorSubjects || []).slice(0, 2).map(s => (
+                        <Badge key={s} variant="outline" className="text-xs">{s}</Badge>
+                      ))}
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-1">
+                      <User className="h-4 w-4" />
+                      {post.authorName}
+                    </span>
+                  )}
                   <span className="flex items-center gap-1">
                     <Calendar className="h-4 w-4" />
                     {format(new Date(post.publishedAt || post.createdAt), 'MMMM d, yyyy')}
@@ -230,6 +251,40 @@ export default function BlogPost() {
                 dangerouslySetInnerHTML={{ __html: post.content.replace(/\n/g, '<br />') }}
               />
 
+              {/* Optional Author Card */}
+              {post.showAuthorCard && (
+                <aside className="mt-12 p-6 border border-border rounded-xl flex flex-col sm:flex-row gap-5">
+                  {post.authorPhoto && (
+                    <img src={post.authorPhoto} alt={post.authorName} className="h-20 w-20 rounded-full object-cover shrink-0" />
+                  )}
+                  <div className="flex-1 space-y-2">
+                    <p className="font-display text-lg font-semibold">
+                      Written by {post.authorName}
+                      {isTutorAuthor && `, Verified ${post.authorSubjects?.[0] ? post.authorSubjects[0] + ' ' : ''}Tutor on TutorsPool`}
+                    </p>
+                    {post.authorQualifications && <p className="text-sm text-muted-foreground">{post.authorQualifications}</p>}
+                    {post.authorBio && <p className="text-sm text-muted-foreground">{post.authorBio}</p>}
+                    <div className="flex flex-wrap items-center gap-3 pt-1">
+                      {post.linkedinUrl && (
+                        <a href={post.linkedinUrl} target="_blank" rel="noopener noreferrer nofollow" className="inline-flex items-center gap-1 text-sm text-primary hover:underline">
+                          <Linkedin className="h-4 w-4" /> LinkedIn
+                        </a>
+                      )}
+                      {post.portfolioUrl && (
+                        <a href={post.portfolioUrl} target="_blank" rel="noopener noreferrer nofollow" className="inline-flex items-center gap-1 text-sm text-primary hover:underline">
+                          <Globe className="h-4 w-4" /> Portfolio
+                        </a>
+                      )}
+                      {isTutorAuthor && (
+                        <Button asChild size="sm" className="sm:ml-auto">
+                          <Link to={`/tutors/${post.authorId}`}>Book a Session with {post.authorName.split(' ')[0]}</Link>
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </aside>
+              )}
+
               {/* CTA */}
               <div className="mt-12 p-8 bg-muted/50 rounded-xl text-center">
                 <h3 className="font-display text-xl font-semibold mb-2">
@@ -238,8 +293,8 @@ export default function BlogPost() {
                 <p className="text-muted-foreground mb-4">
                   Connect with expert tutors and achieve your learning goals
                 </p>
-                <Link to="/register">
-                  <Button size="lg">Get Started Today</Button>
+                <Link to={isTutorAuthor ? `/tutors/${post.authorId}` : "/find-tutors"}>
+                  <Button size="lg">{isTutorAuthor ? `Book a Session with ${post.authorName.split(' ')[0]}` : "Find a Tutor"}</Button>
                 </Link>
               </div>
             </div>
