@@ -135,7 +135,7 @@ type EmailType =
   | "admin_new_student" | "admin_new_tutor" | "tutor_approved" | "tutor_profile_incomplete"
   | "contact_form" | "demo_request"
   | "parent_quiz_completed" | "parent_session_booked" | "parent_session_status" | "parent_milestone"
-  | "lifecycle";
+  | "lifecycle" | "admin_blog_submitted";
 
 interface LifecycleEmailRequest extends BaseEmailRequest {
   type: "lifecycle";
@@ -161,6 +161,7 @@ interface TutorSessionBookingEmailRequest extends BaseEmailRequest { type: "tuto
 interface TutorSessionCancelEmailRequest extends BaseEmailRequest { type: "tutor_session_cancel"; to: string; studentName: string; tutorName: string; date: string; time: string; cancelledBy: "student" | "tutor"; }
 interface TutorReviewReceivedEmailRequest extends BaseEmailRequest { type: "tutor_review_received"; to: string; studentName: string; tutorName: string; subject: string; }
 interface AdminNewStudentEmailRequest extends BaseEmailRequest { type: "admin_new_student"; studentName: string; studentEmail: string; }
+interface AdminBlogSubmittedEmailRequest extends BaseEmailRequest { type: "admin_blog_submitted"; tutorName: string; postTitle: string; excerpt?: string; }
 interface AdminNewTutorEmailRequest extends BaseEmailRequest { type: "admin_new_tutor"; tutorName: string; tutorEmail: string; }
 interface TutorApprovedEmailRequest extends BaseEmailRequest { type: "tutor_approved"; to: string; tutorName: string; }
 interface TutorProfileIncompleteEmailRequest extends BaseEmailRequest { type: "tutor_profile_incomplete"; to: string; tutorName: string; missingFields: string[]; customMessage?: string; }
@@ -435,6 +436,20 @@ async function sendAdminNewStudentEmail(payload: AdminNewStudentEmailRequest) {
   });
 }
 
+async function sendAdminBlogSubmittedEmail(payload: AdminBlogSubmittedEmailRequest) {
+  const e = (v: string) => String(v || "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
+  const body = `
+    <p>A tutor has submitted a new <strong>blog article</strong> for review.</p>
+    ${infoBox({ "Tutor": e(payload.tutorName), "Title": e(payload.postTitle), "Summary": e((payload.excerpt || "").slice(0, 300)) }, "#fef3c7", "#fcd34d")}
+    <p>Review, edit if needed, and approve or reject it.</p>
+  `;
+  return resend.emails.send({
+    from: FROM_ADDRESS, to: ADMIN_EMAILS,
+    subject: `Blog pending review: ${String(payload.postTitle).slice(0, 80)}`,
+    html: renderLayout("admin", "New Blog Submission", body, `${SITE}/admin/blogs`, "Review Blogs"),
+  });
+}
+
 async function sendAdminNewTutorEmail(payload: AdminNewTutorEmailRequest) {
   const body = `
     <p>A new <strong>tutor</strong> has registered and is <strong>awaiting approval</strong>.</p>
@@ -598,6 +613,7 @@ serve(async (req) => {
       case "tutor_session_cancel":  result = await sendTutorSessionCancelEmail(payload); break;
       case "tutor_review_received": result = await sendTutorReviewReceivedEmail(payload); break;
       case "admin_new_student":  result = await sendAdminNewStudentEmail(payload); break;
+      case "admin_blog_submitted": result = await sendAdminBlogSubmittedEmail(payload as AdminBlogSubmittedEmailRequest); break;
       case "admin_new_tutor":    result = await sendAdminNewTutorEmail(payload); break;
       case "tutor_approved":     result = await sendTutorApprovedEmail(payload); break;
       case "tutor_profile_incomplete": result = await sendTutorProfileIncompleteEmail(payload); break;
