@@ -17,14 +17,18 @@ import {
   Plus,
   Image as ImageIcon,
   FileText,
-  Settings
+  Settings,
+  Send,
+  UserCircle
 } from "lucide-react";
 import { 
   createBlogPost, 
   updateBlogPost, 
   getBlogPostById, 
+  getTutorProfile,
   BlogPost 
 } from "@/lib/firestore";
+import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 
@@ -34,6 +38,30 @@ export default function BlogEditor() {
   const navigate = useNavigate();
   const { userProfile } = useAuth();
   const { toast } = useToast();
+  const isTutor = userProfile?.role === 'tutor';
+  const basePath = isTutor ? '/tutor/blogs' : '/admin/blogs';
+  const layoutRole = isTutor ? 'tutor' : 'admin';
+
+  // Optional author card
+  const [showAuthorCard, setShowAuthorCard] = useState(false);
+  const [linkedinUrl, setLinkedinUrl] = useState("");
+  const [portfolioUrl, setPortfolioUrl] = useState("");
+  const [authorBio, setAuthorBio] = useState("");
+  const [tutorExtras, setTutorExtras] = useState<{ photo?: string; subjects?: string[]; qualifications?: string; bio?: string }>({});
+
+  useEffect(() => {
+    if (!isTutor || !userProfile) return;
+    getTutorProfile(userProfile.uid).then((tp: any) => {
+      if (!tp) return;
+      setTutorExtras({
+        photo: tp.photoURL,
+        subjects: tp.subjects,
+        qualifications: Array.isArray(tp.qualifications) ? tp.qualifications.join(', ') : tp.qualifications,
+        bio: tp.bio,
+      });
+      setAuthorBio(prev => prev || tp.bio || "");
+    }).catch(() => {});
+  }, [isTutor, userProfile]);
 
   const [loading, setLoading] = useState(isEditing);
   const [saving, setSaving] = useState(false);
@@ -72,9 +100,13 @@ export default function BlogEditor() {
       setTags(data.tags);
       setMetaTitle(data.metaTitle || "");
       setMetaDescription(data.metaDescription || "");
+      setShowAuthorCard(!!data.showAuthorCard);
+      setLinkedinUrl(data.linkedinUrl || "");
+      setPortfolioUrl(data.portfolioUrl || "");
+      setAuthorBio(data.authorBio || "");
     } else {
       toast({ title: "Error", description: "Blog post not found", variant: "destructive" });
-      navigate('/admin/blogs');
+      navigate(basePath);
     }
     setLoading(false);
   };
@@ -154,7 +186,8 @@ export default function BlogEditor() {
     }
   };
 
-  const handleSave = async (publish: boolean = false) => {
+  const handleSave = async (mode: 'draft' | 'submit' | 'publish' = 'draft') => {
+    const publish = mode === 'publish';
     if (!title.trim() || !content.trim() || !excerpt.trim()) {
       toast({ 
         title: "Missing fields", 
@@ -168,21 +201,36 @@ export default function BlogEditor() {
     setSaving(true);
 
     try {
+      const willPublish = !isTutor && (publish || isPublished);
+      const status: BlogPost['status'] = willPublish ? 'published' : (isTutor && mode === 'submit') ? 'pending' : 'draft';
+      const cleanUrl = (u: string) => { const t = u.trim(); if (!t) return ''; return /^https?:\/\//i.test(t) ? t : `https://${t}`; };
+      const keepAuthor = isEditing && originalPost && !isTutor;
       const postData: Omit<BlogPost, 'id'> = {
         title,
         slug,
         content,
         excerpt,
         coverImage: coverImage || undefined,
-        authorId: userProfile.uid,
-        authorName: userProfile.fullName,
-        isPublished: publish || isPublished,
-        publishedAt: (publish || isPublished) ? new Date().toISOString() : undefined,
+        authorId: keepAuthor ? originalPost!.authorId : userProfile.uid,
+        authorName: keepAuthor ? originalPost!.authorName : userProfile.fullName,
+        authorRole: keepAuthor ? (originalPost!.authorRole || 'admin') : (isTutor ? 'tutor' : 'admin'),
+        isPublished: willPublish,
+        status,
+        publishedAt: willPublish ? (originalPost?.publishedAt || new Date().toISOString()) : undefined,
         createdAt: originalPost?.createdAt || new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         tags,
         metaTitle: metaTitle || undefined,
-        metaDescription: metaDescription || undefined
+        metaDescription: metaDescription || undefined,
+        showAuthorCard,
+        linkedinUrl: cleanUrl(linkedinUrl),
+        portfolioUrl: cleanUrl(portfolioUrl),
+        authorBio: authorBio.trim(),
+        ...(isTutor ? {
+          authorPhoto: tutorExtras.photo || '',
+          authorSubjects: tutorExtras.subjects || [],
+          authorQualifications: tutorExtras.qualifications || '',
+        } : {}),
       };
 
       if (isEditing && id) {
@@ -193,7 +241,14 @@ export default function BlogEditor() {
         toast({ title: "Success", description: "Blog post created successfully" });
       }
 
-      navigate('/admin/blogs');
+      if (status === 'pending') {
+        supabase.functions.invoke('send-email', {
+          body: { type: 'admin_blog_submitted', tutorName: userProfile.fullName, postTitle: title, excerpt },
+        }).catch(() => {});
+        toast({ title: "Submitted for review", description: "The admin team will review your article shortly." });
+      }
+
+      navigate(basePath);
     } catch (error: any) {
       console.error('Blog save failed:', error);
       const msg = error?.message || error?.code || 'Failed to save blog post';
@@ -205,7 +260,7 @@ export default function BlogEditor() {
 
   if (loading) {
     return (
-      <DashboardLayout role="admin">
+      <DashboardLayout role={layoutRole}>
         <div className="flex justify-center py-12">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
@@ -214,9 +269,9 @@ export default function BlogEditor() {
   }
 
   return (
-    <DashboardLayout role="admin">
+    <DashboardLayout role={layoutRole}>
       <div className="mb-6">
-        <Link to="/admin/blogs" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-4">
+        <Link to={basePath} className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-4">
           <ArrowLeft className="h-4 w-4 mr-1" /> Back to Blogs
         </Link>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -229,14 +284,21 @@ export default function BlogEditor() {
             </p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => handleSave(false)} disabled={saving}>
+            <Button variant="outline" onClick={() => handleSave('draft')} disabled={saving}>
               <Save className="h-4 w-4 mr-2" />
               Save Draft
             </Button>
-            <Button onClick={() => handleSave(true)} disabled={saving}>
-              <Eye className="h-4 w-4 mr-2" />
-              {saving ? "Publishing..." : "Publish"}
-            </Button>
+            {isTutor ? (
+              <Button onClick={() => handleSave('submit')} disabled={saving}>
+                <Send className="h-4 w-4 mr-2" />
+                {saving ? "Submitting..." : "Submit for Review"}
+              </Button>
+            ) : (
+              <Button onClick={() => handleSave('publish')} disabled={saving}>
+                <Eye className="h-4 w-4 mr-2" />
+                {saving ? "Publishing..." : "Publish"}
+              </Button>
+            )}
           </div>
         </div>
       </div>
@@ -342,7 +404,17 @@ export default function BlogEditor() {
 
         {/* Sidebar */}
         <div className="space-y-6">
-          {/* Publish Settings */}
+          {isTutor ? (
+            <Card>
+              <CardHeader><CardTitle>Review Process</CardTitle></CardHeader>
+              <CardContent className="text-sm text-muted-foreground space-y-2">
+                <p>Your article is reviewed by the TutorsPool team before it goes live.</p>
+                {originalPost?.status === 'rejected' && originalPost.reviewNote && (
+                  <p className="text-destructive">Reviewer note: {originalPost.reviewNote}</p>
+                )}
+              </CardContent>
+            </Card>
+          ) : (
           <Card>
             <CardHeader>
               <CardTitle>Publish Status</CardTitle>
@@ -359,6 +431,36 @@ export default function BlogEditor() {
               <p className="text-xs text-muted-foreground mt-2">
                 {isPublished ? "Post will be visible to the public" : "Post will be saved as draft"}
               </p>
+            </CardContent>
+          </Card>
+          )}
+
+          {/* Author Card (optional) */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <UserCircle className="h-5 w-5 text-primary" />
+                Author Card
+              </CardTitle>
+              <CardDescription>Optional — show your bio and links on this article</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="showAuthorCard">Show author card</Label>
+                <Switch id="showAuthorCard" checked={showAuthorCard} onCheckedChange={setShowAuthorCard} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="linkedinUrl">LinkedIn (optional)</Label>
+                <Input id="linkedinUrl" placeholder="linkedin.com/in/yourname" value={linkedinUrl} onChange={(e) => setLinkedinUrl(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="portfolioUrl">Portfolio / Website (optional)</Label>
+                <Input id="portfolioUrl" placeholder="yourwebsite.com" value={portfolioUrl} onChange={(e) => setPortfolioUrl(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="authorBio">Short bio (optional)</Label>
+                <Textarea id="authorBio" rows={3} value={authorBio} onChange={(e) => setAuthorBio(e.target.value)} />
+              </div>
             </CardContent>
           </Card>
 
