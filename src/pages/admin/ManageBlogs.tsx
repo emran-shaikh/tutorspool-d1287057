@@ -32,18 +32,22 @@ import {
   EyeOff, 
   Search,
   FileText,
-  ArrowLeft 
+  ArrowLeft,
+  Check,
+  XCircle
 } from "lucide-react";
-import { getAllBlogPosts, deleteBlogPost, updateBlogPost, seedBlogPosts, seedMoreBlogPosts, BlogPost } from "@/lib/firestore";
+import { getAllBlogPosts, deleteBlogPost, updateBlogPost, seedBlogPosts, seedMoreBlogPosts, BlogPost, getBlogStatus } from "@/lib/firestore";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function ManageBlogs() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [seeding, setSeeding] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [tab, setTab] = useState<"all" | "published" | "pending" | "draft">("all");
   const { toast } = useToast();
   const { userProfile } = useAuth();
 
@@ -72,11 +76,12 @@ export default function ManageBlogs() {
       const newStatus = !post.isPublished;
       await updateBlogPost(post.id!, { 
         isPublished: newStatus,
+        status: newStatus ? 'published' : 'draft',
         publishedAt: newStatus ? new Date().toISOString() : undefined
       });
       setPosts(posts.map(p => 
         p.id === post.id 
-          ? { ...p, isPublished: newStatus, publishedAt: newStatus ? new Date().toISOString() : undefined }
+          ? { ...p, isPublished: newStatus, status: newStatus ? 'published' : 'draft', publishedAt: newStatus ? new Date().toISOString() : undefined }
           : p
       ));
       toast({ 
@@ -88,7 +93,27 @@ export default function ManageBlogs() {
     }
   };
 
-  const filteredPosts = posts.filter(post => 
+  const handleReject = async (post: BlogPost) => {
+    const note = prompt("Reason / changes needed (shown to the tutor):", "") ?? null;
+    if (note === null) return;
+    try {
+      await updateBlogPost(post.id!, { status: 'rejected', isPublished: false, reviewNote: note });
+      setPosts(posts.map(p => p.id === post.id ? { ...p, status: 'rejected', isPublished: false, reviewNote: note } : p));
+      toast({ title: "Sent back", description: "The tutor can now revise the article." });
+    } catch {
+      toast({ title: "Error", description: "Failed to update blog post", variant: "destructive" });
+    }
+  };
+
+  const pendingCount = posts.filter(p => getBlogStatus(p) === 'pending').length;
+
+  const filteredPosts = posts.filter(post => {
+    const st = getBlogStatus(post);
+    if (tab === 'published' && st !== 'published') return false;
+    if (tab === 'pending' && st !== 'pending') return false;
+    if (tab === 'draft' && !(st === 'draft' || st === 'rejected')) return false;
+    return true;
+  }).filter(post => 
     post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     post.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
   );
@@ -163,6 +188,14 @@ export default function ManageBlogs() {
               </CardTitle>
               <CardDescription>{posts.length} total posts</CardDescription>
             </div>
+            <Tabs value={tab} onValueChange={(v) => setTab(v as typeof tab)}>
+              <TabsList>
+                <TabsTrigger value="all">All</TabsTrigger>
+                <TabsTrigger value="published">Published</TabsTrigger>
+                <TabsTrigger value="pending">Pending{pendingCount ? ` (${pendingCount})` : ''}</TabsTrigger>
+                <TabsTrigger value="draft">Drafts</TabsTrigger>
+              </TabsList>
+            </Tabs>
             <div className="relative sm:ml-auto sm:w-64">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
@@ -217,15 +250,28 @@ export default function ManageBlogs() {
                         {post.authorName}
                       </TableCell>
                       <TableCell>
-                        <Badge variant={post.isPublished ? "default" : "secondary"}>
-                          {post.isPublished ? "Published" : "Draft"}
-                        </Badge>
+                        {(() => { const st = getBlogStatus(post); return (
+                          <Badge variant={st === 'published' ? "default" : st === 'rejected' ? "destructive" : st === 'pending' ? "outline" : "secondary"}>
+                            {st === 'published' ? "Published" : st === 'pending' ? "Pending Review" : st === 'rejected' ? "Sent Back" : "Draft"}
+                          </Badge>
+                        ); })()}
+                        {post.authorRole === 'tutor' && <p className="text-xs text-muted-foreground mt-1">Tutor</p>}
                       </TableCell>
                       <TableCell className="text-muted-foreground">
                         {format(new Date(post.createdAt), 'MMM d, yyyy')}
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
+                          {getBlogStatus(post) === 'pending' && (
+                            <>
+                              <Button variant="ghost" size="icon" title="Approve & Publish" onClick={() => handleTogglePublish(post)}>
+                                <Check className="h-4 w-4 text-primary" />
+                              </Button>
+                              <Button variant="ghost" size="icon" title="Send back" onClick={() => handleReject(post)}>
+                                <XCircle className="h-4 w-4 text-destructive" />
+                              </Button>
+                            </>
+                          )}
                           <Button
                             variant="ghost"
                             size="icon"

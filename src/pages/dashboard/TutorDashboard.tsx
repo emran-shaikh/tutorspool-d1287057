@@ -301,6 +301,22 @@ export default function TutorDashboard() {
             </Button>
           </CardContent>
         </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <BookOpen className="h-4 w-4 text-primary" />
+              My Articles
+            </CardTitle>
+            <CardDescription>Write blog articles & attract students</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground mb-4">Share your expertise. Articles go live after a quick review.</p>
+            <Button className="w-full" variant="outline" asChild>
+              <Link to="/tutor/blogs">Write & Manage Articles</Link>
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     </DashboardLayout>
   );
