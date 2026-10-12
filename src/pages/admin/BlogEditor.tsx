@@ -233,11 +233,16 @@ export default function BlogEditor() {
         } : {}),
       };
 
+      // Firestore rejects undefined field values — strip them
+      const cleanData = Object.fromEntries(
+        Object.entries(postData).filter(([, v]) => v !== undefined)
+      ) as Omit<BlogPost, 'id'>;
+
       if (isEditing && id) {
-        await updateBlogPost(id, postData);
+        await updateBlogPost(id, cleanData);
         toast({ title: "Success", description: "Blog post updated successfully" });
       } else {
-        await createBlogPost(postData);
+        await createBlogPost(cleanData);
         toast({ title: "Success", description: "Blog post created successfully" });
       }
 
