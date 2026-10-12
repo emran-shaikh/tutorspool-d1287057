@@ -242,7 +242,7 @@ export default function BlogEditor() {
         await updateBlogPost(id, cleanData);
         toast({ title: "Success", description: "Blog post updated successfully" });
       } else {
-        await createBlogPost(postData);
+        await createBlogPost(cleanData);
         toast({ title: "Success", description: "Blog post created successfully" });
       }
 
