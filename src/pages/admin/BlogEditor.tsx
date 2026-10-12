@@ -65,6 +65,7 @@ export default function BlogEditor() {
 
   const [loading, setLoading] = useState(isEditing);
   const [saving, setSaving] = useState(false);
+  const [showPreview, setShowPreview] = useState(() => new URLSearchParams(window.location.search).get('preview') === '1');
 
   // Form state
   const [title, setTitle] = useState("");
@@ -308,9 +309,61 @@ export default function BlogEditor() {
         </div>
       </div>
 
+      <div className="flex gap-2 mb-4">
+        <Button variant={showPreview ? "outline" : "default"} size="sm" onClick={() => setShowPreview(false)}>
+          <FileText className="h-4 w-4 mr-2" />Edit
+        </Button>
+        <Button variant={showPreview ? "default" : "outline"} size="sm" onClick={() => setShowPreview(true)}>
+          <Eye className="h-4 w-4 mr-2" />Live Preview
+        </Button>
+      </div>
+
       <div className="grid lg:grid-cols-3 gap-6">
+        {showPreview && (
+          <div className="lg:col-span-2">
+            <Card className="overflow-hidden">
+              {coverImage && <img src={coverImage} alt="Cover" className="w-full aspect-video object-cover" />}
+              <CardContent className="p-6 md:p-8 space-y-4">
+                {tags.length > 0 && (
+                  <div className="flex flex-wrap gap-2">{tags.map(t => <Badge key={t} variant="secondary">{t}</Badge>)}</div>
+                )}
+                <h1 className="font-display text-3xl md:text-4xl font-bold">{title || "Untitled article"}</h1>
+                <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                  {isTutor && tutorExtras.photo ? (
+                    <img src={tutorExtras.photo} alt="" className="h-9 w-9 rounded-full object-cover" />
+                  ) : <UserCircle className="h-9 w-9" />}
+                  <div>
+                    <p className="font-medium text-foreground">{isTutor ? userProfile?.fullName : (originalPost?.authorName || "TutorsPool Editorial Team")}</p>
+                    <p>{Math.max(1, Math.ceil((content.split(/\s+/).filter(Boolean).length) / 200))} min read</p>
+                  </div>
+                </div>
+                {excerpt && <p className="text-lg text-muted-foreground italic">{excerpt}</p>}
+                <Separator />
+                <div className="prose max-w-none whitespace-pre-wrap text-foreground leading-relaxed">
+                  {content || "Start writing to see your article here..."}
+                </div>
+                {showAuthorCard && (
+                  <Card className="bg-muted/40 mt-6">
+                    <CardContent className="p-5 space-y-2">
+                      <p className="font-semibold">Written by {isTutor ? userProfile?.fullName : (originalPost?.authorName || userProfile?.fullName)}</p>
+                      {isTutor && tutorExtras.subjects?.[0] && (
+                        <p className="text-sm text-muted-foreground">Verified {tutorExtras.subjects[0]} Tutor on TutorsPool</p>
+                      )}
+                      {authorBio && <p className="text-sm">{authorBio}</p>}
+                      <div className="flex flex-wrap gap-3 text-sm">
+                        {linkedinUrl && <span className="text-primary">LinkedIn</span>}
+                        {portfolioUrl && <span className="text-primary">Portfolio</span>}
+                      </div>
+                      <Button size="sm" disabled>{isTutor ? `Book a Session with ${userProfile?.fullName}` : "Find a Tutor"}</Button>
+                    </CardContent>
+                  </Card>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        )}
         {/* Main Content */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className={`lg:col-span-2 space-y-6 ${showPreview ? 'hidden' : ''}`}>
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
