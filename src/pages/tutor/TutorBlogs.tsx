@@ -37,8 +37,8 @@ export default function TutorBlogs() {
       await deleteBlogPost(id);
       setPosts(p => p.filter(x => x.id !== id));
       toast({ title: "Deleted" });
-    } catch {
-      toast({ title: "Error", description: "Failed to delete", variant: "destructive" });
+    } catch (e: any) {
+      toast({ title: "Error", description: e?.code === 'permission-denied' ? "Permission denied — check the Firestore blog rules are published." : "Failed to delete", variant: "destructive" });
     }
   };
 
@@ -86,6 +86,9 @@ export default function TutorBlogs() {
                         </Button>
                       ) : (
                         <>
+                          <Button variant="ghost" size="icon" asChild title="Preview">
+                            <Link to={`/tutor/blogs/edit/${post.id}?preview=1`}><ExternalLink className="h-4 w-4" /></Link>
+                          </Button>
                           <Button variant="ghost" size="icon" asChild title="Edit">
                             <Link to={`/tutor/blogs/edit/${post.id}`}><Pencil className="h-4 w-4" /></Link>
                           </Button>

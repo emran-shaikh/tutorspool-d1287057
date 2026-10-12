@@ -65,7 +65,7 @@ export default function BlogEditor() {
 
   const [loading, setLoading] = useState(isEditing);
   const [saving, setSaving] = useState(false);
-  const [showPreview, setShowPreview] = useState(false);
+  const [showPreview, setShowPreview] = useState(() => new URLSearchParams(window.location.search).get('preview') === '1');
 
   // Form state
   const [title, setTitle] = useState("");
