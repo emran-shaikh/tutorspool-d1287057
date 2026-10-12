@@ -293,7 +293,7 @@ export default function BlogPost() {
                 <p className="text-muted-foreground mb-4">
                   Connect with expert tutors and achieve your learning goals
                 </p>
-                <Link to={isTutorAuthor ? `/tutors/${post.authorId}` : "/find-tutors"}>
+                <Link to={isTutorAuthor ? `/tutors/${post.authorId}` : "/tutors"}>
                   <Button size="lg">{isTutorAuthor ? `Book a Session with ${post.authorName.split(' ')[0]}` : "Find a Tutor"}</Button>
                 </Link>
               </div>
