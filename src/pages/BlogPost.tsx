@@ -275,6 +275,7 @@ export default function BlogPost() {
                     <p className="font-display text-lg font-semibold">
                       Written by {post.authorName}
                       {isTutorAuthor && `, Verified ${post.authorSubjects?.[0] ? post.authorSubjects[0] + ' ' : ''}Tutor on TutorsPool`}
+                      {isGuestAuthor && `, ${post.authorTitle || 'Guest Contributor'}`}
                     </p>
                     {post.authorQualifications && <p className="text-sm text-muted-foreground">{post.authorQualifications}</p>}
                     {post.authorBio && <p className="text-sm text-muted-foreground">{post.authorBio}</p>}
