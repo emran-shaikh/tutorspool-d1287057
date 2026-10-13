@@ -26,8 +26,11 @@ import {
   updateBlogPost, 
   getBlogPostById, 
   getTutorProfile,
-  BlogPost 
+  getAllTutors,
+  BlogPost,
+  TutorProfile
 } from "@/lib/firestore";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -48,6 +51,33 @@ export default function BlogEditor() {
   const [portfolioUrl, setPortfolioUrl] = useState("");
   const [authorBio, setAuthorBio] = useState("");
   const [tutorExtras, setTutorExtras] = useState<{ photo?: string; subjects?: string[]; qualifications?: string; bio?: string }>({});
+
+  // Admin-only: who the article is attributed to
+  const [authorMode, setAuthorMode] = useState<'admin' | 'tutor' | 'guest'>('admin');
+  const [tutorsList, setTutorsList] = useState<TutorProfile[]>([]);
+  const [selectedTutorId, setSelectedTutorId] = useState("");
+  const [guestName, setGuestName] = useState("");
+  const [guestTitle, setGuestTitle] = useState("");
+  const [guestPhoto, setGuestPhoto] = useState("");
+
+  useEffect(() => {
+    if (isTutor || !userProfile) return;
+    getAllTutors().then(list => setTutorsList(list.filter(t => t.isApproved && t.fullName))).catch(() => {});
+  }, [isTutor, userProfile]);
+
+  const selectedTutor = tutorsList.find(t => t.uid === selectedTutorId);
+
+  const handleGuestPhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !file.type.startsWith('image/')) return;
+    const dataUrl = await new Promise<string>((res, rej) => { const r = new FileReader(); r.onloadend = () => res(r.result as string); r.onerror = rej; r.readAsDataURL(file); });
+    const img = new Image(); img.src = dataUrl;
+    await new Promise((res, rej) => { img.onload = res; img.onerror = rej; });
+    const size = 300; const c = document.createElement('canvas'); c.width = size; c.height = size;
+    const s = Math.min(img.width, img.height);
+    c.getContext('2d')!.drawImage(img, (img.width - s) / 2, (img.height - s) / 2, s, s, 0, 0, size, size);
+    setGuestPhoto(c.toDataURL('image/jpeg', 0.8));
+  };
 
   useEffect(() => {
     if (!isTutor || !userProfile) return;
@@ -105,6 +135,11 @@ export default function BlogEditor() {
       setLinkedinUrl(data.linkedinUrl || "");
       setPortfolioUrl(data.portfolioUrl || "");
       setAuthorBio(data.authorBio || "");
+      if (data.authorRole === 'guest') {
+        setAuthorMode('guest'); setGuestName(data.authorName || ""); setGuestTitle(data.authorTitle || ""); setGuestPhoto(data.authorPhoto || "");
+      } else if (data.authorRole === 'tutor') {
+        setAuthorMode('tutor'); setSelectedTutorId(data.authorId);
+      }
     } else {
       toast({ title: "Error", description: "Blog post not found", variant: "destructive" });
       navigate(basePath);
@@ -205,16 +240,40 @@ export default function BlogEditor() {
       const willPublish = !isTutor && (publish || isPublished);
       const status: BlogPost['status'] = willPublish ? 'published' : (isTutor && mode === 'submit') ? 'pending' : 'draft';
       const cleanUrl = (u: string) => { const t = u.trim(); if (!t) return ''; return /^https?:\/\//i.test(t) ? t : `https://${t}`; };
-      const keepAuthor = isEditing && originalPost && !isTutor;
+      if (!isTutor && authorMode === 'tutor' && !selectedTutor) {
+        toast({ title: "Select a tutor", description: "Choose which tutor this article is written for.", variant: "destructive" });
+        setSaving(false); return;
+      }
+      if (!isTutor && authorMode === 'guest' && !guestName.trim()) {
+        toast({ title: "Guest name required", description: "Enter the guest author's name.", variant: "destructive" });
+        setSaving(false); return;
+      }
+      const origIsAdmin = originalPost && (!originalPost.authorRole || originalPost.authorRole === 'admin');
+      let author: Pick<BlogPost, 'authorId' | 'authorName' | 'authorRole' | 'authorPhoto' | 'authorSubjects' | 'authorQualifications' | 'authorTitle'>;
+      if (isTutor) {
+        author = { authorId: userProfile.uid, authorName: userProfile.fullName, authorRole: 'tutor',
+          authorPhoto: tutorExtras.photo || '', authorSubjects: tutorExtras.subjects || [], authorQualifications: tutorExtras.qualifications || '', authorTitle: '' };
+      } else if (authorMode === 'tutor' && selectedTutor) {
+        const q: any = selectedTutor.qualifications;
+        author = { authorId: selectedTutor.uid, authorName: selectedTutor.fullName, authorRole: 'tutor',
+          authorPhoto: selectedTutor.photoURL || '', authorSubjects: selectedTutor.subjects || [],
+          authorQualifications: Array.isArray(q) ? q.join(', ') : (q || ''), authorTitle: '' };
+      } else if (authorMode === 'guest') {
+        author = { authorId: originalPost?.authorRole === 'guest' ? originalPost.authorId : `guest-${Date.now()}`,
+          authorName: guestName.trim(), authorRole: 'guest', authorPhoto: guestPhoto, authorSubjects: [],
+          authorQualifications: '', authorTitle: guestTitle.trim() };
+      } else {
+        author = { authorId: origIsAdmin ? originalPost!.authorId : userProfile.uid,
+          authorName: origIsAdmin ? originalPost!.authorName : userProfile.fullName, authorRole: 'admin',
+          authorPhoto: '', authorSubjects: [], authorQualifications: '', authorTitle: '' };
+      }
       const postData: Omit<BlogPost, 'id'> = {
         title,
         slug,
         content,
         excerpt,
         coverImage: coverImage || undefined,
-        authorId: keepAuthor ? originalPost!.authorId : userProfile.uid,
-        authorName: keepAuthor ? originalPost!.authorName : userProfile.fullName,
-        authorRole: keepAuthor ? (originalPost!.authorRole || 'admin') : (isTutor ? 'tutor' : 'admin'),
+        ...author,
         isPublished: willPublish,
         status,
         publishedAt: willPublish ? (originalPost?.publishedAt || new Date().toISOString()) : undefined,
@@ -227,11 +286,6 @@ export default function BlogEditor() {
         linkedinUrl: cleanUrl(linkedinUrl),
         portfolioUrl: cleanUrl(portfolioUrl),
         authorBio: authorBio.trim(),
-        ...(isTutor ? {
-          authorPhoto: tutorExtras.photo || '',
-          authorSubjects: tutorExtras.subjects || [],
-          authorQualifications: tutorExtras.qualifications || '',
-        } : {}),
       };
 
       // Firestore rejects undefined field values — strip them
@@ -491,6 +545,64 @@ export default function BlogEditor() {
               </p>
             </CardContent>
           </Card>
+          )}
+
+          {!isTutor && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Published As</CardTitle>
+                <CardDescription>Who this article is credited to</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Select value={authorMode} onValueChange={(v) => setAuthorMode(v as any)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="admin">TutorsPool Team (you)</SelectItem>
+                    <SelectItem value="tutor">On behalf of a tutor</SelectItem>
+                    <SelectItem value="guest">Guest / external writer</SelectItem>
+                  </SelectContent>
+                </Select>
+                {authorMode === 'tutor' && (
+                  <div className="space-y-2">
+                    <Label>Tutor</Label>
+                    <Select value={selectedTutorId} onValueChange={(v) => {
+                      setSelectedTutorId(v);
+                      const t = tutorsList.find(x => x.uid === v);
+                      if (t?.bio && !authorBio) setAuthorBio(t.bio);
+                    }}>
+                      <SelectTrigger><SelectValue placeholder="Choose a tutor" /></SelectTrigger>
+                      <SelectContent>
+                        {tutorsList.map(t => (
+                          <SelectItem key={t.uid} value={t.uid}>{t.fullName}{t.subjects?.[0] ? ` — ${t.subjects[0]}` : ''}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground">Their photo, subjects and booking link are added automatically.</p>
+                  </div>
+                )}
+                {authorMode === 'guest' && (
+                  <div className="space-y-3">
+                    <div className="space-y-2">
+                      <Label htmlFor="guestName">Name</Label>
+                      <Input id="guestName" placeholder="Dr. Sarah Khan" value={guestName} onChange={(e) => setGuestName(e.target.value)} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="guestTitle">Role / designation (optional)</Label>
+                      <Input id="guestTitle" placeholder="Guest Contributor" value={guestTitle} onChange={(e) => setGuestTitle(e.target.value)} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Photo (optional)</Label>
+                      <div className="flex items-center gap-3">
+                        {guestPhoto && <img src={guestPhoto} alt="Guest" className="h-12 w-12 rounded-full object-cover" />}
+                        <Input type="file" accept="image/*" onChange={handleGuestPhoto} />
+                        {guestPhoto && <Button type="button" size="icon" variant="ghost" onClick={() => setGuestPhoto("")}><X className="h-4 w-4" /></Button>}
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground">Add their bio and LinkedIn in the Author Card below.</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           )}
 
           {/* Author Card (optional) */}

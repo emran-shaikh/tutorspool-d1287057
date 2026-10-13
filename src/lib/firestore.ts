@@ -72,7 +72,8 @@ export interface BlogPost {
   metaDescription?: string;
   // Workflow (legacy posts have no status; derive from isPublished)
   status?: 'draft' | 'pending' | 'published' | 'rejected';
-  authorRole?: 'admin' | 'tutor';
+  authorRole?: 'admin' | 'tutor' | 'guest';
+  authorTitle?: string; // e.g. "Guest Contributor", "IGCSE Specialist"
   reviewNote?: string;
   // Optional author card (all optional, author decides)
   showAuthorCard?: boolean;
