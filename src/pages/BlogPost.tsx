@@ -66,6 +66,7 @@ export default function BlogPost() {
   }
 
   const isTutorAuthor = post.authorRole === 'tutor';
+  const isGuestAuthor = post.authorRole === 'guest';
 
   // JSON-LD structured data for SEO
   const structuredData = {
@@ -161,6 +162,19 @@ export default function BlogPost() {
                       {(post.authorSubjects || []).slice(0, 2).map(s => (
                         <Badge key={s} variant="outline" className="text-xs">{s}</Badge>
                       ))}
+                    </span>
+                  ) : isGuestAuthor ? (
+                    <span className="flex items-center gap-2">
+                      {post.authorPhoto ? (
+                        <img src={post.authorPhoto} alt={post.authorName} className="h-8 w-8 rounded-full object-cover" />
+                      ) : <User className="h-4 w-4" />}
+                      <span className="font-medium text-foreground">{post.authorName}</span>
+                      {post.linkedinUrl && (
+                        <a href={post.linkedinUrl} target="_blank" rel="noopener noreferrer nofollow" aria-label="LinkedIn" className="hover:text-primary">
+                          <Linkedin className="h-4 w-4" />
+                        </a>
+                      )}
+                      <Badge variant="outline" className="text-xs">{post.authorTitle || 'Guest Contributor'}</Badge>
                     </span>
                   ) : (
                     <span className="flex items-center gap-1">
