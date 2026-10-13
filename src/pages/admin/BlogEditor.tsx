@@ -26,8 +26,11 @@ import {
   updateBlogPost, 
   getBlogPostById, 
   getTutorProfile,
-  BlogPost 
+  getAllTutors,
+  BlogPost,
+  TutorProfile
 } from "@/lib/firestore";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -48,6 +51,33 @@ export default function BlogEditor() {
   const [portfolioUrl, setPortfolioUrl] = useState("");
   const [authorBio, setAuthorBio] = useState("");
   const [tutorExtras, setTutorExtras] = useState<{ photo?: string; subjects?: string[]; qualifications?: string; bio?: string }>({});
+
+  // Admin-only: who the article is attributed to
+  const [authorMode, setAuthorMode] = useState<'admin' | 'tutor' | 'guest'>('admin');
+  const [tutorsList, setTutorsList] = useState<TutorProfile[]>([]);
+  const [selectedTutorId, setSelectedTutorId] = useState("");
+  const [guestName, setGuestName] = useState("");
+  const [guestTitle, setGuestTitle] = useState("");
+  const [guestPhoto, setGuestPhoto] = useState("");
+
+  useEffect(() => {
+    if (isTutor || !userProfile) return;
+    getAllTutors().then(list => setTutorsList(list.filter(t => t.isApproved && t.fullName))).catch(() => {});
+  }, [isTutor, userProfile]);
+
+  const selectedTutor = tutorsList.find(t => t.uid === selectedTutorId);
+
+  const handleGuestPhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !file.type.startsWith('image/')) return;
+    const dataUrl = await new Promise<string>((res, rej) => { const r = new FileReader(); r.onloadend = () => res(r.result as string); r.onerror = rej; r.readAsDataURL(file); });
+    const img = new Image(); img.src = dataUrl;
+    await new Promise((res, rej) => { img.onload = res; img.onerror = rej; });
+    const size = 300; const c = document.createElement('canvas'); c.width = size; c.height = size;
+    const s = Math.min(img.width, img.height);
+    c.getContext('2d')!.drawImage(img, (img.width - s) / 2, (img.height - s) / 2, s, s, 0, 0, size, size);
+    setGuestPhoto(c.toDataURL('image/jpeg', 0.8));
+  };
 
   useEffect(() => {
     if (!isTutor || !userProfile) return;
