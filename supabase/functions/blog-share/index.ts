@@ -139,8 +139,6 @@ serve(async (req) => {
 <meta name="twitter:title" content="${title}" />
 <meta name="twitter:description" content="${description}" />
 <meta name="twitter:image" content="${escapeHtml(image)}" />
-${isBot ? "" : `<meta http-equiv="refresh" content="0; url=${targetUrl}" />
-<script>window.location.replace(${JSON.stringify(targetUrl)});</script>`}
 </head>
 <body>
 <h1>${title}</h1>
