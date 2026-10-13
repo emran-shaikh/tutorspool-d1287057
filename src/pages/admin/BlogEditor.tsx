@@ -135,6 +135,11 @@ export default function BlogEditor() {
       setLinkedinUrl(data.linkedinUrl || "");
       setPortfolioUrl(data.portfolioUrl || "");
       setAuthorBio(data.authorBio || "");
+      if (data.authorRole === 'guest') {
+        setAuthorMode('guest'); setGuestName(data.authorName || ""); setGuestTitle(data.authorTitle || ""); setGuestPhoto(data.authorPhoto || "");
+      } else if (data.authorRole === 'tutor') {
+        setAuthorMode('tutor'); setSelectedTutorId(data.authorId);
+      }
     } else {
       toast({ title: "Error", description: "Blog post not found", variant: "destructive" });
       navigate(basePath);
@@ -235,16 +240,40 @@ export default function BlogEditor() {
       const willPublish = !isTutor && (publish || isPublished);
       const status: BlogPost['status'] = willPublish ? 'published' : (isTutor && mode === 'submit') ? 'pending' : 'draft';
       const cleanUrl = (u: string) => { const t = u.trim(); if (!t) return ''; return /^https?:\/\//i.test(t) ? t : `https://${t}`; };
-      const keepAuthor = isEditing && originalPost && !isTutor;
+      if (!isTutor && authorMode === 'tutor' && !selectedTutor) {
+        toast({ title: "Select a tutor", description: "Choose which tutor this article is written for.", variant: "destructive" });
+        setSaving(false); return;
+      }
+      if (!isTutor && authorMode === 'guest' && !guestName.trim()) {
+        toast({ title: "Guest name required", description: "Enter the guest author's name.", variant: "destructive" });
+        setSaving(false); return;
+      }
+      const origIsAdmin = originalPost && (!originalPost.authorRole || originalPost.authorRole === 'admin');
+      let author: Pick<BlogPost, 'authorId' | 'authorName' | 'authorRole' | 'authorPhoto' | 'authorSubjects' | 'authorQualifications' | 'authorTitle'>;
+      if (isTutor) {
+        author = { authorId: userProfile.uid, authorName: userProfile.fullName, authorRole: 'tutor',
+          authorPhoto: tutorExtras.photo || '', authorSubjects: tutorExtras.subjects || [], authorQualifications: tutorExtras.qualifications || '', authorTitle: '' };
+      } else if (authorMode === 'tutor' && selectedTutor) {
+        const q: any = selectedTutor.qualifications;
+        author = { authorId: selectedTutor.uid, authorName: selectedTutor.fullName, authorRole: 'tutor',
+          authorPhoto: selectedTutor.photoURL || '', authorSubjects: selectedTutor.subjects || [],
+          authorQualifications: Array.isArray(q) ? q.join(', ') : (q || ''), authorTitle: '' };
+      } else if (authorMode === 'guest') {
+        author = { authorId: originalPost?.authorRole === 'guest' ? originalPost.authorId : `guest-${Date.now()}`,
+          authorName: guestName.trim(), authorRole: 'guest', authorPhoto: guestPhoto, authorSubjects: [],
+          authorQualifications: '', authorTitle: guestTitle.trim() };
+      } else {
+        author = { authorId: origIsAdmin ? originalPost!.authorId : userProfile.uid,
+          authorName: origIsAdmin ? originalPost!.authorName : userProfile.fullName, authorRole: 'admin',
+          authorPhoto: '', authorSubjects: [], authorQualifications: '', authorTitle: '' };
+      }
       const postData: Omit<BlogPost, 'id'> = {
         title,
         slug,
         content,
         excerpt,
         coverImage: coverImage || undefined,
-        authorId: keepAuthor ? originalPost!.authorId : userProfile.uid,
-        authorName: keepAuthor ? originalPost!.authorName : userProfile.fullName,
-        authorRole: keepAuthor ? (originalPost!.authorRole || 'admin') : (isTutor ? 'tutor' : 'admin'),
+        ...author,
         isPublished: willPublish,
         status,
         publishedAt: willPublish ? (originalPost?.publishedAt || new Date().toISOString()) : undefined,
@@ -257,11 +286,6 @@ export default function BlogEditor() {
         linkedinUrl: cleanUrl(linkedinUrl),
         portfolioUrl: cleanUrl(portfolioUrl),
         authorBio: authorBio.trim(),
-        ...(isTutor ? {
-          authorPhoto: tutorExtras.photo || '',
-          authorSubjects: tutorExtras.subjects || [],
-          authorQualifications: tutorExtras.qualifications || '',
-        } : {}),
       };
 
       // Firestore rejects undefined field values — strip them
