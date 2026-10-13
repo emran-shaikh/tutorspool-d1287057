@@ -100,6 +100,15 @@ serve(async (req) => {
     }
 
     const targetUrl = `https://tutorspool.com/blog/${slug}`;
+
+    // Humans: send them straight to the real article with a proper redirect.
+    // Bots (Facebook, Twitter, WhatsApp, etc.) fall through and get the OG-tagged HTML below.
+    if (!isBot) {
+      return new Response(null, {
+        status: 302,
+        headers: { ...corsHeaders, Location: targetUrl },
+      });
+    }
     const title = escapeHtml(getVal(fields?.metaTitle) || getVal(fields?.title) || "TutorsPool Blog");
     const description = escapeHtml(
       getVal(fields?.metaDescription) || getVal(fields?.excerpt) || "Read this article on TutorsPool"
@@ -130,8 +139,6 @@ serve(async (req) => {
 <meta name="twitter:title" content="${title}" />
 <meta name="twitter:description" content="${description}" />
 <meta name="twitter:image" content="${escapeHtml(image)}" />
-${isBot ? "" : `<meta http-equiv="refresh" content="0; url=${targetUrl}" />
-<script>window.location.replace(${JSON.stringify(targetUrl)});</script>`}
 </head>
 <body>
 <h1>${title}</h1>
