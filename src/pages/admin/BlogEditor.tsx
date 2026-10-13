@@ -547,6 +547,64 @@ export default function BlogEditor() {
           </Card>
           )}
 
+          {!isTutor && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Published As</CardTitle>
+                <CardDescription>Who this article is credited to</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Select value={authorMode} onValueChange={(v) => setAuthorMode(v as any)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="admin">TutorsPool Team (you)</SelectItem>
+                    <SelectItem value="tutor">On behalf of a tutor</SelectItem>
+                    <SelectItem value="guest">Guest / external writer</SelectItem>
+                  </SelectContent>
+                </Select>
+                {authorMode === 'tutor' && (
+                  <div className="space-y-2">
+                    <Label>Tutor</Label>
+                    <Select value={selectedTutorId} onValueChange={(v) => {
+                      setSelectedTutorId(v);
+                      const t = tutorsList.find(x => x.uid === v);
+                      if (t?.bio && !authorBio) setAuthorBio(t.bio);
+                    }}>
+                      <SelectTrigger><SelectValue placeholder="Choose a tutor" /></SelectTrigger>
+                      <SelectContent>
+                        {tutorsList.map(t => (
+                          <SelectItem key={t.uid} value={t.uid}>{t.fullName}{t.subjects?.[0] ? ` — ${t.subjects[0]}` : ''}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground">Their photo, subjects and booking link are added automatically.</p>
+                  </div>
+                )}
+                {authorMode === 'guest' && (
+                  <div className="space-y-3">
+                    <div className="space-y-2">
+                      <Label htmlFor="guestName">Name</Label>
+                      <Input id="guestName" placeholder="Dr. Sarah Khan" value={guestName} onChange={(e) => setGuestName(e.target.value)} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="guestTitle">Role / designation (optional)</Label>
+                      <Input id="guestTitle" placeholder="Guest Contributor" value={guestTitle} onChange={(e) => setGuestTitle(e.target.value)} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Photo (optional)</Label>
+                      <div className="flex items-center gap-3">
+                        {guestPhoto && <img src={guestPhoto} alt="Guest" className="h-12 w-12 rounded-full object-cover" />}
+                        <Input type="file" accept="image/*" onChange={handleGuestPhoto} />
+                        {guestPhoto && <Button type="button" size="icon" variant="ghost" onClick={() => setGuestPhoto("")}><X className="h-4 w-4" /></Button>}
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground">Add their bio and LinkedIn in the Author Card below.</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
           {/* Author Card (optional) */}
           <Card>
             <CardHeader>
