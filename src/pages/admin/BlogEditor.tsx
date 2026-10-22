@@ -240,7 +240,8 @@ export default function BlogEditor() {
       const willPublish = !isTutor && (publish || isPublished);
       const status: BlogPost['status'] = willPublish ? 'published' : (isTutor && mode === 'submit') ? 'pending' : 'draft';
       const cleanUrl = (u: string) => { const t = u.trim(); if (!t) return ''; return /^https?:\/\//i.test(t) ? t : `https://${t}`; };
-      if (!isTutor && authorMode === 'tutor' && !selectedTutor) {
+      const keepOrigTutor = !!originalPost && originalPost.authorRole === 'tutor' && selectedTutorId === originalPost.authorId;
+      if (!isTutor && authorMode === 'tutor' && !selectedTutor && !keepOrigTutor) {
         toast({ title: "Select a tutor", description: "Choose which tutor this article is written for.", variant: "destructive" });
         setSaving(false); return;
       }
@@ -253,6 +254,11 @@ export default function BlogEditor() {
       if (isTutor) {
         author = { authorId: userProfile.uid, authorName: userProfile.fullName, authorRole: 'tutor',
           authorPhoto: tutorExtras.photo || '', authorSubjects: tutorExtras.subjects || [], authorQualifications: tutorExtras.qualifications || '', authorTitle: '' };
+      } else if (authorMode === 'tutor' && !selectedTutor && keepOrigTutor) {
+        const o = originalPost!;
+        author = { authorId: o.authorId, authorName: o.authorName, authorRole: 'tutor',
+          authorPhoto: o.authorPhoto || '', authorSubjects: o.authorSubjects || [],
+          authorQualifications: o.authorQualifications || '', authorTitle: '' };
       } else if (authorMode === 'tutor' && selectedTutor) {
         const q: any = selectedTutor.qualifications;
         author = { authorId: selectedTutor.uid, authorName: selectedTutor.fullName, authorRole: 'tutor',
