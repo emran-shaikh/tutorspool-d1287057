@@ -17,7 +17,6 @@ import {
   CheckCircle,
   ArrowRight 
 } from "lucide-react";
-import uzairImage from "@/assets/team-uzair.webp";
 import bilalImage from "@/assets/team-bilal.webp";
 import imranImage from "@/assets/team-imran.webp";
 
@@ -34,12 +33,6 @@ const team = [
     roleKey: "founder",
     image: bilalImage,
     bio: "The Founder of TutorsPool with over 8 years of experience teaching O Level Additional Mathematics. He holds a degree in Mechanical Engineering from NED University and is passionate about delivering quality education through personalized online tutoring.",
-  },
-  {
-    name: "Uzair Syed",
-    roleKey: "coFounder",
-    image: uzairImage,
-    bio: "Co-Founder at TutorsPool with an MS in Computer Science. He specializes in O and A Level subjects, focusing on making complex concepts accessible and helping students achieve academic success.",
   },
   {
     name: "Muhammad Imran",
@@ -188,7 +181,7 @@ export default function About() {
                 {t("about.team.subtitle")}
               </p>
             </div>
-            <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            <div className="grid md:grid-cols-2 gap-8 max-w-3xl mx-auto">
               {team.map((member) => (
                 <TeamMember key={member.name} member={member} />
               ))}
